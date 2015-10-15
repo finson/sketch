@@ -25,10 +25,8 @@
   TransportFirmata forked from that base October 2015 by Doug Johnson.
 */
 
-#include "TransportFirmata.h"
+#include <TransportFirmata.h>
 #include <FirmataExt.h>
-
-FirmataExt firmataExt;
 
 // To configure, save this file to your working directory so you can edit it
 // then comment out the include and declaration for any features that you do
@@ -60,42 +58,11 @@ FirmataReporting reporting;
 #endif
 
 /*==============================================================================
- * FUNCTIONS
- *============================================================================*/
-
-// initialize a default state
-
-void systemResetCallback()
-{
-  // pins with analog capability default to analog input
-  // otherwise, pins default to digital output
-
-  for (byte i = 0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_ANALOG(i)) {
-#ifdef AnalogInputFirmata_h
-      // turns off pullup, configures everything
-      Firmata.setPinMode(i, ANALOG);
-#endif
-    } else if (IS_PIN_DIGITAL(i)) {
-#ifdef DigitalOutputFirmata_h
-      // sets the output to 0, configures portConfigInputs
-      Firmata.setPinMode(i, OUTPUT);
-#endif
-    }
-  }
-
-firmataExt.reset();
-}
-
-/*==============================================================================
  * SETUP()
  *============================================================================*/
 
 void setup()
 {
-
-Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
-Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
 #if defined AnalogOutputFirmata_h
   /* analogWriteCallback is declared in AnalogWrite.h */
@@ -103,19 +70,19 @@ Firmata.attach(SYSTEM_RESET, systemResetCallback);
 #endif
 
 #ifdef DigitalInputFirmata_h
-  firmataExt.addFeature(digitalInput);
+  FirmataExt.addFeature(digitalInput);
 #endif
 #ifdef DigitalOutputFirmata_h
-  firmataExt.addFeature(digitalOutput);
+  FirmataExt.addFeature(digitalOutput);
 #endif
 #ifdef AnalogInputFirmata_h
-  firmataExt.addFeature(analogInput);
+  FirmataExt.addFeature(analogInput);
 #endif
 #ifdef AnalogOutputFirmata_h
-  firmataExt.addFeature(analogOutput);
+  FirmataExt.addFeature(analogOutput);
 #endif
 #ifdef FirmataReporting_h
-  firmataExt.addFeature(reporting);
+  FirmataExt.addFeature(reporting);
 #endif
 
 
@@ -123,7 +90,7 @@ Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
 Firmata.begin(57600);
 
-systemResetCallback();  // reset to default config
+Firmata.reset();
 }
 
 /*==============================================================================

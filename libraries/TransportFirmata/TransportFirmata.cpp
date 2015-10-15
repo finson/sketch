@@ -16,13 +16,24 @@
 //* Includes
 //******************************************************************************
 
-#include "TransportFirmata.h"
-#include "HardwareSerial.h"
+#include <TransportFirmata.h>
+#include <HardwareSerial.h>
+#include <FirmataExt.h>
 
 extern "C" {
 #include <string.h>
 #include <stdlib.h>
 }
+
+/*==============================================================================
+ * MACROS
+ *============================================================================*/
+
+/* shortcut for setFirmwareNameAndVersion() that uses __FILE__ to set the
+ * firmware name.  It needs to be a macro so that __FILE__ is included in the
+ * firmware source file rather than the library source file.
+ */
+#define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
 
 //******************************************************************************
 //* Support Functions
@@ -52,7 +63,47 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
-  systemReset();
+  reset();
+  setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+}
+
+// resets the system state upon a SYSTEM_RESET message from the host software
+void FirmataClass::reset(void)
+{
+  resetting = true;
+  byte i;
+
+  waitForData = 0; // this flag says the next serial input will be data
+  executeMultiByteCommand = 0; // execute this after getting multi-byte data
+  multiByteChannel = 0; // channel data for multiByteCommands
+
+  for (i = 0; i < MAX_DATA_BYTES; i++) {
+    storedInputData[i] = 0;
+  }
+
+  parsingSysex = false;
+  sysexBytesRead = 0;
+
+  // pins with analog capability default to analog input
+  // otherwise, pins default to digital output
+
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_ANALOG(i)) {
+#ifdef AnalogInputFirmata_h
+      // turns off pullup, configures everything
+      Firmata.setPinMode(i, ANALOG);
+#endif
+    } else if (IS_PIN_DIGITAL(i)) {
+#ifdef DigitalOutputFirmata_h
+      // sets the output to 0, configures portConfigInputs
+      Firmata.setPinMode(i, OUTPUT);
+#endif
+    }
+  }
+
+FirmataExt.reset();
+
+resetting = false;
 }
 
 //******************************************************************************
@@ -162,7 +213,6 @@ int FirmataClass::available(void)
 {
   return FirmataStream->available();
 }
-
 
 void FirmataClass::processStandardSysexMessages(void)
 {
@@ -283,10 +333,10 @@ void FirmataClass::parse(byte inputData)
         sysexBytesRead = 0;
         break;
       case SYSTEM_RESET:
-        systemReset();
+        reset();
         break;
       case REPORT_VERSION:
-        Firmata.printVersion();
+        printVersion();
         break;
     }
   }
@@ -389,12 +439,12 @@ void FirmataClass::attach(byte command, callbackFunction newFunction)
   }
 }
 
-void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
-{
-  switch (command) {
-    case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
-  }
-}
+// void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
+// {
+//   switch (command) {
+//     case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
+//   }
+// }
 
 void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
 {
@@ -403,7 +453,7 @@ void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
   }
 }
 
-void FirmataClass::attach(byte command, sysexCallbackFunction newFunction)
+void FirmataClass::attach(sysexCallbackFunction newFunction)
 {
   currentSysexCallback = newFunction;
 }
@@ -411,23 +461,11 @@ void FirmataClass::attach(byte command, sysexCallbackFunction newFunction)
 void FirmataClass::detach(byte command)
 {
   switch (command) {
-    case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
+    // case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
     case STRING_DATA: currentStringCallback = NULL; break;
     case START_SYSEX: currentSysexCallback = NULL; break;
     default:
       attach(command, (callbackFunction)NULL);
-  }
-}
-
-void FirmataClass::attachDelayTask(delayTaskCallbackFunction newFunction)
-{
-  delayTaskCallback = newFunction;
-}
-
-void FirmataClass::delayTask(long delay)
-{
-  if (delayTaskCallback) {
-    (*delayTaskCallback)(delay);
   }
 }
 
@@ -480,29 +518,6 @@ void FirmataClass::setPinState(byte pin, int state)
 //******************************************************************************
 //* Private Methods
 //******************************************************************************
-
-// resets the system state upon a SYSTEM_RESET message from the host software
-void FirmataClass::systemReset(void)
-{
-  resetting = true;
-  byte i;
-
-  waitForData = 0; // this flag says the next serial input will be data
-  executeMultiByteCommand = 0; // execute this after getting multi-byte data
-  multiByteChannel = 0; // channel data for multiByteCommands
-
-  for (i = 0; i < MAX_DATA_BYTES; i++) {
-    storedInputData[i] = 0;
-  }
-
-  parsingSysex = false;
-  sysexBytesRead = 0;
-
-  if (currentSystemResetCallback)
-    (*currentSystemResetCallback)();
-
-  resetting = false;
-}
 
 // =============================================================================
 // used for flashing the pin for the version number

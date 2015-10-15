@@ -95,22 +95,22 @@
 extern "C" {
   // callback function types
   typedef void (*callbackFunction)(byte, int);
-  typedef void (*systemResetCallbackFunction)(void);
+//  typedef void (*systemResetCallbackFunction)(void);
   typedef void (*stringCallbackFunction)(char *);
   typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
-  typedef void (*delayTaskCallbackFunction)(long delay);
+//  typedef void (*delayTaskCallbackFunction)(long delay);
 }
-
 
 // TODO make it a subclass of a generic Serial/Stream base class
 class FirmataClass
 {
   public:
     FirmataClass();
-    /* Arduino constructors */
     void begin();
     void begin(long);
     void begin(Stream &s);
+    void reset(void);
+
     /* querying functions */
     void printVersion(void);
     void blinkVersion(void);
@@ -133,20 +133,16 @@ class FirmataClass
     void write(byte c);
     /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
-    void attach(byte command, systemResetCallbackFunction newFunction);
+//    void attach(byte command, systemResetCallbackFunction newFunction);
     void attach(byte command, stringCallbackFunction newFunction);
-    void attach(byte command, sysexCallbackFunction newFunction);
+    void attach(sysexCallbackFunction newFunction);
     void detach(byte command);
-    /* delegate to Scheduler (if any) */
-    void attachDelayTask(delayTaskCallbackFunction newFunction);
-    void delayTask(long delay);
     /* access pin config */
     byte getPinMode(byte pin);
     void setPinMode(byte pin, byte config);
     /* access pin state */
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
-
 
   private:
     Stream *FirmataStream;
@@ -173,14 +169,13 @@ class FirmataClass
     callbackFunction currentReportAnalogCallback;
     callbackFunction currentReportDigitalCallback;
     callbackFunction currentPinModeCallback;
-    systemResetCallbackFunction currentSystemResetCallback;
+ //   systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
-    delayTaskCallbackFunction delayTaskCallback;
+//    delayTaskCallbackFunction delayTaskCallback;
 
     /* private methods ------------------------------ */
     void processStandardSysexMessages(void);
-    void systemReset(void);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);
@@ -188,15 +183,5 @@ class FirmataClass
 };
 
 extern FirmataClass Firmata;
+#endif
 
-/*==============================================================================
- * MACROS
- *============================================================================*/
-
-/* shortcut for setFirmwareNameAndVersion() that uses __FILE__ to set the
- * firmware name.  It needs to be a macro so that __FILE__ is included in the
- * firmware source file rather than the library source file.
- */
-#define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
-
-#endif /* Configurable_Firmata_h */

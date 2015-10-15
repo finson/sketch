@@ -17,17 +17,14 @@
 #include <TransportFirmata.h>
 #include "FirmataExt.h"
 
-FirmataExt *FirmataExtInstance;
-
-FirmataExt::FirmataExt()
+FirmataExtClass::FirmataExtClass()
 {
-  FirmataExtInstance = this;
   Firmata.attach(SET_PIN_MODE, handleSetPinModeCallback);
-  Firmata.attach((byte)START_SYSEX, handleExtendedSysexCallback);
+  Firmata.attach(handleExtendedSysexCallback);
   numFeatures = 0;
 }
 
-boolean FirmataExt::handlePinMode(byte pin, int mode)
+boolean FirmataExtClass::handlePinMode(byte pin, int mode)
 {
   boolean known = false;
   for (byte i = 0; i < numFeatures; i++) {
@@ -36,7 +33,7 @@ boolean FirmataExt::handlePinMode(byte pin, int mode)
   return known;
 }
 
-boolean FirmataExt::handleExtendedSysex(byte command, byte argc, byte* argv)
+boolean FirmataExtClass::handleExtendedSysex(byte command, byte argc, byte* argv)
 {
   switch (command) {
 
@@ -81,14 +78,14 @@ boolean FirmataExt::handleExtendedSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-void FirmataExt::addFeature(FirmataFeature &capability)
+void FirmataExtClass::addFeature(FirmataFeature &capability)
 {
   if (numFeatures < MAX_FEATURES) {
     features[numFeatures++] = &capability;
   }
 }
 
-void FirmataExt::reset()
+void FirmataExtClass::reset()
 {
   for (byte i = 0; i < numFeatures; i++) {
     features[i]->reset();
@@ -97,14 +94,18 @@ void FirmataExt::reset()
 
 void handleSetPinModeCallback(byte pin, int mode)
 {
-  if (!FirmataExtInstance->handlePinMode(pin, mode) && mode != IGNORE) {
+  if (!FirmataExt.handlePinMode(pin, mode) && mode != IGNORE) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
 }
 
 void handleExtendedSysexCallback(byte command, byte argc, byte* argv)
 {
-  if (!FirmataExtInstance->handleExtendedSysex(command, argc, argv)) {
+  if (!FirmataExt.handleExtendedSysex(command, argc, argv)) {
     Firmata.sendString("Unhandled sysex command");
   }
 }
+
+// make one static instance
+FirmataExtClass FirmataExt;
+
