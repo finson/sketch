@@ -46,9 +46,6 @@ AnalogOutputFirmata analogOutput;
 #include <FirmataExt.h>
 FirmataExt firmataExt;
 
-#include <FirmataScheduler.h>
-FirmataScheduler scheduler;
-
 //----------------------------------------------------------------
 
 // Dependencies. Do not comment out the following lines
@@ -66,10 +63,10 @@ FirmataReporting reporting;
  * FUNCTIONS
  *============================================================================*/
 
+// initialize a default state
+
 void systemResetCallback()
 {
-  // initialize a default state
-
   // pins with analog capability default to analog input
   // otherwise, pins default to digital output
 
@@ -100,6 +97,7 @@ void setup()
 {
 
 Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
 #if defined AnalogOutputFirmata_h
   /* analogWriteCallback is declared in AnalogWrite.h */
@@ -122,12 +120,8 @@ Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
-#ifdef FirmataScheduler_h
-  firmataExt.addFeature(scheduler);
-#endif
 #endif
 
-Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
 // start up the default Firmata using Serial interface:
 
@@ -151,14 +145,6 @@ void loop()
    * checking digital inputs.  */
   while (Firmata.available()) {
     Firmata.processInput();
-#ifdef FirmataScheduler_h
-    if (!Firmata.isParsingMessage()) {
-      goto runtasks;
-    }
-  }
-  if (!Firmata.isParsingMessage()) {
-runtasks: scheduler.runTasks();
-#endif
   }
 
   /* SEND STREAM WRITE BUFFER - TO DO: make sure that the stream buffer doesn't go over
