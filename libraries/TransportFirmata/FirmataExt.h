@@ -24,15 +24,16 @@
 
 void handleSetPinModeCallback(byte pin, int mode);
 
-void handleSysexCallback(byte command, byte argc, byte* argv);
+void handleExtendedSysexCallback(byte command, byte argc, byte* argv);
 
-class FirmataExt: public FirmataFeature
+class FirmataExt: public FirmataFeature  // why is this a feature?
 {
   public:
     FirmataExt();
     void handleCapability(byte pin); //empty method
     boolean handlePinMode(byte pin, int mode);
-    boolean handleSysex(byte command, byte argc, byte* argv);
+    boolean handleExtendedSysex(byte command, byte argc, byte* argv);
+    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void addFeature(FirmataFeature &capability);
     void reset();
 

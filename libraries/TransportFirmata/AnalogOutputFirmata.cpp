@@ -46,7 +46,7 @@ void AnalogOutputFirmata::handleCapability(byte pin)
   }
 }
 
-boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
+boolean AnalogOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   return handleAnalogFirmataSysex(command, argc, argv);
 }

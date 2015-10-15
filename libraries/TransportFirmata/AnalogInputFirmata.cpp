@@ -82,7 +82,7 @@ void AnalogInputFirmata::handleCapability(byte pin)
   }
 }
 
-boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
+boolean AnalogInputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   if (command == EXTENDED_ANALOG) {
     if (argc > 1) {

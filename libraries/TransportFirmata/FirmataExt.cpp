@@ -19,25 +19,11 @@
 
 FirmataExt *FirmataExtInstance;
 
-void handleSetPinModeCallback(byte pin, int mode)
-{
-  if (!FirmataExtInstance->handlePinMode(pin, mode) && mode != IGNORE) {
-    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
-  }
-}
-
-void handleSysexCallback(byte command, byte argc, byte* argv)
-{
-  if (!FirmataExtInstance->handleSysex(command, argc, argv)) {
-    Firmata.sendString("Unhandled sysex command");
-  }
-}
-
 FirmataExt::FirmataExt()
 {
   FirmataExtInstance = this;
   Firmata.attach(SET_PIN_MODE, handleSetPinModeCallback);
-  Firmata.attach((byte)START_SYSEX, handleSysexCallback);
+  Firmata.attach((byte)START_SYSEX, handleExtendedSysexCallback);
   numFeatures = 0;
 }
 
@@ -54,8 +40,11 @@ boolean FirmataExt::handlePinMode(byte pin, int mode)
   }
   return known;
 }
+boolean FirmataExt::handleFeatureSysex(byte command, byte argc, byte* argv) {
+  return false;
+}
 
-boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
+boolean FirmataExt::handleExtendedSysex(byte command, byte argc, byte* argv)
 {
   switch (command) {
 
@@ -91,7 +80,7 @@ boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
       return true;
     default:
       for (byte i = 0; i < numFeatures; i++) {
-        if (features[i]->handleSysex(command, argc, argv)) {
+        if (features[i]->handleFeatureSysex(command, argc, argv)) {
           return true;
         }
       }
@@ -111,5 +100,19 @@ void FirmataExt::reset()
 {
   for (byte i = 0; i < numFeatures; i++) {
     features[i]->reset();
+  }
+}
+
+void handleSetPinModeCallback(byte pin, int mode)
+{
+  if (!FirmataExtInstance->handlePinMode(pin, mode) && mode != IGNORE) {
+    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
+  }
+}
+
+void handleExtendedSysexCallback(byte command, byte argc, byte* argv)
+{
+  if (!FirmataExtInstance->handleExtendedSysex(command, argc, argv)) {
+    Firmata.sendString("Unhandled sysex command");
   }
 }

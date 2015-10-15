@@ -164,7 +164,7 @@ int FirmataClass::available(void)
 }
 
 
-void FirmataClass::processSysexMessage(void)
+void FirmataClass::processStandardSysexMessages(void)
 {
   switch (storedInputData[0]) { //first byte in buffer is command
     case REPORT_FIRMWARE:
@@ -218,7 +218,7 @@ void FirmataClass::parse(byte inputData)
       //stop sysex byte
       parsingSysex = false;
       //fire off handler function
-      processSysexMessage();
+      processStandardSysexMessages();
     } else {
       //normal data byte - add to buffer
       storedInputData[sysexBytesRead] = inputData;

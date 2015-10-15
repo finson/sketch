@@ -30,7 +30,7 @@ DigitalInputFirmata::DigitalInputFirmata()
   Firmata.attach(REPORT_DIGITAL, reportDigitalInputCallback);
 }
 
-boolean DigitalInputFirmata::handleSysex(byte command, byte argc, byte* argv)
+boolean DigitalInputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }

@@ -28,7 +28,7 @@ class FirmataReporting: public FirmataFeature
     void setSamplingInterval(int interval);
     void handleCapability(byte pin); //empty method
     boolean handlePinMode(byte pin, int mode); //empty method
-    boolean handleSysex(byte command, byte argc, byte* argv);
+    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     boolean elapsed();
     void reset();
   private:

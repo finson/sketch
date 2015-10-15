@@ -30,7 +30,7 @@ DigitalOutputFirmata::DigitalOutputFirmata()
   Firmata.attach(DIGITAL_MESSAGE, digitalOutputWriteCallback);
 }
 
-boolean DigitalOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
+boolean DigitalOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }

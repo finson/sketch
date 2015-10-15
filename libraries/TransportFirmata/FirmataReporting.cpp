@@ -33,7 +33,7 @@ boolean FirmataReporting::handlePinMode(byte pin, int mode)
   return false;
 }
 
-boolean FirmataReporting::handleSysex(byte command, byte argc, byte* argv)
+boolean FirmataReporting::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   if (command == SAMPLING_INTERVAL) {
     if (argc > 1) {
