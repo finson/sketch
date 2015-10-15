@@ -26,6 +26,9 @@
 */
 
 #include "TransportFirmata.h"
+#include <FirmataExt.h>
+
+FirmataExt firmataExt;
 
 // To configure, save this file to your working directory so you can edit it
 // then comment out the include and declaration for any features that you do
@@ -42,9 +45,6 @@ AnalogInputFirmata analogInput;
 
 #include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
-
-#include <FirmataExt.h>
-FirmataExt firmataExt;
 
 //----------------------------------------------------------------
 
@@ -84,9 +84,7 @@ void systemResetCallback()
     }
   }
 
-#ifdef FirmataExt_h
-  firmataExt.reset();
-#endif
+firmataExt.reset();
 }
 
 /*==============================================================================
@@ -104,7 +102,6 @@ Firmata.attach(SYSTEM_RESET, systemResetCallback);
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
 #endif
 
-#ifdef FirmataExt_h
 #ifdef DigitalInputFirmata_h
   firmataExt.addFeature(digitalInput);
 #endif
@@ -119,7 +116,6 @@ Firmata.attach(SYSTEM_RESET, systemResetCallback);
 #endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
-#endif
 #endif
 
 

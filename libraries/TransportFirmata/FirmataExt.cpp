@@ -27,11 +27,6 @@ FirmataExt::FirmataExt()
   numFeatures = 0;
 }
 
-void FirmataExt::handleCapability(byte pin)
-{
-
-}
-
 boolean FirmataExt::handlePinMode(byte pin, int mode)
 {
   boolean known = false;
@@ -39,9 +34,6 @@ boolean FirmataExt::handlePinMode(byte pin, int mode)
     known |= features[i]->handlePinMode(pin, mode);
   }
   return known;
-}
-boolean FirmataExt::handleFeatureSysex(byte command, byte argc, byte* argv) {
-  return false;
 }
 
 boolean FirmataExt::handleExtendedSysex(byte command, byte argc, byte* argv)

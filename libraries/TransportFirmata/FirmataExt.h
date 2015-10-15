@@ -26,7 +26,7 @@ void handleSetPinModeCallback(byte pin, int mode);
 
 void handleExtendedSysexCallback(byte command, byte argc, byte* argv);
 
-class FirmataExt: public FirmataFeature  // why is this a feature?
+class FirmataExt
 {
   public:
     FirmataExt();
