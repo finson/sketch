@@ -27,20 +27,20 @@
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
-// message command bytes (128-255/0x80-0xFF)
+// basic command set (128-255/0x80-0xFF)
 
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin
-#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
-#define REPORT_ANALOG           0xC0 // enable analog input by pin #
-#define REPORT_DIGITAL          0xD0 // enable digital input by port pair
+#define REPORT_VERSION          0xF9 // report protocol version (TransportFirmata)
+#define SYSTEM_RESET            0xFF // reset from MIDI (TransportFirmata)
 
-#define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc
+#define START_SYSEX             0xF0 // start a MIDI Sysex message (TransportFirmata)
+#define END_SYSEX               0xF7 // end a MIDI Sysex message (TransportFirmata)
 
-#define REPORT_VERSION          0xF9 // report protocol version
-#define SYSTEM_RESET            0xFF // reset from MIDI
+#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFirmata)
+#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (attach is in Main!)
+#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFirmata)
+#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFirmata)
 
-#define START_SYSEX             0xF0 // start a MIDI Sysex message
-#define END_SYSEX               0xF7 // end a MIDI Sysex message
+#define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc (TransportFirmata, then FirmataExt)
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
@@ -60,29 +60,23 @@
 #define I2C_REPLY               0x77 // a reply to an I2C read request (FirmataFeature I2CFirmata)
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (FirmataFeature I2CFirmata)
 
-// sysex commands that do not have an associated pin mode
+// Sysex commands that do not have an associated pin mode
 
-#define REPORT_FIRMWARE         0x79 // report name and version of the firmware (ConfigurableFirmata)
-#define STRING_DATA             0x71 // a string message with 14-bits per char (ConfigurableFirmata)
-#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value (FirmataExt)
+#define REPORT_FIRMWARE         0x79 // report name and version of the firmware (TransportFirmata - Std)
+#define STRING_DATA             0x71 // a string message with 14-bits per char (TransportFirmata - Std)
+
+#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value (FirmataExt - Extended)
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value (FirmataExt)
-#define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins (FirmataExt)
+#define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins (FirmataExt - Extended)
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution (FirmataExt)
 
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataFeature FirmataReporting)
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler (FirmataFeature FirmataScheduler)
-#define BLISTER_DATA            0x7C // read and write lists of typed binary data (FirmataFeature Blister)
 
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 
 #define TOTAL_SYSEX_COMMANDS    22   // MAX_FEATURES in FirmataExt is based on this (inflated) number
-
-// these are DEPRECATED to make the naming more consistent
-#define FIRMATA_STRING          0x71 // same as STRING_DATA
-#define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
-#define SYSEX_I2C_REPLY         0x77 // same as I2C_REPLY
-#define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
 //#define INPUT                 0x00 // defined in wiring.h
@@ -185,7 +179,7 @@ class FirmataClass
     delayTaskCallbackFunction delayTaskCallback;
 
     /* private methods ------------------------------ */
-    void processSysexMessage(void);
+    void processStandardSysexMessages(void);
     void systemReset(void);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
