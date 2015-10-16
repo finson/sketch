@@ -26,10 +26,10 @@ class FirmataReporting: public FirmataFeature
 {
   public:
     void setSamplingInterval(int interval);
-    void handleCapability(byte pin); //empty method
-    boolean handlePinMode(byte pin, int mode); //empty method
-    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     boolean elapsed();
+    void handleGetCapability(byte pin); //empty method
+    boolean handleSetPinMode(byte pin, int mode); //empty method
+    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
   private:
     /* timer variables */

@@ -18,20 +18,20 @@
 #define FirmataExt_h
 
 #include <TransportFirmata.h>
-#include "FirmataFeature.h"
+#include <FirmataFeature.h>
 
 #define MAX_FEATURES TOTAL_SYSEX_COMMANDS
 
-void handleSetPinModeCallback(byte pin, int mode);
+void dispatchSetPinModeCallback(byte pin, int mode);
 
-void handleExtendedSysexCallback(byte command, byte argc, byte* argv);
+void dispatchExtendedSysexCallback(byte command, byte argc, byte* argv);
 
 class FirmataExtClass
 {
   public:
     FirmataExtClass();
-    boolean handlePinMode(byte pin, int mode);
-    boolean handleExtendedSysex(byte command, byte argc, byte* argv);
+    boolean dispatchSetPinMode(byte pin, int mode);
+    boolean dispatchExtendedSysex(byte command, byte argc, byte* argv);
     void addFeature(FirmataFeature &capability);
     void reset();
 

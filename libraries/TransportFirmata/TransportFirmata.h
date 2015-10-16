@@ -95,9 +95,9 @@
 extern "C" {
   // callback function types
   typedef void (*callbackFunction)(byte, int);
-//  typedef void (*systemResetCallbackFunction)(void);
   typedef void (*stringCallbackFunction)(char *);
   typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
+//  typedef void (*systemResetCallbackFunction)(void);
 //  typedef void (*delayTaskCallbackFunction)(long delay);
 }
 
@@ -165,14 +165,15 @@ class FirmataClass
 
     /* callback functions */
     callbackFunction currentAnalogCallback;
-    callbackFunction currentDigitalCallback;
+    callbackFunction currentDigitalCallback;        // DigitalOutputFirmata
     callbackFunction currentReportAnalogCallback;
     callbackFunction currentReportDigitalCallback;
-    callbackFunction currentPinModeCallback;
- //   systemResetCallbackFunction currentSystemResetCallback;
+    callbackFunction currentPinModeCallback;        // FirmataExt
     stringCallbackFunction currentStringCallback;
-    sysexCallbackFunction currentSysexCallback;
-//    delayTaskCallbackFunction delayTaskCallback;
+    sysexCallbackFunction currentSysexCallback;     // FirmataExt
+
+//   systemResetCallbackFunction currentSystemResetCallback;
+//   delayTaskCallbackFunction delayTaskCallback;
 
     /* private methods ------------------------------ */
     void processStandardSysexMessages(void);

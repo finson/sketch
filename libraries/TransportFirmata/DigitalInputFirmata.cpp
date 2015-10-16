@@ -86,7 +86,7 @@ void DigitalInputFirmata::reportDigital(byte port, int value)
   // pins configured as analog
 }
 
-boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
+boolean DigitalInputFirmata::handleSetPinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
@@ -101,7 +101,7 @@ boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalInputFirmata::handleCapability(byte pin)
+void DigitalInputFirmata::handleGetCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)INPUT);

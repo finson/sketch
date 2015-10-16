@@ -28,9 +28,9 @@ class DigitalInputFirmata: public FirmataFeature
     DigitalInputFirmata();
     void reportDigital(byte port, int value);
     void report(void);
-    void handleCapability(byte pin);
+    void handleGetCapability(byte pin);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
-    boolean handlePinMode(byte pin, int mode);
+    boolean handleSetPinMode(byte pin, int mode);
     void reset();
 
   private:

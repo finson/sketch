@@ -23,12 +23,12 @@ void FirmataReporting::setSamplingInterval(int interval)
   samplingInterval = interval;
 }
 
-void FirmataReporting::handleCapability(byte pin)
+void FirmataReporting::handleGetCapability(byte pin)
 {
 
 }
 
-boolean FirmataReporting::handlePinMode(byte pin, int mode)
+boolean FirmataReporting::handleSetPinMode(byte pin, int mode)
 {
   return false;
 }

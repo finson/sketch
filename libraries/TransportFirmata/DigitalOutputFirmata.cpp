@@ -65,7 +65,7 @@ void DigitalOutputFirmata::digitalWrite(byte port, int value)
   }
 }
 
-boolean DigitalOutputFirmata::handlePinMode(byte pin, int mode)
+boolean DigitalOutputFirmata::handleSetPinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin) && mode == OUTPUT && Firmata.getPinMode(pin) != IGNORE) {
     digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
@@ -75,7 +75,7 @@ boolean DigitalOutputFirmata::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalOutputFirmata::handleCapability(byte pin)
+void DigitalOutputFirmata::handleGetCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)OUTPUT);

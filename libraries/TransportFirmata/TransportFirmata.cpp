@@ -481,6 +481,7 @@ void FirmataClass::setPinMode(byte pin, byte config)
     return;
   pinState[pin] = 0;
   pinConfig[pin] = config;
+
   if (currentPinModeCallback)
     (*currentPinModeCallback)(pin, config);
 }

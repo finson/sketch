@@ -27,9 +27,9 @@ class DigitalOutputFirmata: public FirmataFeature
   public:
     DigitalOutputFirmata();
     void digitalWrite(byte port, int value);
-    void handleCapability(byte pin);
+    void handleGetCapability(byte pin);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
-    boolean handlePinMode(byte pin, int mode);
+    boolean handleSetPinMode(byte pin, int mode);
     void reset();
   private:
 };
