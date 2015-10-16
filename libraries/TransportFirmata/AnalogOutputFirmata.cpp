@@ -1,5 +1,5 @@
 /*
-  AnalogFirmata.h - Firmata library
+  AnalogFirmata.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,13 +15,21 @@
 */
 
 #include <TransportFirmata.h>
-#include "AnalogFirmata.h"
-#include "AnalogOutputFirmata.h"
+#include <AnalogFirmata.h>
+#include <AnalogOutputFirmata.h>
 
-//AnalogOutputFirmata::AnalogOutputFirmata()
-//{
-//  Firmata.attach(REPORT_ANALOG, analogWriteCallback); //TODO: analogWriteCallback is the same for PWM and SERVO
-//}
+AnalogOutputFirmata *AnalogOutputFirmataInstance;
+
+void analogOutputWriteCallback(byte port, int value)
+{
+  AnalogOutputFirmataInstance->analogWrite(port, value);
+}
+
+AnalogOutputFirmata::AnalogOutputFirmata()
+{
+  AnalogOutputFirmataInstance = this;
+  Firmata.attach(ANALOG_MESSAGE, analogOutputWriteCallback);
+}
 
 void AnalogOutputFirmata::reset()
 {
@@ -48,5 +56,40 @@ void AnalogOutputFirmata::handleGetCapability(byte pin)
 
 boolean AnalogOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
-  return handleAnalogFirmataSysex(command, argc, argv);
+  if (command == EXTENDED_ANALOG) {
+    if (argc > 1) {
+      int val = argv[1];
+      if (argc > 2) val |= (argv[2] << 7);
+      if (argc > 3) val |= (argv[3] << 14);
+      analogWrite(argv[0], val);
+      return true;
+    }
+  } else {
+    return handleAnalogFirmataSysex(command, argc, argv);
+  }
 }
+
+void AnalogOutputFirmata::analogWrite(byte pin, int value)
+{
+  if (pin < TOTAL_PINS) {
+    switch (Firmata.getPinMode(pin)) {
+#ifdef ServoFirmata_h
+      case SERVO:
+        if (IS_PIN_SERVO(pin)) {
+          servoAnalogWrite(pin, value);
+          Firmata.setPinState(pin, value);
+        }
+        break;
+#endif
+#ifdef AnalogOutputFirmata_h
+      case PWM:
+        if (IS_PIN_PWM(pin)) {
+          analogWrite(PIN_TO_PWM(pin), value);
+          Firmata.setPinState(pin, value);
+        }
+        break;
+#endif
+    }
+  }
+}
+

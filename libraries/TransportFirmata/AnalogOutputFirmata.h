@@ -1,5 +1,5 @@
 /*
-  AnalogFirmata.h - Firmata library
+  AnalogOutputFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -18,15 +18,20 @@
 #define AnalogOutputFirmata_h
 
 #include <TransportFirmata.h>
-#include "FirmataFeature.h"
+#include <FirmataFeature.h>
+#include <AnalogFirmata.h>
+
+void analogOutputWriteCallback(byte port, int value);
 
 class AnalogOutputFirmata: public FirmataFeature
 {
   public:
+    AnalogOutputFirmata();
     void handleGetCapability(byte pin);
     boolean handleSetPinMode(byte pin, int mode);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
+    void analogWrite(byte port, int value);
   private:
 };
 

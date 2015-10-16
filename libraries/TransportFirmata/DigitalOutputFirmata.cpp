@@ -15,7 +15,7 @@
 */
 
 #include <TransportFirmata.h>
-#include "DigitalOutputFirmata.h"
+#include <DigitalOutputFirmata.h>
 
 DigitalOutputFirmata *DigitalOutputFirmataInstance;
 
@@ -30,14 +30,32 @@ DigitalOutputFirmata::DigitalOutputFirmata()
   Firmata.attach(DIGITAL_MESSAGE, digitalOutputWriteCallback);
 }
 
-boolean DigitalOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
-{
-  return false;
-}
-
 void DigitalOutputFirmata::reset()
 {
 
+}
+
+boolean DigitalOutputFirmata::handleSetPinMode(byte pin, int mode)
+{
+  if (IS_PIN_DIGITAL(pin) && mode == OUTPUT && Firmata.getPinMode(pin) != IGNORE) {
+    digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
+    pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
+    return true;
+  }
+  return false;
+}
+
+void DigitalOutputFirmata::handleGetCapability(byte pin)
+{
+  if (IS_PIN_DIGITAL(pin)) {
+    Firmata.write((byte)OUTPUT);
+    Firmata.write(1);
+  }
+}
+
+boolean DigitalOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
+{
+  return false;
 }
 
 void DigitalOutputFirmata::digitalWrite(byte port, int value)
@@ -62,23 +80,5 @@ void DigitalOutputFirmata::digitalWrite(byte port, int value)
       mask = mask << 1;
     }
     writePort(port, (byte)value, pinWriteMask);
-  }
-}
-
-boolean DigitalOutputFirmata::handleSetPinMode(byte pin, int mode)
-{
-  if (IS_PIN_DIGITAL(pin) && mode == OUTPUT && Firmata.getPinMode(pin) != IGNORE) {
-    digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
-    pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-    return true;
-  }
-  return false;
-}
-
-void DigitalOutputFirmata::handleGetCapability(byte pin)
-{
-  if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write((byte)OUTPUT);
-    Firmata.write(1);
   }
 }

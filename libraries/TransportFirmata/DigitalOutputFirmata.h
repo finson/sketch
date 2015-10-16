@@ -26,11 +26,11 @@ class DigitalOutputFirmata: public FirmataFeature
 {
   public:
     DigitalOutputFirmata();
-    void digitalWrite(byte port, int value);
     void handleGetCapability(byte pin);
-    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     boolean handleSetPinMode(byte pin, int mode);
+    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
+    void digitalWrite(byte port, int value);
   private:
 };
 

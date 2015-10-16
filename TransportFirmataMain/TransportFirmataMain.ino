@@ -48,10 +48,6 @@ AnalogOutputFirmata analogOutput;
 
 // Dependencies. Do not comment out the following lines
 
-#if defined AnalogOutputFirmata_h
-#include <AnalogWrite.h>
-#endif
-
 #if defined AnalogInputFirmata_h
 #include <FirmataReporting.h>
 FirmataReporting reporting;
@@ -63,11 +59,6 @@ FirmataReporting reporting;
 
 void setup()
 {
-
-#if defined AnalogOutputFirmata_h
-  /* analogWriteCallback is declared in AnalogWrite.h */
-  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
-#endif
 
 #ifdef DigitalInputFirmata_h
   FirmataExt.addFeature(digitalInput);
@@ -84,7 +75,6 @@ void setup()
 #ifdef FirmataReporting_h
   FirmataExt.addFeature(reporting);
 #endif
-
 
 // start up the default Firmata using Serial interface:
 
