@@ -4,10 +4,10 @@
   software on a host computer. It is intended to work with any host computer
   software package.
 
-  TransportFirmata is a pared down version of ConfigurableFirmata intended to
-  provide only a basic transport link between systems upon which other protocols
-  can be built.  TransportFirmata was forked from ConfigurableFirmata, version
-  2.7.0, in October 2015.
+  FirmataCore is a pared down version of ConfigurableFirmata intended to
+  be a stable base upon which various extensions can be built.
+  FirmataCore was forked from ConfigurableFirmata, version 2.7.0, in
+  October 2015.
 
   To download a host software package, please click on the following link
   to open the download page in your default browser.
@@ -22,10 +22,10 @@
   See file LICENSE.txt for further informations on licensing terms.
 
   Base version of ConfigurableFirmata last updated by Jeff Hoefs April 25, 2015
-  TransportFirmata forked from that base October 2015 by Doug Johnson.
+  FirmataCore forked from that base October 2015 by Doug Johnson.
 */
 
-#include <TransportFirmata.h>
+#include <FirmataCore.h>
 #include <FirmataExt.h>
 
 // To configure, save this file to your working directory so you can edit it

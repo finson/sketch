@@ -7,7 +7,7 @@
 #######################################
 
 Firmata                     KEYWORD1
-TransportFirmata            KEYWORD1
+FirmataCore            KEYWORD1
 callbackFunction            KEYWORD1
 systemResetCallbackFunction KEYWORD1
 stringCallbackFunction      KEYWORD1

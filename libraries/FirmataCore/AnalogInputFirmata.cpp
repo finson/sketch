@@ -14,7 +14,7 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include <TransportFirmata.h>
+#include <FirmataCore.h>
 #include "AnalogInputFirmata.h"
 
 AnalogInputFirmata *AnalogInputFirmataInstance;

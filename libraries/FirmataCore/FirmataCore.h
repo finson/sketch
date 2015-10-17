@@ -1,5 +1,5 @@
 /*
-  TransportFirmata.h - Firmata library v2.7.0-beta - 2015-4-15
+  FirmataCore.h - Firmata library v2.7.0-beta - 2015-4-15
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
   Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
@@ -31,18 +31,18 @@
 
 // basic command set (128-255/0x80-0xFF)
 
-#define REPORT_VERSION          0xF9 // report protocol version (TransportFirmata)
-#define SYSTEM_RESET            0xFF // reset from MIDI (TransportFirmata)
+#define REPORT_VERSION          0xF9 // report protocol version (FirmataCore)
+#define SYSTEM_RESET            0xFF // reset from MIDI (FirmataCore)
 
-#define START_SYSEX             0xF0 // start a MIDI Sysex message (TransportFirmata)
-#define END_SYSEX               0xF7 // end a MIDI Sysex message (TransportFirmata)
+#define START_SYSEX             0xF0 // start a MIDI Sysex message (FirmataCore)
+#define END_SYSEX               0xF7 // end a MIDI Sysex message (FirmataCore)
 
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFirmata)
 #define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFirmata)
 #define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFirmata)
 #define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFirmata)
 
-#define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc (TransportFirmata, then FirmataExt)
+#define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc (FirmataCore, then FirmataExt)
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
@@ -64,9 +64,9 @@
 
 // Sysex commands that do not have an associated pin mode
 
-#define REPORT_FIRMWARE         0x79 // report name and version of the firmware (TransportFirmata - Std)
-#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (TransportFirmata - Std)
-#define STRING_DATA             0x71 // a string message with 14-bits per char (TransportFirmata - Std)
+#define REPORT_FIRMWARE         0x79 // report name and version of the firmware (FirmataCore - Std)
+#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataCore - Std)
+#define STRING_DATA             0x71 // a string message with 14-bits per char (FirmataCore - Std)
 
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value (FirmataExt - Extended)
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value (FirmataExt)

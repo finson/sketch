@@ -1,5 +1,5 @@
 /*
-  FirmataExt.h - Firmata library
+  DigitalOutputFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,32 +14,24 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef FirmataExt_h
-#define FirmataExt_h
+#ifndef DigitalOutputFirmata_h
+#define DigitalOutputFirmata_h
 
-#include <TransportFirmata.h>
-#include <FirmataFeature.h>
+#include <FirmataCore.h>
+#include "FirmataFeature.h"
 
-#define MAX_FEATURES TOTAL_SYSEX_COMMANDS
+void digitalOutputWriteCallback(byte port, int value);
 
-void dispatchSetPinModeCallback(byte pin, int mode);
-
-void dispatchExtendedSysexCallback(byte command, byte argc, byte* argv);
-
-class FirmataExtClass
+class DigitalOutputFirmata: public FirmataFeature
 {
   public:
-    FirmataExtClass();
-    boolean dispatchSetPinMode(byte pin, int mode);
-    boolean dispatchExtendedSysex(byte command, byte argc, byte* argv);
-    void addFeature(FirmataFeature &capability);
+    DigitalOutputFirmata();
+    void handleGetCapability(byte pin);
+    boolean handleSetPinMode(byte pin, int mode);
+    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
-
+    void digitalWrite(byte port, int value);
   private:
-    FirmataFeature *features[MAX_FEATURES];
-    byte numFeatures;
 };
-
-extern FirmataExtClass FirmataExt;
 
 #endif

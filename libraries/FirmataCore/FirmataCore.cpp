@@ -16,7 +16,7 @@
 //* Includes
 //******************************************************************************
 
-#include <TransportFirmata.h>
+#include <FirmataCore.h>
 #include <HardwareSerial.h>
 #include <FirmataExt.h>
 
