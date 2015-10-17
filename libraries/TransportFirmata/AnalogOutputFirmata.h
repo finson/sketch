@@ -19,7 +19,6 @@
 
 #include <TransportFirmata.h>
 #include <FirmataFeature.h>
-#include <AnalogFirmata.h>
 
 void analogOutputWriteCallback(byte port, int value);
 

@@ -15,7 +15,6 @@
 */
 
 #include <TransportFirmata.h>
-#include "AnalogFirmata.h"
 #include "AnalogInputFirmata.h"
 
 AnalogInputFirmata *AnalogInputFirmataInstance;
@@ -84,7 +83,7 @@ void AnalogInputFirmata::handleGetCapability(byte pin)
 
 boolean AnalogInputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
-  return handleAnalogFirmataSysex(command, argc, argv);
+  return false;
 }
 
 void AnalogInputFirmata::reset()

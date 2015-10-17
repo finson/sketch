@@ -15,7 +15,6 @@
 */
 
 #include <TransportFirmata.h>
-#include <AnalogFirmata.h>
 #include <AnalogOutputFirmata.h>
 
 AnalogOutputFirmata *AnalogOutputFirmataInstance;
@@ -65,7 +64,7 @@ boolean AnalogOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* a
       return true;
     }
   } else {
-    return handleAnalogFirmataSysex(command, argc, argv);
+    return false;
   }
 }
 

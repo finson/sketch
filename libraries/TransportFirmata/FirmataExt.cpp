@@ -54,6 +54,7 @@ boolean FirmataExtClass::dispatchExtendedSysex(byte command, byte argc, byte* ar
         }
       }
       break;
+
     case CAPABILITY_QUERY:
       Firmata.write(START_SYSEX);
       Firmata.write(CAPABILITY_RESPONSE);
@@ -67,6 +68,18 @@ boolean FirmataExtClass::dispatchExtendedSysex(byte command, byte argc, byte* ar
       }
       Firmata.write(END_SYSEX);
       return true;
+      break;
+
+    case ANALOG_MAPPING_QUERY:
+      Firmata.write(START_SYSEX);
+      Firmata.write(ANALOG_MAPPING_RESPONSE);
+      for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+        Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+      }
+      Firmata.write(END_SYSEX);
+      return true;
+      break;
+
     default:
       for (byte i = 0; i < numFeatures; i++) {
         if (features[i]->handleFeatureSysex(command, argc, argv)) {
