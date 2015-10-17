@@ -25,8 +25,9 @@
   FirmataCore forked from that base October 2015 by Doug Johnson.
 */
 
-#include <FirmataCore.h>
 #include <FirmataExt.h>
+#include <FirmataCore.h>
+#include <FirmataExtensions.h>
 
 // To configure, save this file to your working directory so you can edit it
 // then comment out the include and declaration for any features that you do
@@ -43,6 +44,9 @@ AnalogInputFirmata analogInput;
 
 #include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
+
+#include <StepperFirmata.h>
+StepperFirmata stepperControl;
 
 /*==============================================================================
  * SETUP()

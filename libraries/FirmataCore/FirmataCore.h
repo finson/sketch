@@ -12,8 +12,8 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef Transport_Firmata_h
-#define Transport_Firmata_h
+#ifndef Firmata_Core_h
+#define Firmata_Core_h
 
 #include "hal/Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
 
