@@ -38,7 +38,7 @@
 #define END_SYSEX               0xF7 // end a MIDI Sysex message (TransportFirmata)
 
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFirmata)
-#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (attach is in Main!)
+#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFirmata)
 #define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFirmata)
 #define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFirmata)
 
@@ -65,6 +65,7 @@
 // Sysex commands that do not have an associated pin mode
 
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware (TransportFirmata - Std)
+#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (TransportFirmata - Std)
 #define STRING_DATA             0x71 // a string message with 14-bits per char (TransportFirmata - Std)
 
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value (FirmataExt - Extended)
@@ -72,7 +73,6 @@
 #define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins (FirmataExt - Extended)
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution (FirmataExt)
 
-#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataFeature FirmataReporting)
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler (FirmataFeature FirmataScheduler)
 
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
