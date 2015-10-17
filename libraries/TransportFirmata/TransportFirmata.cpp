@@ -101,6 +101,9 @@ void FirmataClass::reset(void)
     }
   }
 
+previousMillis = millis();
+samplingInterval = DEFAULT_SAMPLING_INTERVAL;
+
 FirmataExt.reset();
 
 resetting = false;
@@ -214,41 +217,6 @@ int FirmataClass::available(void)
   return FirmataStream->available();
 }
 
-void FirmataClass::processStandardSysexMessages(void)
-{
-  switch (storedInputData[0]) { //first byte in buffer is command
-    case REPORT_FIRMWARE:
-      printFirmwareVersion();
-      break;
-    case STRING_DATA:
-      if (currentStringCallback) {
-        byte bufferLength = (sysexBytesRead - 1) / 2;
-        byte i = 1;
-        byte j = 0;
-        while (j < bufferLength) {
-          // The string length will only be at most half the size of the
-          // stored input buffer so we can decode the string within the buffer.
-          storedInputData[j] = storedInputData[i];
-          i++;
-          storedInputData[j] += (storedInputData[i] << 7);
-          i++;
-          j++;
-        }
-        // Make sure string is null terminated. This may be the case for data
-        // coming from client libraries in languages that don't null terminate
-        // strings.
-        if (storedInputData[j - 1] != '\0') {
-          storedInputData[j] = '\0';
-        }
-        (*currentStringCallback)((char *)&storedInputData[0]);
-      }
-      break;
-    default:
-      if (currentSysexCallback)
-        (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
-  }
-}
-
 void FirmataClass::processInput(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
@@ -339,6 +307,46 @@ void FirmataClass::parse(byte inputData)
         printVersion();
         break;
     }
+  }
+}
+
+void FirmataClass::processStandardSysexMessages(void)
+{
+  switch (storedInputData[0]) { //first byte in buffer is command
+    case REPORT_FIRMWARE:
+      printFirmwareVersion();
+      break;
+    case SAMPLING_INTERVAL:
+      if (sysexBytesRead > 2) {
+        samplingInterval = max(storedInputData[1] + (storedInputData[2] << 7),MINIMUM_SAMPLING_INTERVAL);
+      }
+      break;
+    case STRING_DATA:
+      if (currentStringCallback) {
+        byte bufferLength = (sysexBytesRead - 1) / 2;
+        byte i = 1;
+        byte j = 0;
+        while (j < bufferLength) {
+          // The string length will only be at most half the size of the
+          // stored input buffer so we can decode the string within the buffer.
+          storedInputData[j] = storedInputData[i];
+          i++;
+          storedInputData[j] += (storedInputData[i] << 7);
+          i++;
+          j++;
+        }
+        // Make sure string is null terminated. This may be the case for data
+        // coming from client libraries in languages that don't null terminate
+        // strings.
+        if (storedInputData[j - 1] != '\0') {
+          storedInputData[j] = '\0';
+        }
+        (*currentStringCallback)((char *)&storedInputData[0]);
+      }
+      break;
+    default:
+      if (currentSysexCallback)
+        (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
   }
 }
 
@@ -495,6 +503,23 @@ int FirmataClass::getPinState(byte pin)
 void FirmataClass::setPinState(byte pin, int state)
 {
   pinState[pin] = state;
+}
+
+void FirmataClass::setSamplingInterval(int interval)
+{
+  samplingInterval = max(interval, MINIMUM_SAMPLING_INTERVAL);
+}
+
+boolean FirmataClass::elapsed()
+{
+  currentMillis = millis();
+  if (currentMillis - previousMillis > samplingInterval) {
+    previousMillis += samplingInterval;
+    if (currentMillis - previousMillis > samplingInterval)
+      previousMillis = currentMillis - samplingInterval;
+    return true;
+  }
+  return false;
 }
 
 

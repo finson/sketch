@@ -19,7 +19,6 @@
 
 #include <TransportFirmata.h>
 #include "FirmataFeature.h"
-#include "FirmataReporting.h"
 
 void reportAnalogInputCallback(byte analogPin, int value);
 

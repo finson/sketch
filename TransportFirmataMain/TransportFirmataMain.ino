@@ -44,15 +44,6 @@ AnalogInputFirmata analogInput;
 #include <AnalogOutputFirmata.h>
 AnalogOutputFirmata analogOutput;
 
-//----------------------------------------------------------------
-
-// Dependencies. Do not comment out the following lines
-
-#if defined AnalogInputFirmata_h
-#include <FirmataReporting.h>
-FirmataReporting reporting;
-#endif
-
 /*==============================================================================
  * SETUP()
  *============================================================================*/
@@ -71,9 +62,6 @@ void setup()
 #endif
 #ifdef AnalogOutputFirmata_h
   FirmataExt.addFeature(analogOutput);
-#endif
-#ifdef FirmataReporting_h
-  FirmataExt.addFeature(reporting);
 #endif
 
 // start up the default Firmata using Serial interface:
@@ -104,12 +92,10 @@ void loop()
    * 60 bytes. use a timer to sending an event character every 4 ms to
    * trigger the buffer to dump. */
 
-#ifdef FirmataReporting_h
-  if (reporting.elapsed()) {
+  if (Firmata.elapsed()) {
 #ifdef AnalogInputFirmata_h
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
     analogInput.report();
 #endif
   }
-#endif
 }

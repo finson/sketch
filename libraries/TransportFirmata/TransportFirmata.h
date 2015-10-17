@@ -26,6 +26,8 @@
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
+#define MINIMUM_SAMPLING_INTERVAL 10  // milliseconds
+#define DEFAULT_SAMPLING_INTERVAL 19
 
 // basic command set (128-255/0x80-0xFF)
 
@@ -131,18 +133,25 @@ class FirmataClass
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);
+
     /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
 //    void attach(byte command, systemResetCallbackFunction newFunction);
     void attach(byte command, stringCallbackFunction newFunction);
     void attach(sysexCallbackFunction newFunction);
     void detach(byte command);
+
     /* access pin config */
     byte getPinMode(byte pin);
     void setPinMode(byte pin, byte config);
+
     /* access pin state */
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
+
+    /* Sampling interval */
+    void setSamplingInterval(int interval);
+    boolean elapsed();
 
   private:
     Stream *FirmataStream;
@@ -160,6 +169,11 @@ class FirmataClass
     /* pins configuration */
     byte pinConfig[TOTAL_PINS];         // configuration of every pin
     int pinState[TOTAL_PINS];           // any value that has been written
+
+    /* timer variables */
+    unsigned long currentMillis;        // store the current value from millis()
+    unsigned long previousMillis;       // for comparison with currentMillis
+    int samplingInterval;          // how often to run the main loop (in ms)
 
     boolean resetting;
 
