@@ -57,9 +57,9 @@
 #define StepperDriver_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #else
-#include "WProgram.h"
+#include <WProgram.h>
 #endif
 
 #define PI_2 2*3.14159

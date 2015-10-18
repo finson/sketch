@@ -31,10 +31,11 @@
  */
 
 #include <FirmataCore.h>
-#include <StepperFirmata.h>
+#include <StepperFeature.h>
 #include <StepperDriver.h>
+#include <FirmataFeatureCommands.h>
 
-boolean StepperFirmata::handleSetPinMode(byte pin, int mode)
+boolean StepperFeature::handleSetPinMode(byte pin, int mode)
 {
   if (mode == STEPPER) {
     if (IS_PIN_DIGITAL(pin)) {
@@ -46,7 +47,7 @@ boolean StepperFirmata::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void StepperFirmata::handleGetCapability(byte pin)
+void StepperFeature::handleGetCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write(STEPPER);
@@ -58,7 +59,7 @@ void StepperFirmata::handleGetCapability(byte pin)
  * SYSEX-BASED commands
  *============================================================================*/
 
-boolean StepperFirmata::handleFeatureSysex(byte command, byte argc, byte *argv)
+boolean StepperFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   if (command == STEPPER_DATA) {
     byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
@@ -126,7 +127,7 @@ boolean StepperFirmata::handleFeatureSysex(byte command, byte argc, byte *argv)
  * SETUP()
  *============================================================================*/
 
-void StepperFirmata::reset()
+void StepperFeature::reset()
 {
   for (byte i = 0; i < MAX_STEPPERS; i++) {
     if (stepper[i]) {
@@ -140,7 +141,7 @@ void StepperFirmata::reset()
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void StepperFirmata::update()
+void StepperFeature::update()
 {
   if (numSteppers > 0) {
     // if one or more stepper motors are used, update their position

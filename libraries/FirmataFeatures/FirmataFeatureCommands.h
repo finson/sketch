@@ -1,5 +1,5 @@
 /*
-  FirmataExtensions.h - Firmata library v2.7.0-beta - 2015-4-15
+  FirmataFeatureCommands.h - Firmata library v2.7.0-beta - 2015-4-15
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (c) 2013 Norbert Truchsess. All rights reserved.
   Copyright (c) 2013-2015 Jeff Hoefs. All rights reserved.
@@ -12,18 +12,22 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef Firmata_Extensions_h
-#define Firmata_Extensions_h
+#ifndef Firmata_Feature_Commands_h
+#define Firmata_Feature_Commands_h
 
-#include "hal/Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
-
-/* Version numbers for the protocol.  The protocol is still changing, so these
- * version numbers are important.  This number can be queried so that host
- * software can test whether it will be compatible with the currently
- * installed firmware. */
-#define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   7 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
+// pin modes
+//#define INPUT                 0x00 // defined in wiring.h
+//#define OUTPUT                0x01 // defined in wiring.h
+// #define ANALOG                  0x02 // analog pin in analogInput mode
+// #define PWM                     0x03 // digital pin in PWM output mode
+#define SERVO                   0x04 // digital pin in Servo output mode
+#define SHIFT                   0x05 // shiftIn/shiftOut mode
+#define I2C                     0x06 // pin included in I2C setup
+#define ONEWIRE                 0x07 // pin configured for 1-wire
+#define STEPPER                 0x08 // pin configured for stepper motor
+#define ENCODER                 0x09 // pin configured for encoders
+// #define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
+// #define TOTAL_PIN_MODES         11
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
@@ -42,23 +46,6 @@
 // Sysex commands that do not have an associated pin mode
 
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler (FirmataFeature FirmataScheduler)
-
-#define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
-#define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
-
-// pin modes
-//#define INPUT                 0x00 // defined in wiring.h
-//#define OUTPUT                0x01 // defined in wiring.h
-#define ANALOG                  0x02 // analog pin in analogInput mode
-#define PWM                     0x03 // digital pin in PWM output mode
-#define SERVO                   0x04 // digital pin in Servo output mode
-#define SHIFT                   0x05 // shiftIn/shiftOut mode
-#define I2C                     0x06 // pin included in I2C setup
-#define ONEWIRE                 0x07 // pin configured for 1-wire
-#define STEPPER                 0x08 // pin configured for stepper motor
-#define ENCODER                 0x09 // pin configured for encoders
-#define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         11
 
 
 #endif

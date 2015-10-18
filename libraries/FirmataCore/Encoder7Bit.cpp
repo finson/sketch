@@ -10,8 +10,8 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "Encoder7Bit.h"
 #include <FirmataCore.h>
+#include <Encoder7Bit.h>
 
 Encoder7BitClass::Encoder7BitClass()
 {

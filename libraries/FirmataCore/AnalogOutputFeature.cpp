@@ -1,5 +1,5 @@
 /*
-  AnalogFirmata.cpp - Firmata library
+  AnalogOutputFeature.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,27 +15,27 @@
 */
 
 #include <FirmataCore.h>
-#include <AnalogOutputFirmata.h>
+#include <AnalogOutputFeature.h>
 
-AnalogOutputFirmata *AnalogOutputFirmataInstance;
+AnalogOutputFeature *AnalogOutputFeatureInstance;
 
 void analogOutputWriteCallback(byte port, int value)
 {
-  AnalogOutputFirmataInstance->analogWrite(port, value);
+  AnalogOutputFeatureInstance->analogWrite(port, value);
 }
 
-AnalogOutputFirmata::AnalogOutputFirmata()
+AnalogOutputFeature::AnalogOutputFeature()
 {
-  AnalogOutputFirmataInstance = this;
+  AnalogOutputFeatureInstance = this;
   Firmata.attach(ANALOG_MESSAGE, analogOutputWriteCallback);
 }
 
-void AnalogOutputFirmata::reset()
+void AnalogOutputFeature::reset()
 {
 
 }
 
-boolean AnalogOutputFirmata::handleSetPinMode(byte pin, int mode)
+boolean AnalogOutputFeature::handleSetPinMode(byte pin, int mode)
 {
   if (mode == PWM && IS_PIN_PWM(pin)) {
     pinMode(PIN_TO_PWM(pin), OUTPUT);
@@ -45,7 +45,7 @@ boolean AnalogOutputFirmata::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void AnalogOutputFirmata::handleGetCapability(byte pin)
+void AnalogOutputFeature::handleGetCapability(byte pin)
 {
   if (IS_PIN_PWM(pin)) {
     Firmata.write(PWM);
@@ -53,7 +53,7 @@ void AnalogOutputFirmata::handleGetCapability(byte pin)
   }
 }
 
-boolean AnalogOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
+boolean AnalogOutputFeature::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   if (command == EXTENDED_ANALOG) {
     if (argc > 1) {
@@ -68,7 +68,7 @@ boolean AnalogOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* a
   }
 }
 
-void AnalogOutputFirmata::analogWrite(byte pin, int value)
+void AnalogOutputFeature::analogWrite(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
     switch (Firmata.getPinMode(pin)) {
@@ -80,7 +80,7 @@ void AnalogOutputFirmata::analogWrite(byte pin, int value)
         }
         break;
 #endif
-#ifdef AnalogOutputFirmata_h
+#ifdef AnalogOutputFeature_h
       case PWM:
         if (IS_PIN_PWM(pin)) {
           analogWrite(PIN_TO_PWM(pin), value);

@@ -52,7 +52,7 @@
   http://www.arduino.cc/en/Tutorial/Stepper
 */
 
-#include "StepperDriver.h"
+#include <StepperDriver.h>
 
 /**
  * Constructor.

@@ -1,5 +1,5 @@
 /*
-  DigitalOutputFirmata.cpp - Firmata library
+  DigitalOutputFeature.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,27 +15,27 @@
 */
 
 #include <FirmataCore.h>
-#include <DigitalOutputFirmata.h>
+#include <DigitalOutputFeature.h>
 
-DigitalOutputFirmata *DigitalOutputFirmataInstance;
+DigitalOutputFeature *DigitalOutputFeatureInstance;
 
 void digitalOutputWriteCallback(byte port, int value)
 {
-  DigitalOutputFirmataInstance->digitalWrite(port, value);
+  DigitalOutputFeatureInstance->digitalWrite(port, value);
 }
 
-DigitalOutputFirmata::DigitalOutputFirmata()
+DigitalOutputFeature::DigitalOutputFeature()
 {
-  DigitalOutputFirmataInstance = this;
+  DigitalOutputFeatureInstance = this;
   Firmata.attach(DIGITAL_MESSAGE, digitalOutputWriteCallback);
 }
 
-void DigitalOutputFirmata::reset()
+void DigitalOutputFeature::reset()
 {
 
 }
 
-boolean DigitalOutputFirmata::handleSetPinMode(byte pin, int mode)
+boolean DigitalOutputFeature::handleSetPinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin) && mode == OUTPUT && Firmata.getPinMode(pin) != IGNORE) {
     digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
@@ -45,7 +45,7 @@ boolean DigitalOutputFirmata::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalOutputFirmata::handleGetCapability(byte pin)
+void DigitalOutputFeature::handleGetCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)OUTPUT);
@@ -53,12 +53,12 @@ void DigitalOutputFirmata::handleGetCapability(byte pin)
   }
 }
 
-boolean DigitalOutputFirmata::handleFeatureSysex(byte command, byte argc, byte* argv)
+boolean DigitalOutputFeature::handleFeatureSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }
 
-void DigitalOutputFirmata::digitalWrite(byte port, int value)
+void DigitalOutputFeature::digitalWrite(byte port, int value)
 {
   byte pin, lastPin, mask = 1, pinWriteMask = 0;
 

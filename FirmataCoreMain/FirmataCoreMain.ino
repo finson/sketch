@@ -25,28 +25,28 @@
   FirmataCore forked from that base October 2015 by Doug Johnson.
 */
 
-#include <FirmataExt.h>
 #include <FirmataCore.h>
-#include <FirmataExtensions.h>
+#include <FirmataExt.h>
+#include <FirmataFeatureCommands.h>
 
 // To configure, save this file to your working directory so you can edit it
 // then comment out the include and declaration for any features that you do
 // not need below.
 
-#include <DigitalInputFirmata.h>
-DigitalInputFirmata digitalInput;
+#include <DigitalInputFeature.h>
+DigitalInputFeature digitalInput;
 
-#include <DigitalOutputFirmata.h>
-DigitalOutputFirmata digitalOutput;
+#include <DigitalOutputFeature.h>
+DigitalOutputFeature digitalOutput;
 
-#include <AnalogInputFirmata.h>
-AnalogInputFirmata analogInput;
+#include <AnalogInputFeature.h>
+AnalogInputFeature analogInput;
 
-#include <AnalogOutputFirmata.h>
-AnalogOutputFirmata analogOutput;
+#include <AnalogOutputFeature.h>
+AnalogOutputFeature analogOutput;
 
-#include <StepperFirmata.h>
-StepperFirmata stepperControl;
+#include <StepperFeature.h>
+StepperFeature stepperControl;
 
 /*==============================================================================
  * SETUP()
@@ -55,16 +55,16 @@ StepperFirmata stepperControl;
 void setup()
 {
 
-#ifdef DigitalInputFirmata_h
+#ifdef DigitalInputFeature_h
   FirmataExt.addFeature(digitalInput);
 #endif
-#ifdef DigitalOutputFirmata_h
+#ifdef DigitalOutputFeature_h
   FirmataExt.addFeature(digitalOutput);
 #endif
-#ifdef AnalogInputFirmata_h
+#ifdef AnalogInputFeature_h
   FirmataExt.addFeature(analogInput);
 #endif
-#ifdef AnalogOutputFirmata_h
+#ifdef AnalogOutputFeature_h
   FirmataExt.addFeature(analogOutput);
 #endif
 
@@ -80,7 +80,7 @@ Firmata.reset();
  *============================================================================*/
 void loop()
 {
-#ifdef DigitalInputFirmata_h
+#ifdef DigitalInputFeature_h
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
    * stream buffer using Firmata.write()  */
   digitalInput.report();
@@ -97,7 +97,7 @@ void loop()
    * trigger the buffer to dump. */
 
   if (Firmata.elapsed()) {
-#ifdef AnalogInputFirmata_h
+#ifdef AnalogInputFeature_h
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
     analogInput.report();
 #endif

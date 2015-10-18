@@ -15,7 +15,7 @@
 */
 
 #include <FirmataCore.h>
-#include "FirmataExt.h"
+#include <FirmataExt.h>
 
 FirmataExtClass::FirmataExtClass()
 {
