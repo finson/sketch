@@ -35,7 +35,7 @@
 
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
-#include "drivers/StepperDriver.h"
+#include <StepperDriver.h>
 
 #define MAX_STEPPERS 6 // arbitrary value... may need to adjust
 #define STEPPER_CONFIG 0

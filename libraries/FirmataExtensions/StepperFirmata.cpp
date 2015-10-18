@@ -31,8 +31,8 @@
  */
 
 #include <FirmataCore.h>
-#include "StepperFirmata.h"
-#include "drivers/StepperDriver.h"
+#include <StepperFirmata.h>
+#include <StepperDriver.h>
 
 boolean StepperFirmata::handleSetPinMode(byte pin, int mode)
 {
