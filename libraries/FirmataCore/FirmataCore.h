@@ -21,8 +21,9 @@
  * version numbers are important.  This number can be queried so that host
  * software can test whether it will be compatible with the currently
  * installed firmware. */
+
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   7 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   4 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages

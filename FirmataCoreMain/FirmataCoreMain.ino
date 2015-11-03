@@ -29,10 +29,6 @@
 #include <FirmataExt.h>
 #include <FirmataFeatureCommands.h>
 
-// To configure, save this file to your working directory so you can edit it
-// then comment out the include and declaration for any features that you do
-// not need below.
-
 #include <DigitalInputFeature.h>
 DigitalInputFeature digitalInput;
 
@@ -55,18 +51,10 @@ StepperFeature stepperControl;
 void setup()
 {
 
-#ifdef DigitalInputFeature_h
   FirmataExt.addFeature(digitalInput);
-#endif
-#ifdef DigitalOutputFeature_h
   FirmataExt.addFeature(digitalOutput);
-#endif
-#ifdef AnalogInputFeature_h
   FirmataExt.addFeature(analogInput);
-#endif
-#ifdef AnalogOutputFeature_h
   FirmataExt.addFeature(analogOutput);
-#endif
 
 // start up the default Firmata using Serial interface:
 
