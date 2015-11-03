@@ -24,6 +24,13 @@
     numFeatures = 0;
   }
 
+  void FirmataExtClass::addFeature(FirmataFeature &capability)
+  {
+    if (numFeatures < MAX_FEATURES) {
+      features[numFeatures++] = &capability;
+    }
+  }
+
   boolean FirmataExtClass::dispatchSetPinMode(byte pin, int mode)
   {
     boolean known = false;
@@ -61,13 +68,6 @@
       }
     }
     return false;
-  }
-
-  void FirmataExtClass::addFeature(FirmataFeature &capability)
-  {
-    if (numFeatures < MAX_FEATURES) {
-      features[numFeatures++] = &capability;
-    }
   }
 
   void FirmataExtClass::reset()

@@ -234,10 +234,14 @@ void FirmataClass::parse(byte inputData)
 
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
-      //stop sysex byte
       parsingSysex = false;
       //fire off handler function
-      executeCoreSysex();
+      if (!executeCoreSysex()) {
+        if (currentSysexCallback) {
+          (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
+        }
+      }
+
     } else {
       //normal data byte - add to buffer
       storedInputData[sysexBytesRead] = inputData;
@@ -311,7 +315,7 @@ void FirmataClass::parse(byte inputData)
   }
 }
 
-void FirmataClass::executeCoreSysex(void)
+boolean FirmataClass::executeCoreSysex(void)
 {
   switch (storedInputData[0]) { //first byte in buffer is command
     case REPORT_FIRMWARE:
@@ -373,9 +377,9 @@ void FirmataClass::executeCoreSysex(void)
       break;
 
     default:
-      if (currentSysexCallback)
-        (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
+      return false;
   }
+  return true;
 }
 
 boolean FirmataClass::isParsingMessage(void)
