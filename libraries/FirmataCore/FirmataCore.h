@@ -180,7 +180,7 @@ class FirmataClass
 //   delayTaskCallbackFunction delayTaskCallback;
 
     /* private methods ------------------------------ */
-    void processStandardSysexMessages(void);
+    void executeCoreSysex(void);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);

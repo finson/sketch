@@ -64,7 +64,8 @@ FirmataClass::FirmataClass()
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
   reset();
-  setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+//  setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+  setFirmwareVersion(0,3);    // Development version of the implementation, not the protocol
 }
 
 // resets the system state upon a SYSTEM_RESET message from the host software
@@ -236,7 +237,7 @@ void FirmataClass::parse(byte inputData)
       //stop sysex byte
       parsingSysex = false;
       //fire off handler function
-      processStandardSysexMessages();
+      executeCoreSysex();
     } else {
       //normal data byte - add to buffer
       storedInputData[sysexBytesRead] = inputData;
@@ -310,7 +311,7 @@ void FirmataClass::parse(byte inputData)
   }
 }
 
-void FirmataClass::processStandardSysexMessages(void)
+void FirmataClass::executeCoreSysex(void)
 {
   switch (storedInputData[0]) { //first byte in buffer is command
     case REPORT_FIRMWARE:
@@ -344,6 +345,33 @@ void FirmataClass::processStandardSysexMessages(void)
         (*currentStringCallback)((char *)&storedInputData[0]);
       }
       break;
+
+    case PIN_STATE_QUERY:
+      if (sysexBytesRead > 1) {
+        byte pin = storedInputData[1];
+        if (pin < TOTAL_PINS) {
+          Firmata.write(START_SYSEX);
+          Firmata.write(PIN_STATE_RESPONSE);
+          Firmata.write(pin);
+          Firmata.write(Firmata.getPinMode(pin));
+          int pinState = Firmata.getPinState(pin);
+          Firmata.write((byte)pinState & 0x7F);
+          if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
+          if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
+          Firmata.write(END_SYSEX);
+        }
+      }
+      break;
+
+    case ANALOG_MAPPING_QUERY:
+      Firmata.write(START_SYSEX);
+      Firmata.write(ANALOG_MAPPING_RESPONSE);
+      for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+        Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+      }
+      Firmata.write(END_SYSEX);
+      break;
+
     default:
       if (currentSysexCallback)
         (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);

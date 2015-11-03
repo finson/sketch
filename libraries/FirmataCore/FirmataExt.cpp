@@ -17,45 +17,27 @@
 #include <FirmataCore.h>
 #include <FirmataExt.h>
 
-FirmataExtClass::FirmataExtClass()
-{
-  Firmata.attach(SET_PIN_MODE, dispatchSetPinModeCallback);
-  Firmata.attach(dispatchExtendedSysexCallback);
-  numFeatures = 0;
-}
-
-boolean FirmataExtClass::dispatchSetPinMode(byte pin, int mode)
-{
-  boolean known = false;
-  for (byte i = 0; i < numFeatures; i++) {
-    known |= features[i]->handleSetPinMode(pin, mode);
+  FirmataExtClass::FirmataExtClass()
+  {
+    Firmata.attach(SET_PIN_MODE, dispatchSetPinModeCallback);
+    Firmata.attach(dispatchFeatureSysexCallback);
+    numFeatures = 0;
   }
-  return known;
-}
 
-boolean FirmataExtClass::dispatchExtendedSysex(byte command, byte argc, byte* argv)
-{
-  switch (command) {
+  boolean FirmataExtClass::dispatchSetPinMode(byte pin, int mode)
+  {
+    boolean known = false;
+    for (byte i = 0; i < numFeatures; i++) {
+      known |= features[i]->handleSetPinMode(pin, mode);
+    }
+    return known;
+  }
 
-    case PIN_STATE_QUERY:
-      if (argc > 0) {
-        byte pin = argv[0];
-        if (pin < TOTAL_PINS) {
-          Firmata.write(START_SYSEX);
-          Firmata.write(PIN_STATE_RESPONSE);
-          Firmata.write(pin);
-          Firmata.write(Firmata.getPinMode(pin));
-          int pinState = Firmata.getPinState(pin);
-          Firmata.write((byte)pinState & 0x7F);
-          if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
-          if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
-          Firmata.write(END_SYSEX);
-          return true;
-        }
-      }
-      break;
+  boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* argv)
+  {
+    switch (command) {
 
-    case CAPABILITY_QUERY:
+      case CAPABILITY_QUERY:
       Firmata.write(START_SYSEX);
       Firmata.write(CAPABILITY_RESPONSE);
       for (byte pin = 0; pin < TOTAL_PINS; pin++) {
@@ -70,51 +52,41 @@ boolean FirmataExtClass::dispatchExtendedSysex(byte command, byte argc, byte* ar
       return true;
       break;
 
-    case ANALOG_MAPPING_QUERY:
-      Firmata.write(START_SYSEX);
-      Firmata.write(ANALOG_MAPPING_RESPONSE);
-      for (byte pin = 0; pin < TOTAL_PINS; pin++) {
-        Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
-      }
-      Firmata.write(END_SYSEX);
-      return true;
-      break;
-
-    default:
+      default:
       for (byte i = 0; i < numFeatures; i++) {
         if (features[i]->handleFeatureSysex(command, argc, argv)) {
           return true;
         }
+        break;
       }
-      break;
+    }
+    return false;
   }
-  return false;
-}
 
-void FirmataExtClass::addFeature(FirmataFeature &capability)
-{
-  if (numFeatures < MAX_FEATURES) {
-    features[numFeatures++] = &capability;
+  void FirmataExtClass::addFeature(FirmataFeature &capability)
+  {
+    if (numFeatures < MAX_FEATURES) {
+      features[numFeatures++] = &capability;
+    }
   }
-}
 
-void FirmataExtClass::reset()
-{
-  for (byte i = 0; i < numFeatures; i++) {
-    features[i]->reset();
+  void FirmataExtClass::reset()
+  {
+    for (byte i = 0; i < numFeatures; i++) {
+      features[i]->reset();
+    }
   }
-}
 
-void dispatchSetPinModeCallback(byte pin, int mode)
-{
-  if (!FirmataExt.dispatchSetPinMode(pin, mode) && mode != IGNORE) {
+  void dispatchSetPinModeCallback(byte pin, int mode)
+  {
+    if (!FirmataExt.dispatchSetPinMode(pin, mode) && mode != IGNORE) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
 }
 
-void dispatchExtendedSysexCallback(byte command, byte argc, byte* argv)
+void dispatchFeatureSysexCallback(byte command, byte argc, byte* argv)
 {
-  if (!FirmataExt.dispatchExtendedSysex(command, argc, argv)) {
+  if (!FirmataExt.dispatchFeatureSysex(command, argc, argv)) {
     Firmata.sendString("Unhandled sysex command");
   }
 }

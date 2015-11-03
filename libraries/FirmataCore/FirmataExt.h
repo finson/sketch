@@ -24,15 +24,15 @@
 
 void dispatchSetPinModeCallback(byte pin, int mode);
 
-void dispatchExtendedSysexCallback(byte command, byte argc, byte* argv);
+void dispatchFeatureSysexCallback(byte command, byte argc, byte* argv);
 
 class FirmataExtClass
 {
   public:
     FirmataExtClass();
-    boolean dispatchSetPinMode(byte pin, int mode);
-    boolean dispatchExtendedSysex(byte command, byte argc, byte* argv);
     void addFeature(FirmataFeature &capability);
+    boolean dispatchSetPinMode(byte pin, int mode);
+    boolean dispatchFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
 
   private:
