@@ -218,7 +218,7 @@ int FirmataClass::available(void)
   return FirmataStream->available();
 }
 
-void FirmataClass::processInput(void)
+void FirmataClass::processInputStream(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
   if (inputData != -1) {
@@ -229,26 +229,21 @@ void FirmataClass::processInput(void)
 void FirmataClass::parse(byte inputData)
 {
   int command;
+  char errorMsg[100] ;
 
   // TODO make sure it handles -1 properly
 
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
       parsingSysex = false;
-      //fire off handler function
-      if (!executeCoreSysex()) {
+      if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
         if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
-          Firmata.sendString("Unhandled sysex command");
+          sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
+          Firmata.sendString(errorMsg);
         }
-        // if (currentSysexCallback) {
-        //   (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
-        // }
       }
-
     } else {
-      //normal data byte - add to buffer
-      storedInputData[sysexBytesRead] = inputData;
-      sysexBytesRead++;
+      storedInputData[sysexBytesRead++] = inputData;
     }
   } else if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
@@ -269,9 +264,6 @@ void FirmataClass::parse(byte inputData)
                                       + storedInputData[1]);
           }
           break;
-        case SET_PIN_MODE:
-          setPinMode(storedInputData[1], storedInputData[0]);
-          break;
         case REPORT_ANALOG:
           if (currentReportAnalogCallback)
             (*currentReportAnalogCallback)(multiByteChannel, storedInputData[0]);
@@ -279,6 +271,9 @@ void FirmataClass::parse(byte inputData)
         case REPORT_DIGITAL:
           if (currentReportDigitalCallback)
             (*currentReportDigitalCallback)(multiByteChannel, storedInputData[0]);
+          break;
+        case SET_PIN_MODE:
+          setPinMode(storedInputData[1], storedInputData[0]);
           break;
       }
       executeMultiByteCommand = 0;
@@ -290,7 +285,6 @@ void FirmataClass::parse(byte inputData)
       multiByteChannel = inputData & 0x0F;
     } else {
       command = inputData;
-      // commands in the 0xF* range don't use channel data
     }
     switch (command) {
       case ANALOG_MESSAGE:
@@ -318,44 +312,44 @@ void FirmataClass::parse(byte inputData)
   }
 }
 
-boolean FirmataClass::executeCoreSysex(void)
+boolean FirmataClass::executeCoreSysex(byte cmd, byte argc, byte* argv)
 {
-  switch (storedInputData[0]) { //first byte in buffer is command
+  switch (cmd) {
     case REPORT_FIRMWARE:
       printFirmwareVersion();
       break;
     case SAMPLING_INTERVAL:
-      if (sysexBytesRead > 2) {
-        samplingInterval = max(storedInputData[1] + (storedInputData[2] << 7),MINIMUM_SAMPLING_INTERVAL);
+      if (argc >= 2) {
+        samplingInterval = max(argv[0] + (argv[1] << 7),MINIMUM_SAMPLING_INTERVAL);
       }
       break;
     case STRING_DATA:
       if (currentStringCallback) {
-        byte bufferLength = (sysexBytesRead - 1) / 2;
-        byte i = 1;
+        byte bufferLength = argc / 2;
+        byte i = 0;
         byte j = 0;
         while (j < bufferLength) {
           // The string length will only be at most half the size of the
           // stored input buffer so we can decode the string within the buffer.
-          storedInputData[j] = storedInputData[i];
+          argv[j] = argv[i];
           i++;
-          storedInputData[j] += (storedInputData[i] << 7);
+          argv[j] += (argv[i] << 7);
           i++;
           j++;
         }
         // Make sure string is null terminated. This may be the case for data
         // coming from client libraries in languages that don't null terminate
         // strings.
-        if (storedInputData[j - 1] != '\0') {
-          storedInputData[j] = '\0';
+        if (argv[j - 1] != '\0') {
+          argv[j] = '\0';
         }
-        (*currentStringCallback)((char *)&storedInputData[0]);
+        (*currentStringCallback)((char *)&argv[0]);
       }
       break;
 
     case PIN_STATE_QUERY:
-      if (sysexBytesRead > 1) {
-        byte pin = storedInputData[1];
+      if (argc >= 1) {
+        byte pin = argv[0];
         if (pin < TOTAL_PINS) {
           Firmata.write(START_SYSEX);
           Firmata.write(PIN_STATE_RESPONSE);

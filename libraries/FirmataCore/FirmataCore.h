@@ -90,7 +90,7 @@ extern "C" {
   // callback function types
   typedef void (*callbackFunction)(byte, int);
   typedef void (*stringCallbackFunction)(char *);
-  typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
+//  typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
 //  typedef void (*systemResetCallbackFunction)(void);
 //  typedef void (*delayTaskCallbackFunction)(long delay);
 }
@@ -113,7 +113,7 @@ class FirmataClass
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
     /* serial receive handling */
     int available(void);
-    void processInput(void);
+    void processInputStream(void);
     void parse(unsigned char value);
     boolean isParsingMessage(void);
     boolean isResetting(void);
@@ -130,7 +130,7 @@ class FirmataClass
     void attach(byte command, callbackFunction newFunction);
 //    void attach(byte command, systemResetCallbackFunction newFunction);
     void attach(byte command, stringCallbackFunction newFunction);
-    void attach(sysexCallbackFunction newFunction);
+//    void attach(sysexCallbackFunction newFunction);
     void detach(byte command);
 
     /* access pin config */
@@ -183,7 +183,7 @@ class FirmataClass
 //   delayTaskCallbackFunction delayTaskCallback;
 
     /* private methods ------------------------------ */
-    boolean executeCoreSysex(void);
+    boolean executeCoreSysex(byte command, byte argc, byte* argv);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);

@@ -30,19 +30,17 @@
 #include <FirmataFeatureCommands.h>
 
 #include <DigitalInputFeature.h>
-DigitalInputFeature digitalInput;
-
 #include <DigitalOutputFeature.h>
-DigitalOutputFeature digitalOutput;
-
 #include <AnalogInputFeature.h>
-AnalogInputFeature analogInput;
-
 #include <AnalogOutputFeature.h>
+
+DigitalInputFeature digitalInput;
+DigitalOutputFeature digitalOutput;
+AnalogInputFeature analogInput;
 AnalogOutputFeature analogOutput;
 
-#include <StepperFeature.h>
-StepperFeature stepperControl;
+//#include <StepperFeature.h>
+//StepperFeature stepperControl;
 
 /*==============================================================================
  * SETUP()
@@ -50,7 +48,6 @@ StepperFeature stepperControl;
 
 void setup()
 {
-
   FirmataExt.addFeature(digitalInput);
   FirmataExt.addFeature(digitalOutput);
   FirmataExt.addFeature(analogInput);
@@ -77,7 +74,7 @@ void loop()
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available()) {
-    Firmata.processInput();
+    Firmata.processInputStream();
   }
 
   /* SEND STREAM WRITE BUFFER - TO DO: make sure that the stream buffer doesn't go over
