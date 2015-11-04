@@ -43,7 +43,6 @@
   boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* argv)
   {
     switch (command) {
-
       case CAPABILITY_QUERY:
       Firmata.write(START_SYSEX);
       Firmata.write(CAPABILITY_RESPONSE);
@@ -64,8 +63,8 @@
         if (features[i]->handleFeatureSysex(command, argc, argv)) {
           return true;
         }
-        break;
       }
+      break;
     }
     return false;
   }
