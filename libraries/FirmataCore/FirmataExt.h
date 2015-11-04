@@ -22,9 +22,8 @@
 
 #define MAX_FEATURES TOTAL_SYSEX_COMMANDS
 
-void dispatchSetPinModeCallback(byte pin, int mode);
-
-void dispatchFeatureSysexCallback(byte command, byte argc, byte* argv);
+// void dispatchSetPinModeCallback(byte pin, int mode);
+// void dispatchFeatureSysexCallback(byte command, byte argc, byte* argv);
 
 class FirmataExtClass
 {

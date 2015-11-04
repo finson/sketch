@@ -237,9 +237,12 @@ void FirmataClass::parse(byte inputData)
       parsingSysex = false;
       //fire off handler function
       if (!executeCoreSysex()) {
-        if (currentSysexCallback) {
-          (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
+        if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
+          Firmata.sendString("Unhandled sysex command");
         }
+        // if (currentSysexCallback) {
+        //   (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
+        // }
       }
 
     } else {
@@ -475,7 +478,7 @@ void FirmataClass::attach(byte command, callbackFunction newFunction)
     case DIGITAL_MESSAGE: currentDigitalCallback = newFunction; break;
     case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
     case REPORT_DIGITAL: currentReportDigitalCallback = newFunction; break;
-    case SET_PIN_MODE: currentPinModeCallback = newFunction; break;
+    // case SET_PIN_MODE: currentPinModeCallback = newFunction; break;
   }
 }
 
@@ -493,17 +496,17 @@ void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
   }
 }
 
-void FirmataClass::attach(sysexCallbackFunction newFunction)
-{
-  currentSysexCallback = newFunction;
-}
+// void FirmataClass::attach(sysexCallbackFunction newFunction)
+// {
+//   currentSysexCallback = newFunction;
+// }
 
 void FirmataClass::detach(byte command)
 {
   switch (command) {
     // case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
     case STRING_DATA: currentStringCallback = NULL; break;
-    case START_SYSEX: currentSysexCallback = NULL; break;
+    // case START_SYSEX: currentSysexCallback = NULL; break;
     default:
       attach(command, (callbackFunction)NULL);
   }
@@ -515,15 +518,19 @@ byte FirmataClass::getPinMode(byte pin)
   return pinConfig[pin];
 }
 
-void FirmataClass::setPinMode(byte pin, byte config)
+void FirmataClass::setPinMode(byte pin, byte mode)
 {
-  if (pinConfig[pin] == IGNORE)
-    return;
-  pinState[pin] = 0;
-  pinConfig[pin] = config;
 
-  if (currentPinModeCallback)
-    (*currentPinModeCallback)(pin, config);
+  if (pinConfig[pin] == IGNORE) return;
+  pinState[pin] = 0;
+  pinConfig[pin] = mode;
+
+  if (!FirmataExt.dispatchSetPinMode(pin, mode)) {
+    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
+  }
+
+  // if (currentPinModeCallback)
+  //   (*currentPinModeCallback)(pin, mode);
 }
 
 /* access pin state */

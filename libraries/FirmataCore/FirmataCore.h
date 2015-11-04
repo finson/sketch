@@ -23,14 +23,14 @@
  * installed firmware. */
 
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   4 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 #define MINIMUM_SAMPLING_INTERVAL 10  // milliseconds
 #define DEFAULT_SAMPLING_INTERVAL 19
 
-// basic command set (128-255/0x80-0xFF)
+// Core Direct command set (128-255/0x80-0xFF)
 
 #define REPORT_VERSION          0xF9 // report protocol version (FirmataCore)
 #define SYSTEM_RESET            0xFF // reset from MIDI (FirmataCore)
@@ -45,7 +45,7 @@
 
 #define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc (FirmataCore, then FirmataExt)
 
-// extended command set using sysex (0-127/0x00-0x7F)
+// Core Sysex command set with sub-commands: START_SYSEX, followed by (0-127/0x00-0x7F), ..., END_SYSEX
 /* 0x00-0x0F reserved for user-defined commands */
 
 // Sysex commands that do not have an associated pin mode
@@ -54,16 +54,18 @@
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataCore)
 #define STRING_DATA             0x71 // a string message with 14-bits per char (FirmataCore)
 
-#define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers (FirmataExt)
-#define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info (FirmataExt)
-#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value (FirmataExt)
-#define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value (FirmataExt)
+#define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers (FirmataCore)
+#define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info (FirmataCore)
+#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value (FirmataCore)
+#define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value (FirmataCore)
 #define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins (FirmataExt)
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution (FirmataExt)
 
 // Sysex commands that have an associated pin mode and implement or extend the mode
 
 #define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFeature)
+
+// Other Sysex sub-commands
 
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
@@ -157,24 +159,25 @@ class FirmataClass
     boolean parsingSysex;
     int sysexBytesRead;
     /* pins configuration */
-    byte pinConfig[TOTAL_PINS];         // configuration of every pin
-    int pinState[TOTAL_PINS];           // any value that has been written
+    byte pinConfig[TOTAL_PINS];     // configuration of every pin
+    int pinState[TOTAL_PINS];       // any value that has been written
 
     /* timer variables */
-    unsigned long currentMillis;        // store the current value from millis()
-    unsigned long previousMillis;       // for comparison with currentMillis
+    unsigned long currentMillis;   // store the current value from millis()
+    unsigned long previousMillis;  // for comparison with currentMillis
     int samplingInterval;          // how often to run the main loop (in ms)
 
     boolean resetting;
 
     /* callback functions */
-    callbackFunction currentAnalogCallback;
-    callbackFunction currentDigitalCallback;        // DigitalOutputFirmata
-    callbackFunction currentReportAnalogCallback;
-    callbackFunction currentReportDigitalCallback;
-    callbackFunction currentPinModeCallback;        // FirmataExt
-    stringCallbackFunction currentStringCallback;
-    sysexCallbackFunction currentSysexCallback;     // FirmataExt
+    callbackFunction currentAnalogCallback;         // AnalogOutputFeature
+    callbackFunction currentDigitalCallback;        // DigitalOutputFeature
+    callbackFunction currentReportAnalogCallback;   // AnalogInputFeature
+    callbackFunction currentReportDigitalCallback;  // DigitalInputFeature
+
+    // callbackFunction currentPinModeCallback;        // -unused- (was FirmataExt)
+    stringCallbackFunction currentStringCallback;   // -unused-
+    // sysexCallbackFunction currentSysexCallback;     // -unused- (was FirmataExt)
 
 //   systemResetCallbackFunction currentSystemResetCallback;
 //   delayTaskCallbackFunction delayTaskCallback;

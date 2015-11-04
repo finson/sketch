@@ -19,8 +19,8 @@
 
   FirmataExtClass::FirmataExtClass()
   {
-    Firmata.attach(SET_PIN_MODE, dispatchSetPinModeCallback);
-    Firmata.attach(dispatchFeatureSysexCallback);
+//   Firmata.attach(SET_PIN_MODE, dispatchSetPinModeCallback);
+//   Firmata.attach(dispatchFeatureSysexCallback);
     numFeatures = 0;
   }
 
@@ -77,19 +77,19 @@
     }
   }
 
-  void dispatchSetPinModeCallback(byte pin, int mode)
-  {
-    if (!FirmataExt.dispatchSetPinMode(pin, mode) && mode != IGNORE) {
-    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
-  }
-}
+//   void dispatchSetPinModeCallback(byte pin, int mode)
+//   {
+//     if (mode != IGNORE && !FirmataExt.dispatchSetPinMode(pin, mode)) {
+//     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
+//   }
+// }
 
-void dispatchFeatureSysexCallback(byte command, byte argc, byte* argv)
-{
-  if (!FirmataExt.dispatchFeatureSysex(command, argc, argv)) {
-    Firmata.sendString("Unhandled sysex command");
-  }
-}
+// void dispatchFeatureSysexCallback(byte command, byte argc, byte* argv)
+// {
+//   if (!FirmataExt.dispatchFeatureSysex(command, argc, argv)) {
+//     Firmata.sendString("Unhandled sysex command");
+//   }
+// }
 
 // make one static instance
 FirmataExtClass FirmataExt;
