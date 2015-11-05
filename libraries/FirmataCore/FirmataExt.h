@@ -29,7 +29,7 @@ class FirmataExtClass
 {
   public:
     FirmataExtClass();
-    void addFeature(FirmataFeature &capability);
+    void addFeature(FirmataFeature *capability);
     boolean dispatchSetPinMode(byte pin, int mode);
     boolean dispatchFeatureSysex(byte command, byte argc, byte* argv);
     void reset();

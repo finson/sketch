@@ -1,3 +1,17 @@
+#include <Wire.h>
+
+#include <FirmataFeature.h>
+#include <FirmataProtocol.h>
+#include <I2CProtocol.h>
+
+#include <AnalogInputFeature.h>
+#include <AnalogOutputFeature.h>
+#include <DigitalInputFeature.h>
+#include <DigitalOutputFeature.h>
+#include <Encoder7Bit.h>
+#include <FirmataCore.h>
+#include <FirmataExt.h>
+
 /*
 
   Firmata is a generic protocol for communicating with microcontrollers from
@@ -27,20 +41,8 @@
 
 #include <FirmataCore.h>
 #include <FirmataExt.h>
-#include <FirmataFeatureCommands.h>
 
-#include <DigitalInputFeature.h>
-#include <DigitalOutputFeature.h>
-#include <AnalogInputFeature.h>
-#include <AnalogOutputFeature.h>
-
-DigitalInputFeature digitalInput;
-DigitalOutputFeature digitalOutput;
-AnalogInputFeature analogInput;
-AnalogOutputFeature analogOutput;
-
-//#include <StepperFeature.h>
-//StepperFeature stepperControl;
+#include "SelectedFeatures.h"
 
 /*==============================================================================
  * SETUP()
@@ -48,10 +50,10 @@ AnalogOutputFeature analogOutput;
 
 void setup()
 {
-  FirmataExt.addFeature(digitalInput);
-  FirmataExt.addFeature(digitalOutput);
-  FirmataExt.addFeature(analogInput);
-  FirmataExt.addFeature(analogOutput);
+  int index = 0;
+  while (selectedFeatures[index] != 0) {
+    FirmataExt.addFeature(selectedFeatures[index]);
+  }
 
 // start up the default Firmata using Serial interface:
 
