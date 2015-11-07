@@ -114,7 +114,7 @@ class FirmataClass
     /* serial receive handling */
     int available(void);
     void processInputStream(void);
-    void parse(unsigned char value);
+    void parse(int value);
     boolean isParsingMessage(void);
     boolean isResetting(void);
     /* serial send handling */

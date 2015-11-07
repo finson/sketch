@@ -55,7 +55,6 @@
         Firmata.write(127);
       }
       Firmata.write(END_SYSEX);
-      return true;
       break;
 
       default:
@@ -64,9 +63,10 @@
           return true;
         }
       }
+      return false;
       break;
     }
-    return false;
+    return true;
   }
 
   void FirmataExtClass::reset()

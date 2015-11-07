@@ -1,16 +1,11 @@
 #include <Wire.h>
 
-#include <FirmataFeature.h>
-#include <FirmataProtocol.h>
-#include <I2CProtocol.h>
-
-#include <AnalogInputFeature.h>
-#include <AnalogOutputFeature.h>
-#include <DigitalInputFeature.h>
-#include <DigitalOutputFeature.h>
-#include <Encoder7Bit.h>
 #include <FirmataCore.h>
 #include <FirmataExt.h>
+#include <FirmataFeature.h>
+#include <FirmataProtocol.h>
+
+#include "SelectedFeatures.h"
 
 /*
 
@@ -39,27 +34,23 @@
   FirmataCore forked from that base October 2015 by Doug Johnson.
 */
 
-#include <FirmataCore.h>
-#include <FirmataExt.h>
-
-#include "SelectedFeatures.h"
-
 /*==============================================================================
  * SETUP()
  *============================================================================*/
 
 void setup()
 {
-  int index = 0;
-  while (selectedFeatures[index] != 0) {
-    FirmataExt.addFeature(selectedFeatures[index]);
-  }
+//  int index = 0;
+//  while (selectedFeatures[index] != 0) {
+//    FirmataExt.addFeature(selectedFeatures[index]);
+//  }
 
 // start up the default Firmata using Serial interface:
 
 Firmata.begin(57600);
 
 Firmata.reset();
+
 }
 
 /*==============================================================================
@@ -67,6 +58,8 @@ Firmata.reset();
  *============================================================================*/
 void loop()
 {
+Firmata.sendString("Loop start.");
+
 #ifdef DigitalInputFeature_h
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
    * stream buffer using Firmata.write()  */
@@ -89,4 +82,5 @@ void loop()
     analogInput.report();
 #endif
   }
+Firmata.sendString("Loop end.");
 }

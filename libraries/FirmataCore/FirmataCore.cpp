@@ -222,11 +222,11 @@ void FirmataClass::processInputStream(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
   if (inputData != -1) {
-    parse(inputData);
+    parse(inputData & 0xFF);
   }
 }
 
-void FirmataClass::parse(byte inputData)
+void FirmataClass::parse(int inputData)
 {
   int command;
   char errorMsg[100] ;
@@ -236,7 +236,9 @@ void FirmataClass::parse(byte inputData)
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
       parsingSysex = false;
-      if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
+           sprintf(errorMsg, "Sysex command. %02x",storedInputData[0]);
+          Firmata.sendString(errorMsg);
+     if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
         if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
           sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
           Firmata.sendString(errorMsg);
@@ -314,6 +316,7 @@ void FirmataClass::parse(byte inputData)
 
 boolean FirmataClass::executeCoreSysex(byte cmd, byte argc, byte* argv)
 {
+
   switch (cmd) {
     case REPORT_FIRMWARE:
       printFirmwareVersion();
