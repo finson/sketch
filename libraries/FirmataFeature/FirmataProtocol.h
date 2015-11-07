@@ -32,12 +32,6 @@
 class FirmataProtocol: public FirmataFeature
 {
   public:
-    virtual int open(char *controllerName) = 0;
-    virtual boolean status(int handle) = 0;
-    virtual boolean control(int handle) = 0;
-    virtual boolean read(int handle) = 0;
-    virtual boolean write(int handle) = 0;
-    virtual boolean close(int handle) = 0;
 };
 
 #endif
