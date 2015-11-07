@@ -40,10 +40,10 @@
 
 void setup()
 {
-//  int index = 0;
-//  while (selectedFeatures[index] != 0) {
-//    FirmataExt.addFeature(selectedFeatures[index]);
-//  }
+  int index = 0;
+  while (selectedFeatures[index] != 0) {
+    FirmataExt.addFeature(selectedFeatures[index++]);
+  }
 
 // start up the default Firmata using Serial interface:
 
