@@ -16,6 +16,8 @@
 
 #include <I2CProtocol.h>
 
+//----------------------------------------------------------------------------
+
 I2CProtocol::I2CProtocol()
 {
   isI2CEnabled = false;
@@ -23,56 +25,12 @@ I2CProtocol::I2CProtocol()
   i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
 
-int I2CProtocol::open(char *controllerName){}
-boolean I2CProtocol::status(int handle){}
-boolean I2CProtocol::control(int handle){}
-boolean I2CProtocol::read(int handle){}
-boolean I2CProtocol::write(int handle){}
-boolean I2CProtocol::close(int handle){}
-
-void I2CProtocol::readAndReportData(byte address, int theRegister, byte numBytes) {
-  // allow I2C requests that don't require a register read
-  // for example, some devices using an interrupt pin to signify new data available
-  // do not always require the register read so upon interrupt you call Wire.requestFrom()
-  if (theRegister != REGISTER_NOT_SPECIFIED) {
-    Wire.beginTransmission(address);
-#if ARDUINO >= 100
-    Wire.write((byte)theRegister);
-#else
-    Wire.send((byte)theRegister);
-#endif
-    Wire.endTransmission();
-    // do not set a value of 0
-    if (i2cReadDelayTime > 0) {
-      // delay is necessary for some devices such as WiiNunchuck
-      delayMicroseconds(i2cReadDelayTime);
-    }
-  } else {
-    theRegister = 0;  // fill the register with a dummy value
+void I2CProtocol::handleGetCapability(byte pin)
+{
+  if (IS_PIN_I2C(pin)) {
+    Firmata.write(I2C);
+    Firmata.write(1);  // to do: determine appropriate value
   }
-
-  Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
-
-  // check to be sure correct number of bytes were returned by slave
-  if (numBytes < Wire.available()) {
-    Firmata.sendString("I2C: Too many bytes received");
-  } else if (numBytes > Wire.available()) {
-    Firmata.sendString("I2C: Too few bytes received");
-  }
-
-  i2cRxData[0] = address;
-  i2cRxData[1] = theRegister;
-
-  for (int i = 0; i < numBytes && Wire.available(); i++) {
-#if ARDUINO >= 100
-    i2cRxData[2 + i] = Wire.read();
-#else
-    i2cRxData[2 + i] = Wire.receive();
-#endif
-  }
-
-  // send slave address, register and received bytes
-  Firmata.sendSysex(I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
 boolean I2CProtocol::handleSetPinMode(byte pin, int mode)
@@ -92,14 +50,6 @@ boolean I2CProtocol::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void I2CProtocol::handleGetCapability(byte pin)
-{
-  if (IS_PIN_I2C(pin)) {
-    Firmata.write(I2C);
-    Firmata.write(1);  // to do: determine appropriate value
-  }
-}
-
 boolean I2CProtocol::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   switch (command) {
@@ -112,6 +62,29 @@ boolean I2CProtocol::handleFeatureSysex(byte command, byte argc, byte *argv)
       return handleI2CConfig(argc, argv);
   }
   return false;
+}
+
+void I2CProtocol::reset()
+{
+  if (isI2CEnabled) {
+    disableI2CPins();
+  }
+}
+
+//----------------------------------------------------------------------------
+
+boolean I2CProtocol::handleI2CConfig(byte argc, byte *argv)
+{
+  unsigned int delayTime = (argv[0] + (argv[1] << 7));
+
+  if (delayTime > 0) {
+    i2cReadDelayTime = delayTime;
+  }
+
+  if (!isI2CEnabled) {
+    enableI2CPins();
+  }
+  return isI2CEnabled;
 }
 
 void I2CProtocol::handleI2CRequest(byte argc, byte *argv)
@@ -209,20 +182,6 @@ void I2CProtocol::handleI2CRequest(byte argc, byte *argv)
   }
 }
 
-boolean I2CProtocol::handleI2CConfig(byte argc, byte *argv)
-{
-  unsigned int delayTime = (argv[0] + (argv[1] << 7));
-
-  if (delayTime > 0) {
-    i2cReadDelayTime = delayTime;
-  }
-
-  if (!isI2CEnabled) {
-    enableI2CPins();
-  }
-  return isI2CEnabled;
-}
-
 boolean I2CProtocol::enableI2CPins()
 {
   byte i;
@@ -255,19 +214,58 @@ void I2CProtocol::disableI2CPins()
   // Wire.end();
 }
 
-void I2CProtocol::reset()
-{
-  if (isI2CEnabled) {
-    disableI2CPins();
+
+void I2CProtocol::readAndReportData(byte address, int theRegister, byte numBytes) {
+  // allow I2C requests that don't require a register read
+  // for example, some devices using an interrupt pin to signify new data available
+  // do not always require the register read so upon interrupt you call Wire.requestFrom()
+  if (theRegister != REGISTER_NOT_SPECIFIED) {
+    Wire.beginTransmission(address);
+#if ARDUINO >= 100
+    Wire.write((byte)theRegister);
+#else
+    Wire.send((byte)theRegister);
+#endif
+    Wire.endTransmission();
+    // do not set a value of 0
+    if (i2cReadDelayTime > 0) {
+      // delay is necessary for some devices such as WiiNunchuck
+      delayMicroseconds(i2cReadDelayTime);
+    }
+  } else {
+    theRegister = 0;  // fill the register with a dummy value
   }
+
+  Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
+
+  // check to be sure correct number of bytes were returned by slave
+  if (numBytes < Wire.available()) {
+    Firmata.sendString("I2C: Too many bytes received");
+  } else if (numBytes > Wire.available()) {
+    Firmata.sendString("I2C: Too few bytes received");
+  }
+
+  i2cRxData[0] = address;
+  i2cRxData[1] = theRegister;
+
+  for (int i = 0; i < numBytes && Wire.available(); i++) {
+#if ARDUINO >= 100
+    i2cRxData[2 + i] = Wire.read();
+#else
+    i2cRxData[2 + i] = Wire.receive();
+#endif
+  }
+
+  // send slave address, register and received bytes
+  Firmata.sendSysex(I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
-void I2CProtocol::report()
-{
-  // report i2c data for all device with read continuous mode enabled
-  if (queryIndex > -1) {
-    for (byte i = 0; i < queryIndex + 1; i++) {
-      readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
-    }
-  }
-}
+// void I2CProtocol::report()
+// {
+//   // report i2c data for all device with read continuous mode enabled
+//   if (queryIndex > -1) {
+//     for (byte i = 0; i < queryIndex + 1; i++) {
+//       readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
+//     }
+//   }
+// }

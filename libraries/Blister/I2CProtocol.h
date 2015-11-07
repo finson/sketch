@@ -42,19 +42,20 @@ class I2CProtocol: public FirmataProtocol
 {
   public:
     I2CProtocol();
-    void report();
 
     void handleGetCapability(byte pin);
     boolean handleSetPinMode(byte pin, int mode);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
 
-    int open(char *controllerName);
-    boolean status(int handle);
-    boolean control(int handle);
-    boolean read(int handle);
-    boolean write(int handle);
-    boolean close(int handle);
+    // void report();
+
+    // int open(char *controllerName);
+    // boolean status(int handle);
+    // boolean control(int handle);
+    // boolean read(int handle);
+    // boolean write(int handle);
+    // boolean close(int handle);
 
 
   private:
