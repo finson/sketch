@@ -1,5 +1,5 @@
-#ifndef FirmataProtocol_h
-#define FirmataProtocol_h
+#ifndef DeviceProtocol_h
+#define DeviceProtocol_h
 
 #include <FirmataFeature.h>
 
@@ -29,7 +29,7 @@
 #define I2C_REPLY               0x77 // a reply to an I2C read request (FirmataFeature I2CFirmata)
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (FirmataFeature I2CFirmata)
 
-class FirmataProtocol: public FirmataFeature
+class DeviceProtocol: public FirmataFeature
 {
   public:
 };
