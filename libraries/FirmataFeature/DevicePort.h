@@ -1,5 +1,10 @@
-#ifndef DeviceProtocol_h
-#define DeviceProtocol_h
+/*
+  DevicePorts are the board-level interfaces from the processor to other
+  on-board or off-board devices like sensors and actuators.
+ */
+
+#ifndef DevicePort_h
+#define DevicePort_h
 
 #include <FirmataFeature.h>
 
@@ -29,7 +34,7 @@
 #define I2C_REPLY               0x77 // a reply to an I2C read request (FirmataFeature I2CFirmata)
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (FirmataFeature I2CFirmata)
 
-class DeviceProtocol: public FirmataFeature
+class DevicePort: public FirmataFeature
 {
   public:
 };
