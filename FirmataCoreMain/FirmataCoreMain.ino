@@ -1,9 +1,7 @@
-#include <Wire.h>
-
 #include <FirmataCore.h>
 #include <FirmataExt.h>
 #include <FirmataFeature.h>
-#include <FirmataProtocol.h>
+#include <Wire.h>
 
 #include "SelectedFeatures.h"
 
