@@ -236,8 +236,6 @@ void FirmataClass::parse(int inputData)
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
       parsingSysex = false;
-           sprintf(errorMsg, "Sysex command. %02x",storedInputData[0]);
-          Firmata.sendString(errorMsg);
      if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
         if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
           sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
