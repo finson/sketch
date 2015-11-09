@@ -15,7 +15,7 @@
 #ifndef Firmata_Core_h
 #define Firmata_Core_h
 
-#include <hal/Boards.h>  /* Hardware Abstraction Layer + Wiring/Arduino */
+#include <utility/Boards.h>  /* Hardware Abstraction Layer + Wiring/Arduino */
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.  This number can be queried so that host
