@@ -26,11 +26,11 @@ DigitalOutputFeature digitalOutput;
 AnalogInputFeature analogInput;
 AnalogOutputFeature analogOutput;
 
-FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,0};
-//{&digitalInput,&digitalOutput,&analogInput,&analogOutput,0};
-
 // DevicePort *selectedDevicePorts[] = {&pI2C};
 // {&pI2C,0};
 
 //MessageSource *selectedMessageSources[] = {&serialSource1, &serialSource2};
+
+FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,0};
+//{&digitalInput,&digitalOutput,&analogInput,&analogOutput,0};
 
