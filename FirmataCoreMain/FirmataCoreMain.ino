@@ -83,5 +83,5 @@ while (Firmata.available()) {
     analogInput.report();
 #endif
   }
-Firmata.sendString("Loop end.");
+//Firmata.sendString("Loop end.");
 }
