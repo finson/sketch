@@ -42,8 +42,24 @@
 
   boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* argv)
   {
-    switch (command) {
-      case CAPABILITY_QUERY:
+    for (byte i = 0; i < numFeatures; i++) {
+      if (features[i]->handleFeatureSysex(command, argc, argv)) {
+        return true;
+      }
+    }
+  }
+
+  void FirmataExtClass::dispatchReset()
+  {
+    for (byte i = 0; i < numFeatures; i++) {
+      features[i]->reset();
+    }
+  }
+
+boolean FirmataExtClass::executeExtSysex(byte cmd, byte argc, byte* argv)
+{
+  switch (cmd) {
+    case CAPABILITY_QUERY:
       Firmata.write(START_SYSEX);
       Firmata.write(CAPABILITY_RESPONSE);
       for (byte pin = 0; pin < TOTAL_PINS; pin++) {
@@ -57,24 +73,37 @@
       Firmata.write(END_SYSEX);
       break;
 
-      default:
-      for (byte i = 0; i < numFeatures; i++) {
-        if (features[i]->handleFeatureSysex(command, argc, argv)) {
-          return true;
+    case PIN_STATE_QUERY:
+      if (argc >= 1) {
+        byte pin = argv[0];
+        if (pin < TOTAL_PINS) {
+          Firmata.write(START_SYSEX);
+          Firmata.write(PIN_STATE_RESPONSE);
+          Firmata.write(pin);
+          Firmata.write(Firmata.getPinMode(pin));
+          int pinState = Firmata.getPinState(pin);
+          Firmata.write((byte)pinState & 0x7F);
+          if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
+          if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
+          Firmata.write(END_SYSEX);
         }
       }
-      return false;
       break;
-    }
-    return true;
-  }
 
-  void FirmataExtClass::reset()
-  {
-    for (byte i = 0; i < numFeatures; i++) {
-      features[i]->reset();
-    }
+    case ANALOG_MAPPING_QUERY:
+      Firmata.write(START_SYSEX);
+      Firmata.write(ANALOG_MAPPING_RESPONSE);
+      for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+        Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+      }
+      Firmata.write(END_SYSEX);
+      break;
+
+    default:
+      return false;
   }
+  return true;
+}
 
 //   void dispatchSetPinModeCallback(byte pin, int mode)
 //   {

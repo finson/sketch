@@ -31,8 +31,9 @@ class FirmataExtClass
     FirmataExtClass();
     void addFeature(FirmataFeature *capability);
     boolean dispatchSetPinMode(byte pin, int mode);
+    boolean executeExtSysex(byte cmd, byte argc, byte* argv)
     boolean dispatchFeatureSysex(byte command, byte argc, byte* argv);
-    void reset();
+    void dispatchReset();
 
   private:
     FirmataFeature *features[MAX_FEATURES];

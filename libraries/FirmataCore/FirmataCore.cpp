@@ -105,7 +105,7 @@ void FirmataClass::reset(void)
 previousMillis = millis();
 samplingInterval = DEFAULT_SAMPLING_INTERVAL;
 
-FirmataExt.reset();
+FirmataExt.dispatchReset();
 
 resetting = false;
 }
@@ -236,12 +236,15 @@ void FirmataClass::parse(int inputData)
   if (parsingSysex) {
     if (inputData == END_SYSEX) {
       parsingSysex = false;
-     if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
-        if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
-          sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
-          Firmata.sendString(errorMsg);
+      if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
+        if (!executeExtSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
+          if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
+            sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
+            Firmata.sendString(errorMsg);
+          }
         }
       }
+    }
     } else {
       storedInputData[sysexBytesRead++] = inputData;
     }
@@ -346,32 +349,6 @@ boolean FirmataClass::executeCoreSysex(byte cmd, byte argc, byte* argv)
         }
         (*currentStringCallback)((char *)&argv[0]);
       }
-      break;
-
-    case PIN_STATE_QUERY:
-      if (argc >= 1) {
-        byte pin = argv[0];
-        if (pin < TOTAL_PINS) {
-          Firmata.write(START_SYSEX);
-          Firmata.write(PIN_STATE_RESPONSE);
-          Firmata.write(pin);
-          Firmata.write(Firmata.getPinMode(pin));
-          int pinState = Firmata.getPinState(pin);
-          Firmata.write((byte)pinState & 0x7F);
-          if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
-          if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
-          Firmata.write(END_SYSEX);
-        }
-      }
-      break;
-
-    case ANALOG_MAPPING_QUERY:
-      Firmata.write(START_SYSEX);
-      Firmata.write(ANALOG_MAPPING_RESPONSE);
-      for (byte pin = 0; pin < TOTAL_PINS; pin++) {
-        Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
-      }
-      Firmata.write(END_SYSEX);
       break;
 
     default:
