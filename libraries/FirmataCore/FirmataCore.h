@@ -61,8 +61,8 @@
 #define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins (FirmataExt)
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution (FirmataExt)
 
-#define DEVICE_DRIVER_REQUEST   0x30 // message requesting action from a device driver
-#define DEVICE_DRIVER_REPLY     0x31 // message providing the device driver response
+#define DEVICE_QUERY            0x30 // message requesting action from a device driver
+#define DEVICE_RESPONSE         0x31 // message providing the device driver response
 
 // Sysex commands that have an associated pin mode and implement or extend the mode
 

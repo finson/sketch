@@ -6,7 +6,7 @@ Proposed for addition in Firmata 2.6.
 
 The purpose of this Feature is to facilitate arbitrary additions to Firmata capabilities without requiring a central registration or causing frequent command code conflicts.
 
-Two new Sysex sub-commands are added by this Feature: `DEVICE_DRIVER_REQUEST` and `DEVICE_DRIVER_REPLY`.
+Two new Sysex sub-commands are added by this Feature: `DEVICE_QUERY` and `DEVICE_RESPONSE`.
 
 There is a small set of action codes that specify what the driver is to do when it decodes the message.  
 
@@ -33,7 +33,7 @@ In the following message tables, the message contents are all shown one byte per
 From Firmata client to Firmata on the micro-host.
 
 	0  START_SYSEX (0xF0)  
-	1  DEVICE_DRIVER_REQUEST (0x30)  
+	1  DEVICE_QUERY (0x30)  
 	2  action (LSB)  
 	3  action (MSB)  
 	4  data 0  
@@ -49,7 +49,7 @@ From Firmata on the micro-host to Firmata client.
 
 
 	0  START_SYSEX (0xF0)
-	1  DEVICE_DRIVER_REPLY (0x31)
+	1  DEVICE_RESPONSE (0x31)
 	2  action (LSB)
 	3  action (MSB)
 	4  data 0
@@ -84,7 +84,7 @@ addressed in future calls.  Returns handle of 0x3FFF if none of the device drive
 ####Request
 
 	0  START_SYSEX (0xF0)
-	1  DEVICE_DRIVER_REQUEST (0x30)
+	1  DEVICE_QUERY (0x30)
 	2  0x00 (OPEN Lo7)
 	3  0x00 (OPEN Hi7)
 	4  string byte 0 (Lo7)
@@ -98,7 +98,7 @@ addressed in future calls.  Returns handle of 0x3FFF if none of the device drive
 ####Reply
 
 	0  START_SYSEX (0xF0)
-	1  DEVICE_DRIVER_REPLY (0x31)
+	1  DEVICE_RESPONSE (0x31)
 	2  0x00 (OPEN Lo7)
 	3  0x00 (OPEN Hi7)
 	4  handle (Lo7)
@@ -118,8 +118,8 @@ not open or the handle is invalid.
 ####Request
 
 	0  START_SYSEX (0xF0)
-	1  DEVICE_DRIVER_REQUEST (0x30)
-	2  0x01 (CLOSE Lo7)
+	1  DEVICE_QUERY (0x30)
+	2  0x05 (CLOSE Lo7)
 	3  0x00 (CLOSE Hi7)
 	4  handle (Lo7)
 	5  handle (Hi7) 
@@ -129,8 +129,8 @@ not open or the handle is invalid.
 
 
 	0  START_SYSEX (0xF0)
-	1  DEVICE_DRIVER_REPLY (0x31)
-	2  0x01 (CLOSE Lo7)
+	1  DEVICE_RESPONSE (0x31)
+	2  0x05 (CLOSE Lo7)
 	3  0x00 (CLOSE Hi7)
 	4  handle (Lo7)
 	5  handle (Hi7) 

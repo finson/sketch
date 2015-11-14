@@ -454,24 +454,12 @@ void FirmataClass::attach(byte command, callbackFunction newFunction)
   }
 }
 
-// void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
-// {
-//   switch (command) {
-//     case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
-//   }
-// }
-
 void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
 {
   switch (command) {
     case STRING_DATA: currentStringCallback = newFunction; break;
   }
 }
-
-// void FirmataClass::attach(sysexCallbackFunction newFunction)
-// {
-//   currentSysexCallback = newFunction;
-// }
 
 void FirmataClass::detach(byte command)
 {
@@ -500,9 +488,6 @@ void FirmataClass::setPinMode(byte pin, byte mode)
   if (!FirmataExt.dispatchSetPinMode(pin, mode)) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
-
-  // if (currentPinModeCallback)
-  //   (*currentPinModeCallback)(pin, mode);
 }
 
 /* access pin state */
