@@ -14,7 +14,7 @@
 #define OneWirePort_h
 
 #include <FirmataCore.h>
-#include <DevicePort.h>
+#include <DeviceChannel.h>
 #include "utility/OneWire.h"
 
 
@@ -46,7 +46,7 @@ struct ow_device_info
   boolean power;
 };
 
-class OneWirePort: public DevicePort
+class OneWirePort: public DeviceChannel
 {
   public:
     boolean handleSetPinMode(byte pin, int mode);
