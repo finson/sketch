@@ -237,18 +237,19 @@ void FirmataClass::parse(int inputData)
     if (inputData == END_SYSEX) {
       parsingSysex = false;
       if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
-        if (!executeExtSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
-          if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
+        if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
             sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
             Firmata.sendString(errorMsg);
-          }
         }
       }
-    }
     } else {
       storedInputData[sysexBytesRead++] = inputData;
     }
-  } else if ( (waitForData > 0) && (inputData < 128) ) {
+    return;
+  }
+
+
+  if ( (waitForData > 0) && (inputData < 128) ) {
     waitForData--;
     storedInputData[waitForData] = inputData;
     if ( (waitForData == 0) && executeMultiByteCommand ) { // got the whole message
@@ -278,41 +279,45 @@ void FirmataClass::parse(int inputData)
         case SET_PIN_MODE:
           setPinMode(storedInputData[1], storedInputData[0]);
           break;
+        }
+        executeMultiByteCommand = 0;
       }
-      executeMultiByteCommand = 0;
+    return;
     }
+
+
+  // remove channel info from command byte if less than 0xF0
+  if (inputData < 0xF0) {
+    command = inputData & 0xF0;
+    multiByteChannel = inputData & 0x0F;
   } else {
-    // remove channel info from command byte if less than 0xF0
-    if (inputData < 0xF0) {
-      command = inputData & 0xF0;
-      multiByteChannel = inputData & 0x0F;
-    } else {
-      command = inputData;
-    }
-    switch (command) {
-      case ANALOG_MESSAGE:
-      case DIGITAL_MESSAGE:
-      case SET_PIN_MODE:
-        waitForData = 2; // two data bytes needed
-        executeMultiByteCommand = command;
-        break;
-      case REPORT_ANALOG:
-      case REPORT_DIGITAL:
-        waitForData = 1; // one data byte needed
-        executeMultiByteCommand = command;
-        break;
-      case START_SYSEX:
-        parsingSysex = true;
-        sysexBytesRead = 0;
-        break;
-      case SYSTEM_RESET:
-        reset();
-        break;
-      case REPORT_VERSION:
-        printVersion();
-        break;
-    }
+    command = inputData;
   }
+
+  switch (command) {
+    case ANALOG_MESSAGE:
+    case DIGITAL_MESSAGE:
+    case SET_PIN_MODE:
+      waitForData = 2; // two data bytes needed
+      executeMultiByteCommand = command;
+      break;
+    case REPORT_ANALOG:
+    case REPORT_DIGITAL:
+      waitForData = 1; // one data byte needed
+      executeMultiByteCommand = command;
+      break;
+    case START_SYSEX:
+      parsingSysex = true;
+      sysexBytesRead = 0;
+      break;
+    case SYSTEM_RESET:
+      reset();
+      break;
+    case REPORT_VERSION:
+      printVersion();
+      break;
+    }
+  return;
 }
 
 boolean FirmataClass::executeCoreSysex(byte cmd, byte argc, byte* argv)
