@@ -1,36 +1,31 @@
 
-// Selected device Ports
+// Device Communication Channels
 
-#include <I2CPort.h>
-
-// Selected command sources
-
-//#include <MessageIOStream.h>
+#include <I2CChannel.h>
+I2CChannel pI2C;
 
 // Firmata Features
 
 #include <DigitalInputFeature.h>
-#include <DigitalOutputFeature.h>
-#include <AnalogInputFeature.h>
-#include <AnalogOutputFeature.h>
-
-// Associated data structures
-
-I2CPort pI2C;
-
-//MessageIOStream serialSource1(1);
-//MessageIOStream serialSource2(2);
-
 DigitalInputFeature digitalInput;
+
+#include <DigitalOutputFeature.h>
 DigitalOutputFeature digitalOutput;
+
+#include <AnalogInputFeature.h>
 AnalogInputFeature analogInput;
+
+#include <AnalogOutputFeature.h>
 AnalogOutputFeature analogOutput;
 
-// DevicePort *selectedDevicePorts[] = {&pI2C};
-// {&pI2C,0};
+#include <device/DeviceManager.h>
+DeviceManager deviceManager;
 
-//MessageSource *selectedMessageSources[] = {&serialSource1, &serialSource2};
+FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&deviceManager,0};
 
-FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,0};
-//{&digitalInput,&digitalOutput,&analogInput,&analogOutput,0};
+// Device Drivers
 
+#include <device/MCP9808Driver.h>
+MCP9808Driver ddMCP9808("TD",0x18,1);
+
+DeviceDriver *selectedDevices[] = {&ddMCP9808,0};

@@ -43,6 +43,11 @@ void setup()
     FirmataExt.addFeature(selectedFeatures[index++]);
   }
 
+ index = 0;
+  while (selectedDevices[index] != 0) {
+    deviceManager.addDevice(selectedDevices[index++]);
+  }
+
 // start up the default Firmata using Serial interface:
 
 Firmata.begin(57600);
@@ -56,7 +61,7 @@ Firmata.reset();
  *============================================================================*/
 void loop()
 {
-Firmata.sendString("Loop start.");
+//Firmata.sendString("Loop start.");
 
 /* DIGITALREAD - as fast as possible, check for changes and output them to the
  * stream buffer using Firmata.write()  */
