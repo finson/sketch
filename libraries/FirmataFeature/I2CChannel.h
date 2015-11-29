@@ -14,11 +14,11 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef I2CPort_h
-#define I2CPort_h
+#ifndef I2CChannel_h
+#define I2CChannel_h
 
 #include <Wire.h>
-#include <DevicePort.h>
+#include <DeviceChannel.h>
 
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000
@@ -38,10 +38,10 @@ struct i2c_device_info {
   byte bytes;
 };
 
-class I2CPort: public DevicePort
+class I2CChannel: public DeviceChannel
 {
   public:
-    I2CPort();
+    I2CChannel();
 
     void handleGetCapability(byte pin);
     boolean handleSetPinMode(byte pin, int mode);

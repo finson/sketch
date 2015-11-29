@@ -20,19 +20,12 @@
   FirmataExtClass::FirmataExtClass()
   {
     numFeatures = 0;
-    numDevices = 0;
   }
 
   void FirmataExtClass::addFeature(FirmataFeature *capability)
   {
     if (numFeatures < MAX_FEATURES) {
       features[numFeatures++] = capability;
-    }
-  }
-
-  void FirmataExtClass::addDevice(DeviceDriver *device) {
-    if (numDevices < MAX_DEVICES) {
-      devices[numDevices++] = device;
     }
   }
 
@@ -54,6 +47,10 @@
 
   boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* argv)
   {
+    if (executeExtSysex(command, argc, argv)) {
+      return true;
+    }
+
     for (byte i = 0; i < numFeatures; i++) {
       if (features[i]->handleFeatureSysex(command, argc, argv)) {
         return true;
@@ -107,21 +104,21 @@ boolean FirmataExtClass::executeExtSysex(byte cmd, byte argc, byte* argv)
       // Where does the sysex data get repacked before it gets to the driver?
       // how do device drivers call each other's methods (and using int[] return)?
 
-    case DEVICE_QUERY:
-      int action = ((argv[1] << 7) & 0x3F) | (argv[0] & 0x3F);
-      if (action == DD_OPEN) {
-        // convert sysex data to C string
-        for (uint16_t i = 0; i < numDevices; i++) {
-          int[] status = devices[i]->open(device_name_string);
-          if (status[0] == okay) {
-            write_device_response_open(i);
-          }
-        }
-        write_device_response_open(NO_SUCH_DEVICE);
-      } else {
-        // dispatch other actions via the handle provided in the sysex
-      }
-      break;
+    // case DEVICE_QUERY:
+    //   int action = ((argv[1] << 7) & 0x3F) | (argv[0] & 0x3F);
+    //   if (action == DD_OPEN) {
+    //     code7.decodeChars(argv[2], argc-2, deviceName, MAX_DEVICE_NAME_LENGTH );
+    //     for (uint16_t i = 0; i < numDevices; i++) {
+    //       int[] status = devices[i]->open(deviceName);
+    //       if (status[0] == okay) {
+    //         write_device_response_open(i);
+    //       }
+    //     }
+    //     write_device_response_open(NO_SUCH_DEVICE);
+    //   } else {
+    //     // dispatch other actions via the handle provided in the sysex
+    //   }
+    //   break;
 
 
     default:
