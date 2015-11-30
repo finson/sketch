@@ -38,10 +38,10 @@
 #define START_SYSEX             0xF0 // start a MIDI Sysex message (FirmataCore)
 #define END_SYSEX               0xF7 // end a MIDI Sysex message (FirmataCore)
 
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFirmata)
-#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFirmata)
-#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFirmata)
-#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFirmata)
+#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFeature)
+#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFeature)
+#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFeature)
+#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFeature)
 
 #define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc (FirmataCore, then FirmataExt)
 
@@ -61,8 +61,8 @@
 #define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins (FirmataExt)
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution (FirmataExt)
 
-#define DEVICE_QUERY            0x30 // message requesting action from a device driver
-#define DEVICE_RESPONSE         0x31 // message providing the device driver response
+#define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFeature)
+#define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFeature)
 
 // Sysex commands that have an associated pin mode and implement or extend the mode
 
