@@ -1,5 +1,5 @@
 /*
-  I2CChannel.cpp - Firmata library
+  I2CFeature.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,18 +14,18 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include <I2CChannel.h>
+#include "I2CFeature.h"
 
 //----------------------------------------------------------------------------
 
-I2CChannel::I2CChannel()
+I2CFeature::I2CFeature()
 {
   isI2CEnabled = false;
   queryIndex = -1;
   i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
 
-void I2CChannel::handleGetCapability(byte pin)
+void I2CFeature::handleGetCapability(byte pin)
 {
   if (IS_PIN_I2C(pin)) {
     Firmata.write(I2C);
@@ -33,7 +33,7 @@ void I2CChannel::handleGetCapability(byte pin)
   }
 }
 
-boolean I2CChannel::handleSetPinMode(byte pin, int mode)
+boolean I2CFeature::handleSetPinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
     if (mode == I2C) {
@@ -50,7 +50,7 @@ boolean I2CChannel::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-boolean I2CChannel::handleFeatureSysex(byte command, byte argc, byte *argv)
+boolean I2CFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   switch (command) {
     case I2C_REQUEST:
@@ -64,7 +64,7 @@ boolean I2CChannel::handleFeatureSysex(byte command, byte argc, byte *argv)
   return false;
 }
 
-void I2CChannel::reset()
+void I2CFeature::reset()
 {
   if (isI2CEnabled) {
     disableI2CPins();
@@ -73,7 +73,7 @@ void I2CChannel::reset()
 
 //----------------------------------------------------------------------------
 
-boolean I2CChannel::handleI2CConfig(byte argc, byte *argv)
+boolean I2CFeature::handleI2CConfig(byte argc, byte *argv)
 {
   unsigned int delayTime = (argv[0] + (argv[1] << 7));
 
@@ -87,7 +87,7 @@ boolean I2CChannel::handleI2CConfig(byte argc, byte *argv)
   return isI2CEnabled;
 }
 
-void I2CChannel::handleI2CRequest(byte argc, byte *argv)
+void I2CFeature::handleI2CRequest(byte argc, byte *argv)
 {
   byte mode;
   byte slaveAddress;
@@ -182,7 +182,7 @@ void I2CChannel::handleI2CRequest(byte argc, byte *argv)
   }
 }
 
-boolean I2CChannel::enableI2CPins()
+boolean I2CFeature::enableI2CPins()
 {
   byte i;
   // is there a faster way to do this? would probaby require importing
@@ -205,7 +205,7 @@ boolean I2CChannel::enableI2CPins()
 }
 
 /* disable the i2c pins so they can be used for other functions */
-void I2CChannel::disableI2CPins()
+void I2CFeature::disableI2CPins()
 {
   isI2CEnabled = false;
   // disable read continuous mode for all devices
@@ -215,7 +215,7 @@ void I2CChannel::disableI2CPins()
 }
 
 
-void I2CChannel::readAndReportData(byte address, int theRegister, byte numBytes) {
+void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
@@ -260,7 +260,7 @@ void I2CChannel::readAndReportData(byte address, int theRegister, byte numBytes)
   Firmata.sendSysex(I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
-// void I2CChannel::report()
+// void I2CFeature::report()
 // {
 //   // report i2c data for all device with read continuous mode enabled
 //   if (queryIndex > -1) {

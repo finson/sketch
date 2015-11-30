@@ -1,5 +1,5 @@
 /*
-  I2CProtocol.h - Firmata library
+  I2CFeature.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,11 +14,11 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef I2CChannel_h
-#define I2CChannel_h
+#ifndef I2CFeature_h
+#define I2CFeature_h
 
 #include <Wire.h>
-#include <DeviceChannel.h>
+#include <FirmataFeature.h>
 
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000
@@ -38,10 +38,10 @@ struct i2c_device_info {
   byte bytes;
 };
 
-class I2CChannel: public DeviceChannel
+class I2CFeature: public FirmataFeature
 {
   public:
-    I2CChannel();
+    I2CFeature();
 
     void handleGetCapability(byte pin);
     boolean handleSetPinMode(byte pin, int mode);
