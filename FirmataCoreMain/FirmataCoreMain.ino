@@ -1,6 +1,10 @@
+#include <FirmataFeatureLibrary.h>
+#include <FirmataDeviceLibrary.h>
+
 #include <FirmataCore.h>
 #include <FirmataExt.h>
 #include <FirmataFeature.h>
+
 #include <Wire.h>
 
 #include "SelectedFeatures.h"
@@ -38,15 +42,6 @@
 
 void setup()
 {
-  int index = 0;
-  while (selectedFeatures[index] != 0) {
-    FirmataExt.addFeature(selectedFeatures[index++]);
-  }
-
- index = 0;
-  while (selectedDevices[index] != 0) {
-    deviceManager.addDevice(selectedDevices[index++]);
-  }
 
 // start up the default Firmata using Serial interface:
 

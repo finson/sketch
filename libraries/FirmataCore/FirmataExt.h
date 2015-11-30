@@ -19,8 +19,6 @@
 
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
-#include <device/DeviceDriver.h>
-// #include "Z85Codec.h"
 
 #define MAX_FEATURES TOTAL_SYSEX_COMMANDS
 
@@ -35,13 +33,11 @@ class FirmataExtClass
     boolean dispatchFeatureSysex(byte command, byte argc, byte* argv);
 
   private:
-    boolean executeExtSysex(byte cmd, byte argc, byte* argv);
+    boolean handleFeatureSysex(byte cmd, byte argc, byte* argv);
 
     FirmataFeature *features[MAX_FEATURES];
     byte numFeatures;
 
-    // char *deviceName[MAX_DEVICE_NAME_LENGTH]
-    // Z85Codec code7;
 };
 
 extern FirmataExtClass FirmataExt;

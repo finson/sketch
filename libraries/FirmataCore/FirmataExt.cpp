@@ -17,9 +17,14 @@
 #include <FirmataCore.h>
 #include <FirmataExt.h>
 
+  extern FirmataFeature *selectedFeatures[];
+
   FirmataExtClass::FirmataExtClass()
   {
     numFeatures = 0;
+    while (selectedFeatures[numFeatures] != 0) {
+      FirmataExt.addFeature(selectedFeatures[numFeatures++]);
+    }
   }
 
   void FirmataExtClass::addFeature(FirmataFeature *capability)
@@ -47,7 +52,7 @@
 
   boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* argv)
   {
-    if (executeExtSysex(command, argc, argv)) {
+    if (this->handleFeatureSysex(command, argc, argv)) {
       return true;
     }
 
@@ -58,7 +63,7 @@
     }
   }
 
-boolean FirmataExtClass::executeExtSysex(byte cmd, byte argc, byte* argv)
+boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)
 {
   switch (cmd) {
     case CAPABILITY_QUERY:
@@ -100,26 +105,6 @@ boolean FirmataExtClass::executeExtSysex(byte cmd, byte argc, byte* argv)
       }
       Firmata.write(END_SYSEX);
       break;
-
-      // Where does the sysex data get repacked before it gets to the driver?
-      // how do device drivers call each other's methods (and using int[] return)?
-
-    // case DEVICE_QUERY:
-    //   int action = ((argv[1] << 7) & 0x3F) | (argv[0] & 0x3F);
-    //   if (action == DD_OPEN) {
-    //     code7.decodeChars(argv[2], argc-2, deviceName, MAX_DEVICE_NAME_LENGTH );
-    //     for (uint16_t i = 0; i < numDevices; i++) {
-    //       int[] status = devices[i]->open(deviceName);
-    //       if (status[0] == okay) {
-    //         write_device_response_open(i);
-    //       }
-    //     }
-    //     write_device_response_open(NO_SUCH_DEVICE);
-    //   } else {
-    //     // dispatch other actions via the handle provided in the sysex
-    //   }
-    //   break;
-
 
     default:
       return false;
