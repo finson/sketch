@@ -17,7 +17,7 @@ DeviceFeature::DeviceFeature()
 }
 
 void DeviceFeature::addDevice(DeviceDriver *device) {
-  if (numDevices < MAX_DEVICES) {
+  if (numDevices < MAX_MAJOR_HANDLE_COUNT) {
     devices[numDevices++] = device;
   }
 }

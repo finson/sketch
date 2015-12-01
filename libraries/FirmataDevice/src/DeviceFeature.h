@@ -5,7 +5,7 @@
 #include <FirmataFeature.h>
 #include <DeviceDriver.h>
 
-#define MAX_DEVICES 10
+#define MAX_MAJOR_HANDLE_COUNT 10
 #define MAX_DEVICE_NAME_LENGTH 32
 
 class DeviceFeature: public FirmataFeature
@@ -21,7 +21,7 @@ class DeviceFeature: public FirmataFeature
 
   private:
 
-    DeviceDriver *devices[MAX_DEVICES];
+    DeviceDriver *devices[MAX_MAJOR_HANDLE_COUNT];
     int16_t numDevices;
 
 };

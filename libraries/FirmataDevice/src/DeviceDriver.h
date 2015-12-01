@@ -2,6 +2,7 @@
 #define DeviceDriver_h
 
 #include <arduino.h>
+#include "DeviceInfo.h"
 
 #define  DD_OPEN    0x0000
 #define  DD_STATUS  0x0001
@@ -13,7 +14,8 @@
 class DeviceDriver
 {
   public:
-    virtual int open(char *name) = 0;
+    DeviceDriver(char *nameRoot);
+
     virtual int open(char *name, int flags) = 0;
 
     virtual int status(int handle, int reg, int count, byte *buf) = 0;
@@ -23,6 +25,9 @@ class DeviceDriver
     virtual int write(int handle, int count, byte *buf) = 0;
 
     virtual int close(int handle) = 0;
+
+  protected:
+    char *deviceNameRoot;
 };
 
 #endif
