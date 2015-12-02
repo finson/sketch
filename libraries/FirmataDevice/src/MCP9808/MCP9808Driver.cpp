@@ -1,16 +1,16 @@
 #include "MCP9808Driver.h"
 
 enum class MCP9808Register {
-    RESERVED,
-    CONFIG,
-    UPPER_TEMP,
-    LOWER_TEMP,
-    CRIT_TEMP,
-    AMBIENT_TEMP,
-    MANUF_ID,
-    DEVICE_ID,
-    RESOLUTION
-  };
+  RESERVED,
+  CONFIG,
+  UPPER_TEMP,
+  LOWER_TEMP,
+  CRIT_TEMP,
+  AMBIENT_TEMP,
+  MANUF_ID,
+  DEVICE_ID,
+  RESOLUTION
+};
 
 //---------------------------------------------------------------------------
 
@@ -41,7 +41,8 @@ MCP9808Driver::MCP9808Driver(char *dNameRoot, int deviceAddresses[], int addrCou
 //---------------------------------------------------------------------------
 
 int MCP9808Driver::open(char *name, int flags) {
-  byte i2cRxData[32];
+  uint8_t theRegister;
+
   int handle;
   for (handle = 0; handle < actualMinorHandleCount; handle++) {
     if (strcmp(devices[handle].getDeviceName(), name) == 0) {
@@ -61,89 +62,12 @@ int MCP9808Driver::open(char *name, int flags) {
     return -1;
   }
 
+  theRegister = static_cast<uint8_t>(MCP9808Register::MANUF_ID);
+  if (currentDevice.getChannel().read16(theRegister) != 0x0054) return -1;
 
-  int mfgr = -1;
-  int devid = -1;
+  theRegister = static_cast<uint8_t>(MCP9808Register::DEVICE_ID);
+  if (currentDevice.getChannel().read16(theRegister) != 0x0400) return -1;
 
-//         request = new I2CRequestRead(currentDevice.getDeviceAddress(), MCP9808Register.MANUF_ID.ordinal(), 2);
-//         logger.trace("Request mfgr: {}", request.toString());
-//         qOut.writeMessage(request);
-
-  int theAddress = currentDevice.getDeviceAddress();
-  int theRegister = static_cast<int>(MCP9808Register::MANUF_ID);
-  int numBytes = 2;
-
-//        readAndReportData(theAddress, theRegister, numBytes);
-
-  Wire.beginTransmission(theAddress);
-#if ARDUINO >= 100
-  Wire.write((byte)theRegister);
-#else
-  Wire.send((byte)theRegister);
-#endif
-  Wire.endTransmission();
-
-  // do not set a value of 0
-  // if (i2cReadDelayTime > 0) {
-  //   // delay is necessary for some devices such as WiiNunchuck
-  //   delayMicroseconds(i2cReadDelayTime);
-  // }
-
-  Wire.requestFrom(theAddress, numBytes);  // all bytes are returned in requestFrom
-
-  // check to be sure correct number of bytes were returned by slave
-  if (numBytes < Wire.available()) {
-//    Firmata.sendString("I2C: Too many bytes received");
-    return -1;
-  } else if (numBytes > Wire.available()) {
-    // Firmata.sendString("I2C: Too few bytes received");
-    return -1;
-  }
-
-  i2cRxData[0] = theAddress;
-  i2cRxData[1] = theRegister;
-
-  for (int i = 0; i < numBytes && Wire.available(); i++) {
-#if ARDUINO >= 100
-    i2cRxData[2 + i] = Wire.read();
-#else
-    i2cRxData[2 + i] = Wire.receive();
-#endif
-  }
-
-//         do {
-//             response = qIn.readMessage();
-//         } while (!I2CReply.class.isAssignableFrom(response.getClass()));
-
-//         I2CReply msg = (I2CReply) response;
-//         if (msg.getRegister() == MCP9808Register.MANUF_ID.ordinal()) {
-//             mfgr = (msg.getData(0) << 8) | (msg.getData(1));
-//         }
-
-//         request = new I2CRequestRead(currentDevice.getDeviceAddress(), MCP9808Register.DEVICE_ID.ordinal(), 2);
-//         qOut.writeMessage(request);
-
-//         do {
-//             response = qIn.readMessage();
-//         } while (!I2CReply.class.isAssignableFrom(response.getClass()));
-
-//         msg = (I2CReply) response;
-//         if (msg.getRegister() == MCP9808Register.DEVICE_ID.ordinal()) {
-//             devid = msg.getData(0);
-//         }
-
-//         logger.debug("Device manufacturer: expected: 0x0054, actual:{}, Device ID: expected: 0x04, actual: {}",
-//                 Integer.toHexString(mfgr), Integer.toHexString(devid));
-
-//         if ((mfgr != 0x0054) || (devid != 0x04)) {
-//             currentDevice.setOpen(false);
-//             throw new DeviceException("Could not open '" + name + "', " + DeviceStatus.UNKNOWN_DEVICE_TYPE);
-//         } else {
-//             currentDevice.setOpen(true);
-//         }
-//         logger.info("Device {} opened successfully.  Handle is {}.", name, handle);
-//         return handle;
-//     }
   currentDevice.setOpen(true);
   return handle;
 }
@@ -164,9 +88,14 @@ int MCP9808Driver::write(int handle, int count, byte *buf) {
 }
 
 int MCP9808Driver::close(int handle) {
-  return -1;
+  I2CDeviceInfo currentDevice = devices[handle];
+  if (currentDevice.isOpen()) {
+    currentDevice.setOpen(false);
+    return 0;
+  } else {
+    return -1;
+  }
 }
-
 
 //     @Override
 //     public int open(String name, int flags) throws IOException {

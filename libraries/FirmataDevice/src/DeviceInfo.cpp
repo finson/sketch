@@ -21,3 +21,4 @@ char *DeviceInfo::getDeviceName() {
     return deviceName;
 }
 
+//TODO rename to DeviceConfiguration and I2CDeviceConfiguration

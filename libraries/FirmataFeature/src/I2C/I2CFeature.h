@@ -19,6 +19,7 @@
 
 #include <Wire.h>
 #include <FirmataFeature.h>
+#include <I2CBeginEnd.h>
 
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000
@@ -51,19 +52,21 @@ class I2CFeature: public FirmataFeature
     // void report();
 
   private:
+    I2CBeginEnd i2cEnabler;
+    signed char queryIndex;
+    unsigned int i2cReadDelayTime;  // default delay time between i2c read request and Wire.requestFrom()
+
     /* for i2c read continuous more */
     i2c_device_info query[MAX_QUERIES];
 
     byte i2cRxData[32];
-    boolean isI2CEnabled;
-    signed char queryIndex;
-    unsigned int i2cReadDelayTime;  // default delay time between i2c read request and Wire.requestFrom()
+    // boolean isI2CEnabled;
 
     void readAndReportData(byte address, int theRegister, byte numBytes);
     void handleI2CRequest(byte argc, byte *argv);
     boolean handleI2CConfig(byte argc, byte *argv);
-    boolean enableI2CPins();
-    void disableI2CPins();
+    // boolean enableI2CPins();
+    // void disableI2CPins();
 };
 
 #endif

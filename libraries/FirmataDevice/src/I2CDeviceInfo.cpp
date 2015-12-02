@@ -1,16 +1,19 @@
 #include "I2CDeviceInfo.h"
 
-I2CDeviceInfo::I2CDeviceInfo() : DeviceInfo("") {
-    deviceAddress = 0;
-}
-I2CDeviceInfo::I2CDeviceInfo(char *name, int address) : DeviceInfo(name) {
-    deviceAddress = address;
+I2CDeviceInfo::I2CDeviceInfo(char *name, int address):
+DeviceInfo(name),
+channel(address) {
+
 }
 
 void I2CDeviceInfo::setDeviceAddress(int addr) {
-  deviceAddress = addr;
+  channel.setDeviceAddress(addr);
 }
 
 int I2CDeviceInfo::getDeviceAddress() {
-  return deviceAddress;
+  return channel.getDeviceAddress();
+}
+
+I2CReadWrite I2CDeviceInfo::getChannel() {
+  return channel;
 }
