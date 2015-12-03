@@ -20,13 +20,13 @@
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
 
-#define MAX_FEATURES TOTAL_SYSEX_COMMANDS
+#define MAX_FEATURES 100
 
 class FirmataExtClass
 {
   public:
     FirmataExtClass();
-    void addFeature(FirmataFeature *capability);
+    void addSelectedFeatures();
 
     void dispatchReset();
     boolean dispatchSetPinMode(byte pin, int mode);

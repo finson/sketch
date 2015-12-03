@@ -38,28 +38,58 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   if (command == DEVICE_QUERY) {
-      // decode msg to: action, handle/flags, and body
-    int action = argv[0];  // edit after writing the decode stuff above
+    char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
+    int result;
+    int flags;
+
+    int action = argv[0];
+    int minorHandle = argv[1];
+    int majorHandle = argv[2];
+    int inputLength = argc - 3;
+    int outputLength = base64_enc_len(inputLength);
+    if (outputLength > MAX_DEVICE_QUERY_BODY_LENGTH) {
+      sendSysexResponse(action, -1);
+      return true;
+    }
+    base64_decode(msgBody, (char *)(argv + 3), inputLength);
+
     switch (action) {
-      case DD_OPEN:
-      // loop through known devices and capture response
+    case DD_OPEN:
+      flags = (majorHandle << 8) | minorHandle;
+      for (majorHandle = 0; majorHandle < numDevices; majorHandle++) {
+        minorHandle = devices[majorHandle]->open(msgBody, flags);
+        if (minorHandle != -1) break;
+      }
+      result = (majorHandle == numDevices) ? -1 : (((majorHandle << 8) & 0x7F) | (minorHandle & 0x7F));
+      sendSysexResponse(action, result);
       break;
-      case DD_STATUS:
-            // use the handle to address the driver directly and capture response
+    case DD_STATUS:
+      // use the handle to address the driver directly and capture response
       break;
-      case DD_CONTROL:
+    case DD_CONTROL:
       break;
-      case DD_READ:
+    case DD_READ:
       break;
-      case DD_WRITE:
+    case DD_WRITE:
       break;
-      case DD_CLOSE:
+    case DD_CLOSE:
+      result = devices[majorHandle]->close(minorHandle);
+      sendSysexResponse(action, result);
       break;
-      default:
+    default:
       ;// unknown action code
     }
-    // formulate, encode, and send response msg
     return true;
+  } else {
+    return false;
   }
-  return false;
+}
+
+void DeviceFeature::sendSysexResponse(int action, int status) {
+  Firmata.write(START_SYSEX);
+  Firmata.write(DEVICE_RESPONSE);
+  Firmata.write(action & 0x7F);
+  Firmata.write(status & 0x7F);
+  Firmata.write((status << 8) & 0x7F);
+  Firmata.write(END_SYSEX);
 }
