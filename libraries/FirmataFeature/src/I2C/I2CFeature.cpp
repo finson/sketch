@@ -15,13 +15,12 @@
 */
 
 #include "I2CFeature.h"
-#include "I2CBeginEnd.h"
+#include "I2CPort.h"
 
 //----------------------------------------------------------------------------
 
-I2CFeature::I2CFeature() : i2cEnabler(), queryIndex(-1), i2cReadDelayTime(0)
+I2CFeature::I2CFeature() : queryIndex(-1), i2cReadDelayTime(0)
 {
- // isI2CEnabled = false;
   // queryIndex = -1;
   // i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
@@ -40,11 +39,11 @@ boolean I2CFeature::handleSetPinMode(byte pin, int mode)
     if (mode == I2C) {
       // the user must call I2C_CONFIG to enable I2C for a device
       return true;
-    } else if (I2CBeginEnd::isI2CEnabled) {
+    } else if (I2CPort.isEnabled()) {
       // disable i2c so pins can be used for other functions
       // the following if statements should reconfigure the pins properly
       if (Firmata.getPinMode(pin) == I2C) {
-        i2cEnabler.disableI2CPins();
+        I2CPort.disableI2CPins();
       }
     }
   }
@@ -55,7 +54,7 @@ boolean I2CFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   switch (command) {
   case I2C_REQUEST:
-    if (I2CBeginEnd::isI2CEnabled) {
+    if (I2CPort.isEnabled()) {
       handleI2CRequest(argc, argv);
       return true;
     }
@@ -69,7 +68,7 @@ void I2CFeature::reset()
 {
   queryIndex = -1;
   i2cReadDelayTime = 0;
-  i2cEnabler.disableI2CPins();
+  I2CPort.disableI2CPins();
 
   // if (isI2CEnabled) {
   //   disableI2CPins();
@@ -86,12 +85,8 @@ boolean I2CFeature::handleI2CConfig(byte argc, byte *argv)
     i2cReadDelayTime = delayTime;
   }
 
-  i2cEnabler.enableI2CPins();
-
-  // if (!isI2CEnabled) {
-  //   enableI2CPins();
-  // }
-  return I2CBeginEnd::isI2CEnabled;
+  I2CPort.enableI2CPins();
+  return I2CPort.isEnabled();
 }
 
 void I2CFeature::handleI2CRequest(byte argc, byte *argv)
@@ -189,40 +184,8 @@ void I2CFeature::handleI2CRequest(byte argc, byte *argv)
   }
 }
 
-// boolean I2CFeature::enableI2CPins()
-// {
-//   byte i;
-//   // is there a faster way to do this? would probaby require importing
-//   // Arduino.h to get SCL and SDA pins
-//   for (i = 0; i < TOTAL_PINS; i++) {
-//     if (IS_PIN_I2C(i)) {
-//       if (Firmata.getPinMode(i) == IGNORE) {
-//         return false;
-//       }
-//       // mark pins as i2c so they are ignore in non i2c data requests
-//       Firmata.setPinMode(i, I2C);
-//       pinMode(i, I2C);
-//     }
-//   }
-
-//   isI2CEnabled = true;
-
-//   // is there enough time before the first I2C request to call this here?
-//   Wire.begin();
-// }
-
-// /* disable the i2c pins so they can be used for other functions */
-// void I2CFeature::disableI2CPins()
-// {
-//   isI2CEnabled = false;
-//   // disable read continuous mode for all devices
-//   queryIndex = -1;
-//   // uncomment the following if or when the end() method is added to Wire library
-//   // Wire.end();
-// }
-
-
 void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes) {
+  char errorMsg[100] ;
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
@@ -247,13 +210,18 @@ void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes)
 
   // check to be sure correct number of bytes were returned by slave
   if (numBytes < Wire.available()) {
-    Firmata.sendString("I2C: Too many bytes received");
+    sprintf(errorMsg, "I2C: Too many bytes received from device.  Exp: %1d, Act: %1d",numBytes,Wire.available());
+    Firmata.sendString(errorMsg);
   } else if (numBytes > Wire.available()) {
-    Firmata.sendString("I2C: Too few bytes received");
+    sprintf(errorMsg, "I2C: Too few bytes received from device.  Exp: %1d, Act: %1d",numBytes,Wire.available());
+    Firmata.sendString(errorMsg);
   }
 
   i2cRxData[0] = address;
   i2cRxData[1] = theRegister;
+  i2cRxData[2] = 0xF2;  // for debug
+  i2cRxData[3] = 0xF3;  // for debug
+
 
   for (int i = 0; i < numBytes && Wire.available(); i++) {
 #if ARDUINO >= 100

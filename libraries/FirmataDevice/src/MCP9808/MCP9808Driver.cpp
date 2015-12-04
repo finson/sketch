@@ -1,4 +1,5 @@
 #include "MCP9808Driver.h"
+#include <I2CPort.h>
 
 enum class MCP9808Register {
   RESERVED,
@@ -62,11 +63,20 @@ int MCP9808Driver::open(char *name, int flags) {
     return -1;
   }
 
+  I2CPort.enableI2CPins();
+
+  int address = currentDevice.getDeviceAddress();
   theRegister = static_cast<uint8_t>(MCP9808Register::MANUF_ID);
-  if (currentDevice.getChannel().read16(theRegister) != 0x0054) return -1;
+  if (I2CPort.read16(address, theRegister) != 0x0054) {
+    I2CPort.disableI2CPins();
+    return -1;
+  }
 
   theRegister = static_cast<uint8_t>(MCP9808Register::DEVICE_ID);
-  if (currentDevice.getChannel().read16(theRegister) != 0x0400) return -1;
+  if (I2CPort.read16(address, theRegister) != 0x0400) {
+    I2CPort.disableI2CPins();
+    return -1;
+  }
 
   currentDevice.setOpen(true);
   return handle;
@@ -91,6 +101,7 @@ int MCP9808Driver::close(int handle) {
   I2CDeviceInfo currentDevice = devices[handle];
   if (currentDevice.isOpen()) {
     currentDevice.setOpen(false);
+    I2CPort.disableI2CPins();
     return 0;
   } else {
     return -1;
