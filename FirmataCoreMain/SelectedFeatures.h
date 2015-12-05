@@ -1,17 +1,18 @@
 
 // Firmata Features
 
-// #include <DigitalInputFeature.h>
-// DigitalInputFeature digitalInput;
+#include <GPIO/DigitalInputFeature.h>
+DigitalInputFeature digitalInput;
 
-// #include <DigitalOutputFeature.h>
-// DigitalOutputFeature digitalOutput;
+#include <GPIO/DigitalOutputFeature.h>
+DigitalOutputFeature digitalOutput;
 
-// #include <AnalogInputFeature.h>
-// AnalogInputFeature analogInput;
+#include <GPIO/AnalogInputFeature.h>
+AnalogInputFeature analogInput;
 
-// #include <AnalogOutputFeature.h>
-// AnalogOutputFeature analogOutput;
+#include <GPIO/AnalogOutputFeature.h>
+AnalogOutputFeature analogOutput;
+>>>>>>> origin/TransportFirmata
 
 #include <DeviceFeature.h>
 DeviceFeature deviceManager;
