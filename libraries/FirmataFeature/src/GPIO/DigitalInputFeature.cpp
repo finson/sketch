@@ -15,7 +15,7 @@
 */
 
 #include <FirmataCore.h>
-#include <DigitalInputFeature.h>
+#include "DigitalInputFeature.h"
 
 DigitalInputFeature *DigitalInputFeatureInstance;
 

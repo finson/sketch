@@ -1,16 +1,16 @@
 
 // Firmata Features
 
-#include <DigitalInputFeature.h>
+#include <GPIO/DigitalInputFeature.h>
 DigitalInputFeature digitalInput;
 
-#include <DigitalOutputFeature.h>
+#include <GPIO/DigitalOutputFeature.h>
 DigitalOutputFeature digitalOutput;
 
-#include <AnalogInputFeature.h>
+#include <GPIO/AnalogInputFeature.h>
 AnalogInputFeature analogInput;
 
-#include <AnalogOutputFeature.h>
+#include <GPIO/AnalogOutputFeature.h>
 AnalogOutputFeature analogOutput;
 
 #include <DeviceFeature.h>
