@@ -37,11 +37,10 @@
   Base version of ConfigurableFirmata last updated by Jeff Hoefs April 25, 2015
   FirmataCore forked from that base October 2015 by Doug Johnson.
 */
-
 /*==============================================================================
  * SETUP()
  *============================================================================*/
-
+int loopCounter = 0;
 void setup()
 {
 
@@ -87,5 +86,11 @@ while (Firmata.available()) {
 //    analogInput.report();
 //#endif
 //  }
-////Firmata.sendString("Loop end.");
+
+
+
+if (loopCounter++ > 10000) {
+  Firmata.sendString("Loop end.");
+  loopCounter = 0;
+}
 }
