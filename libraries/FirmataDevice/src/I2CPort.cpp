@@ -11,8 +11,6 @@ bool I2CPortClass::isEnabled() {
 void I2CPortClass::enableI2CPins() {
   if (!isEnabled()) {
     byte i;
-    // is there a faster way to do this? would probaby require importing
-    // Arduino.h to get SCL and SDA pins
     for (i = 0; i < TOTAL_PINS; i++) {
       if (IS_PIN_I2C(i)) {
         if (Firmata.getPinMode(i) != IGNORE) {
@@ -69,14 +67,26 @@ void I2CPortClass::write16(int addr, uint8_t reg, uint16_t val) {
 }
 
 uint16_t I2CPortClass::read16(int addr, uint8_t reg) {
+  char errorMsg[100] ;
   uint16_t val;
+  int numBytes = 2;
   if (!isEnabled()) return 0;
 
   Wire.beginTransmission(addr);
   Wire.write((uint8_t)reg);
   Wire.endTransmission();
 
-  Wire.requestFrom((uint8_t)addr, (uint8_t)2);
+  Wire.requestFrom((uint8_t)addr, (uint8_t)numBytes);
+
+    // check to be sure correct number of bytes were returned by slave
+  if (numBytes < Wire.available()) {
+    sprintf(errorMsg, "I2C read16: Too many bytes received from device.  Exp: %1d, Act: %1d",numBytes,Wire.available());
+    Firmata.sendString(errorMsg);
+  } else if (numBytes > Wire.available()) {
+    sprintf(errorMsg, "I2C read16: Too few bytes received from device.  Exp: %1d, Act: %1d",numBytes,Wire.available());
+    Firmata.sendString(errorMsg);
+  }
+
   val = Wire.read();
   val <<= 8;
   val |= Wire.read();

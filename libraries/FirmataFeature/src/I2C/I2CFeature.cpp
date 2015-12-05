@@ -189,48 +189,61 @@ void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes)
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
-  if (theRegister != REGISTER_NOT_SPECIFIED) {
-    Wire.beginTransmission(address);
-#if ARDUINO >= 100
-    Wire.write((byte)theRegister);
-#else
-    Wire.send((byte)theRegister);
-#endif
-    Wire.endTransmission();
-    // do not set a value of 0
-    if (i2cReadDelayTime > 0) {
-      // delay is necessary for some devices such as WiiNunchuck
-      delayMicroseconds(i2cReadDelayTime);
-    }
+
+  if (numBytes == 2) {
+    sprintf(errorMsg, "I2C info: address: %1d, theRegister: %1d, numBytes: %1d", address, theRegister, numBytes);
+    Firmata.sendString(errorMsg);
+
+    int value = I2CPort.read16(address, theRegister);
+
+    i2cRxData[0] = address;
+    i2cRxData[1] = theRegister;
+    i2cRxData[2] = (value >> 8) & 0xFF;
+    i2cRxData[3] = value & 0xFF;
+
   } else {
-    theRegister = 0;  // fill the register with a dummy value
-  }
 
-  Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
-
-  // check to be sure correct number of bytes were returned by slave
-  if (numBytes < Wire.available()) {
-    sprintf(errorMsg, "I2C: Too many bytes received from device.  Exp: %1d, Act: %1d",numBytes,Wire.available());
-    Firmata.sendString(errorMsg);
-  } else if (numBytes > Wire.available()) {
-    sprintf(errorMsg, "I2C: Too few bytes received from device.  Exp: %1d, Act: %1d",numBytes,Wire.available());
-    Firmata.sendString(errorMsg);
-  }
-
-  i2cRxData[0] = address;
-  i2cRxData[1] = theRegister;
-  i2cRxData[2] = 0xF2;  // for debug
-  i2cRxData[3] = 0xF3;  // for debug
-
-
-  for (int i = 0; i < numBytes && Wire.available(); i++) {
+    if (theRegister != REGISTER_NOT_SPECIFIED) {
+      Wire.beginTransmission(address);
 #if ARDUINO >= 100
-    i2cRxData[2 + i] = Wire.read();
+      Wire.write((byte)theRegister);
 #else
-    i2cRxData[2 + i] = Wire.receive();
+      Wire.send((byte)theRegister);
 #endif
-  }
+      Wire.endTransmission();
+      // do not set a value of 0
+      if (i2cReadDelayTime > 0) {
+        // delay is necessary for some devices such as WiiNunchuck
+        delayMicroseconds(i2cReadDelayTime);
+      }
+    } else {
+      theRegister = 0;  // fill the register with a dummy value
+    }
 
+    Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
+
+    // check to be sure correct number of bytes were returned by slave
+    if (numBytes < Wire.available()) {
+      sprintf(errorMsg, "I2C: Too many bytes received from device.  Exp: %1d, Act: %1d", numBytes, Wire.available());
+      Firmata.sendString(errorMsg);
+    } else if (numBytes > Wire.available()) {
+      sprintf(errorMsg, "I2C: Too few bytes received from device.  Exp: %1d, Act: %1d", numBytes, Wire.available());
+      Firmata.sendString(errorMsg);
+    }
+
+    i2cRxData[0] = address;
+    i2cRxData[1] = theRegister;
+    i2cRxData[2] = 0xF2;  // for debug
+    i2cRxData[3] = 0xF3;  // for debug
+
+    for (int i = 0; i < numBytes && Wire.available(); i++) {
+#if ARDUINO >= 100
+      i2cRxData[2 + i] = Wire.read();
+#else
+      i2cRxData[2 + i] = Wire.receive();
+#endif
+    }
+  }
   // send slave address, register and received bytes
   Firmata.sendSysex(I2C_REPLY, numBytes + 2, i2cRxData);
 }
