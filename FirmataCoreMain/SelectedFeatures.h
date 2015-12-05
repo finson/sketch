@@ -12,7 +12,6 @@ AnalogInputFeature analogInput;
 
 #include <GPIO/AnalogOutputFeature.h>
 AnalogOutputFeature analogOutput;
->>>>>>> origin/TransportFirmata
 
 #include <DeviceFeature.h>
 DeviceFeature deviceManager;
