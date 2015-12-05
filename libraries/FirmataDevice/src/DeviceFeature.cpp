@@ -39,6 +39,10 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   char errorMsg[100] ;
   char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
+  char buf[32];
+
+  sprintf(buf, "%1d", freeRam());
+  Firmata.sendString(buf);
 
   if (command == DEVICE_QUERY) {
     int result;
@@ -82,7 +86,7 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
     case DD_OPEN:
       flags = (majorHandle << 8) | minorHandle;
       for (majorHandle = 0; majorHandle < numDevices; majorHandle++) {
-        minorHandle = devices[majorHandle]->open(msgBody, flags);
+        minorHandle = devices[majorHandle]->open("MCP9808:0", flags);
         if (minorHandle != -1) break;
       }
       result = (majorHandle == numDevices) ? -1 : (((majorHandle << 8) & 0x7F) | (minorHandle & 0x7F));
@@ -117,4 +121,10 @@ void DeviceFeature::sendSysexResponse(int action, int status) {
   Firmata.write(status & 0x7F);
   Firmata.write((status << 8) & 0x7F);
   Firmata.write(END_SYSEX);
+}
+
+int DeviceFeature::freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
