@@ -37,21 +37,46 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
 
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
+  char errorMsg[100] ;
+  char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
+
   if (command == DEVICE_QUERY) {
-    char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
     int result;
     int flags;
 
     int action = argv[0];
     int minorHandle = argv[1];
     int majorHandle = argv[2];
-    int inputLength = argc - 3;
-    int outputLength = base64_enc_len(inputLength);
-    if (outputLength > MAX_DEVICE_QUERY_BODY_LENGTH) {
-      sendSysexResponse(action, -1);
-      return true;
-    }
-    base64_decode(msgBody, (char *)(argv + 3), inputLength);
+
+    // sprintf(errorMsg, "DEVICE_QUERY info: action: %1d, minor Handle: %1d, majorHandle: %1d", action, minorHandle, majorHandle);
+    // Firmata.sendString(errorMsg);
+
+    // int inputLength = argc - 3;
+    // int outputLength = base64_dec_len((char *)(argv + 3),inputLength);
+    // if (outputLength > MAX_DEVICE_QUERY_BODY_LENGTH) {
+    //   sendSysexResponse(action, -1);
+    //   return true;
+    // }
+    // //base64_decode(msgBody, (char *)(argv + 3), inputLength);
+
+    // sprintf(errorMsg, "DEVICE_QUERY info: inputLength: %1d, outputLength: %1d", inputLength, outputLength);
+    // Firmata.sendString(errorMsg);
+
+    //strcpy(msgBody,"MCP9808:0");
+    // msgBody[0] = 'M';
+    // msgBody[1] = 'C';
+    // msgBody[2] = 'P';
+    // msgBody[3] = '9';
+    // msgBody[4] = '8';
+    // msgBody[5] = '0';
+    // msgBody[6] = '8';
+    // msgBody[7] = ':';
+    // msgBody[8] = '0';
+    // msgBody[9] = '\0';
+
+    // sprintf(errorMsg, "Hello %s!","MCP9808");
+ //   sprintf(errorMsg, "DEVICE_QUERY info: msgBody: %s", msgBody);
+    Firmata.sendString("MCP9808");
 
     switch (action) {
     case DD_OPEN:

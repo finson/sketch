@@ -5,6 +5,7 @@
 #include <FirmataCore.h>
 #include <FirmataExt.h>
 #include <FirmataFeature.h>
+#include <DeviceDriver.h>
 
 #include <Wire.h>
 
