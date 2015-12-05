@@ -15,7 +15,7 @@
 */
 
 #include <FirmataCore.h>
-#include <AnalogOutputFeature.h>
+#include "AnalogOutputFeature.h"
 
 AnalogOutputFeature *AnalogOutputFeatureInstance;
 

@@ -15,7 +15,7 @@
 */
 
 #include <FirmataCore.h>
-#include <DigitalOutputFeature.h>
+#include "DigitalOutputFeature.h"
 
 DigitalOutputFeature *DigitalOutputFeatureInstance;
 
