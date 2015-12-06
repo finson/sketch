@@ -25,9 +25,7 @@ class DeviceFeature: public FirmataFeature
 
     DeviceDriver *devices[MAX_MAJOR_HANDLE_COUNT];
     int16_t numDevices;
-    void sendSysexResponse(int action, int status);
-    int freeRam ();
-
+    void sendDeviceResponse(int action, int status);
 };
 
 #endif

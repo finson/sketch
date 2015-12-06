@@ -10,9 +10,9 @@ extern DeviceDriver *selectedDevices[];
 
 DeviceFeature::DeviceFeature()
 {
-  numDevices = 0;
-  while (selectedDevices[numDevices] != 0) {
-    addDevice(selectedDevices[numDevices++]);
+  int selectionIndex = 0;
+  while (selectedDevices[selectionIndex] != 0) {
+    addDevice(selectedDevices[selectionIndex++]);
   }
 }
 
@@ -41,8 +41,10 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
   char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
   char buf[32];
 
-  sprintf(buf, "%1d", freeRam());
-  Firmata.sendString(buf);
+  msgBody[0] = '\0';
+
+  // sprintf(buf, "Free Ram: %1d", freeRam());
+  // Firmata.sendString(buf);
 
   if (command == DEVICE_QUERY) {
     int result;
@@ -52,45 +54,36 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
     int minorHandle = argv[1];
     int majorHandle = argv[2];
 
+    Firmata.sendString("Hello 1 from DeviceFeature.cpp!");
+
     // sprintf(errorMsg, "DEVICE_QUERY info: action: %1d, minor Handle: %1d, majorHandle: %1d", action, minorHandle, majorHandle);
     // Firmata.sendString(errorMsg);
 
     // int inputLength = argc - 3;
     // int outputLength = base64_dec_len((char *)(argv + 3),inputLength);
     // if (outputLength > MAX_DEVICE_QUERY_BODY_LENGTH) {
-    //   sendSysexResponse(action, -1);
+    //   sendDeviceResponse(action, -1);
     //   return true;
     // }
-    // //base64_decode(msgBody, (char *)(argv + 3), inputLength);
+
+    //base64_decode(msgBody, (char *)(argv + 3), inputLength);
 
     // sprintf(errorMsg, "DEVICE_QUERY info: inputLength: %1d, outputLength: %1d", inputLength, outputLength);
     // Firmata.sendString(errorMsg);
 
-    //strcpy(msgBody,"MCP9808:0");
-    // msgBody[0] = 'M';
-    // msgBody[1] = 'C';
-    // msgBody[2] = 'P';
-    // msgBody[3] = '9';
-    // msgBody[4] = '8';
-    // msgBody[5] = '0';
-    // msgBody[6] = '8';
-    // msgBody[7] = ':';
-    // msgBody[8] = '0';
-    // msgBody[9] = '\0';
+    //sprintf(errorMsg, "DEVICE_QUERY info: msgBody: %s", msgBody);
+    Firmata.sendString("Hello 2 from DeviceFeature.cpp.");
 
-    // sprintf(errorMsg, "Hello %s!","MCP9808");
- //   sprintf(errorMsg, "DEVICE_QUERY info: msgBody: %s", msgBody);
-    Firmata.sendString("MCP9808");
-
+    result = -1;
     switch (action) {
     case DD_OPEN:
+      Firmata.sendString("Hello 3 from DeviceFeature.cpp.");
       flags = (majorHandle << 8) | minorHandle;
       for (majorHandle = 0; majorHandle < numDevices; majorHandle++) {
-        minorHandle = devices[majorHandle]->open("MCP9808:0", flags);
+        minorHandle = devices[majorHandle]->open("Hello:0", flags);
         if (minorHandle != -1) break;
       }
       result = (majorHandle == numDevices) ? -1 : (((majorHandle << 8) & 0x7F) | (minorHandle & 0x7F));
-      sendSysexResponse(action, result);
       break;
     case DD_STATUS:
       // use the handle to address the driver directly and capture response
@@ -103,28 +96,24 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
       break;
     case DD_CLOSE:
       result = devices[majorHandle]->close(minorHandle);
-      sendSysexResponse(action, result);
       break;
     default:
       ;// unknown action code
     }
+    sendDeviceResponse(action, result);
+    Firmata.sendString("Hello 4 from DeviceFeature.cpp.");
     return true;
   } else {
+    Firmata.sendString("Hello 5 from DeviceFeature.cpp.");
     return false;
   }
 }
 
-void DeviceFeature::sendSysexResponse(int action, int status) {
+void DeviceFeature::sendDeviceResponse(int action, int status) {
   Firmata.write(START_SYSEX);
   Firmata.write(DEVICE_RESPONSE);
   Firmata.write(action & 0x7F);
   Firmata.write(status & 0x7F);
-  Firmata.write((status << 8) & 0x7F);
+  Firmata.write((status >> 8) & 0x7F);
   Firmata.write(END_SYSEX);
-}
-
-int DeviceFeature::freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
