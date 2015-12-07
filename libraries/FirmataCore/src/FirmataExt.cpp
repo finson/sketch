@@ -16,8 +16,12 @@
 
 #include <FirmataCore.h>
 #include <FirmataExt.h>
+#include <DeviceDriver.h>
 
 extern FirmataFeature *selectedFeatures[];
+extern DeviceDriver *selectedDevices[];
+
+//----------------------------------------------------------------------------
 
 FirmataExtClass::FirmataExtClass() : numFeatures(0)
 {
@@ -25,12 +29,29 @@ FirmataExtClass::FirmataExtClass() : numFeatures(0)
 
 void FirmataExtClass::addSelectedFeatures()
 {
+  byte msg[3];
+
+// Install the user-selected FirmataFeatures.
+
   int selectionIndex = 0;
   while (selectedFeatures[selectionIndex] != 0) {
     if (numFeatures < MAX_FEATURES) {
       features[numFeatures++] = selectedFeatures[selectionIndex];
     }
     selectionIndex += 1;
+  }
+
+// If one of the user-selected FirmataFeatures is the DeviceFeature, then ask
+// it to install the user-selected devices.
+
+  msg[0] = DD_OPEN;
+  msg[1] = 0;
+  msg[2] = 0x7E;
+
+  for (byte i = 0; i < numFeatures; i++) {
+    if (features[i]->handleFeatureSysex(DEVICE_QUERY, 3, msg)) {
+      break;
+    }
   }
 }
 

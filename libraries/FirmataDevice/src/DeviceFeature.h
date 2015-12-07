@@ -3,7 +3,7 @@
 #define DeviceFeature_h
 
 #include <FirmataFeature.h>
-#include <DeviceDriver.h>
+#include "DeviceDriver.h"
 #include <Base64.h>
 
 #define MAX_MAJOR_HANDLE_COUNT 10
@@ -14,7 +14,6 @@ class DeviceFeature: public FirmataFeature
 {
   public:
     DeviceFeature();
-    void addDevice(DeviceDriver *device);
 
     void reset();
     void handleGetCapability(byte pin);
@@ -26,6 +25,7 @@ class DeviceFeature: public FirmataFeature
     DeviceDriver *devices[MAX_MAJOR_HANDLE_COUNT];
     int16_t numDevices;
     void sendDeviceResponse(int action, int status);
+    void addSelectedDevices();
 };
 
 #endif
