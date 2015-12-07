@@ -43,14 +43,13 @@
 
 void setup()
 {
-
-FirmataExt.addSelectedFeatures();
-
 // start up the default Firmata using Serial interface:
 
 Firmata.begin(57600);
 
 Firmata.reset();
+
+FirmataExt.addSelectedFeatures();
 
 }
 
