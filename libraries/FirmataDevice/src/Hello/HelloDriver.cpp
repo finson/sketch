@@ -20,7 +20,7 @@ HelloDriver::HelloDriver(char *dNameRoot, int count) :
   actualMinorHandleCount = min(MAX_HELLO_MINOR_HANDLE_COUNT, count);
   for (int idx = 0; idx < actualMinorHandleCount; idx++) {
     sprintf(buf, "%s:%1d", dNameRoot, idx);
-    devices[idx].setDeviceName(buf);
+    devices[idx].setDeviceName(strdup(buf));
     devices[idx].setWho("World.");
     devices[idx].setOpen(false);
   }
@@ -31,8 +31,11 @@ HelloDriver::HelloDriver(char *dNameRoot, int count) :
 int HelloDriver::open(char *name, int flags) {
   uint8_t theRegister;
 
+
   int handle;
   for (handle = 0; handle < actualMinorHandleCount; handle++) {
+    Firmata.sendString("Marker 1 from HelloDriver::HelloDriver.");
+    Firmata.sendString(devices[handle].getDeviceName());
     if (strcmp(devices[handle].getDeviceName(), name) == 0) {
       break;
     }

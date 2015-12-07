@@ -1,6 +1,7 @@
 #ifndef HelloDriver_h
 #define HelloDriver_h
 
+#include <FirmataCore.h>
 #include <DeviceDriver.h>
 
 #define MAX_HELLO_MINOR_HANDLE_COUNT 8
