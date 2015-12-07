@@ -242,7 +242,7 @@ void FirmataClass::parse(int inputData)
             Firmata.sendString(errorMsg);
         }
       }
-    Firmata.sendString("Hello (Sysex completed) from FirmataCore.cpp.");
+      Firmata.sendString("Sysex processing completed in FirmataCore parse().");
     } else {
       storedInputData[sysexBytesRead++] = inputData;
     }

@@ -29,6 +29,8 @@
 #define I2C_REPLY               0x77 // a reply to an I2C read request (FirmataFeature I2CFirmata)
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (FirmataFeature I2CFirmata)
 
+#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFeature)
+
 // Feature Sysex commands that do not have an associated pin mode
 
 #define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers (FirmataCore)
@@ -40,10 +42,6 @@
 
 #define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFeature)
 #define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFeature)
-
-// Feature Sysex commands that have an associated pin mode and implement or extend the mode
-
-#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFeature)
 
 class FirmataFeature
 {
