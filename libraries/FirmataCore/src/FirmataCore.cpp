@@ -17,8 +17,8 @@
 //******************************************************************************
 
 #include <FirmataCore.h>
-#include <HardwareSerial.h>
 #include <FirmataExt.h>
+#include <HardwareSerial.h>
 
 extern "C" {
 #include <string.h>
@@ -242,7 +242,6 @@ void FirmataClass::parse(int inputData)
             Firmata.sendString(errorMsg);
         }
       }
-      Firmata.sendString("Sysex processing completed in FirmataCore parse().");
     } else {
       storedInputData[sysexBytesRead++] = inputData;
     }
@@ -285,7 +284,6 @@ void FirmataClass::parse(int inputData)
       }
     return;
     }
-
 
   // remove channel info from command byte if less than 0xF0
   if (inputData < 0xF0) {

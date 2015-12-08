@@ -41,18 +41,15 @@ void FirmataExtClass::addSelectedFeatures()
     selectionIndex += 1;
   }
 
-// If one of the user-selected FirmataFeatures is the DeviceFeature, then ask
-// it to install the user-selected devices.
+// Ask DeviceFeature to install the user-selected DeviceDrivers.
+// If DeviceFeature is not installed, the Sysex command will just fall on
+// the floor.
 
   msg[0] = DD_OPEN;
   msg[1] = 0;
   msg[2] = 0x7E;
 
-  for (byte i = 0; i < numFeatures; i++) {
-    if (features[i]->handleFeatureSysex(DEVICE_QUERY, 3, msg)) {
-      break;
-    }
-  }
+  dispatchFeatureSysex(DEVICE_QUERY, 3, msg);
 }
 
 void FirmataExtClass::dispatchReset()
