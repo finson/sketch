@@ -9,23 +9,38 @@
 #define MAX_MAJOR_HANDLE_COUNT 10
 #define MAX_DEVICE_NAME_LENGTH 32
 #define MAX_DEVICE_QUERY_BODY_LENGTH 128
+#define MAX_DEVICE_FEATURE_MINOR_HANDLE_COUNT 1
 
-class DeviceFeature: public FirmataFeature
+class DeviceFeature: public FirmataFeature, public DeviceDriver
 {
-  public:
-    DeviceFeature();
+public:
+    DeviceFeature(char *dNameRoot = "DeviceFeature", int count = 1);
+
+    // Feature methods
 
     void reset();
     void handleGetCapability(byte pin);
     boolean handleSetPinMode(byte pin, int mode);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
 
-  private:
+    // Device Driver methods
 
-    DeviceDriver *devices[MAX_MAJOR_HANDLE_COUNT];
+    int open(char *name, int flags = 0);
+    int status(int handle, int reg, int count, byte *buf);
+    int control(int handle, int reg, int count, byte *buf);
+    int read(int handle, int count, byte *buf);
+    int write(int handle, int count, byte *buf);
+    int close(int handle);
+
+private:
+
+    DeviceDriver *devices[MAX_MAJOR_HANDLE_COUNT+1];
     int16_t numDevices;
     void sendDeviceResponse(int action, int status);
-    void addSelectedDevices();
+    void setSelectedDevices(int flags);
+
+    DeviceInfo devices[MAX_DEVICE_FEATURE_MINOR_HANDLE_COUNT];
+    int actualMinorHandleCount = 0;
 };
 
 #endif
