@@ -41,11 +41,11 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
   char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
   char buf[32];
 
-  msgBody[0] = '\0';
-
   if (command != DEVICE_QUERY) {
     return false;
   }
+
+  msgBody[0] = '\0';
 
   int result;
   int flags;

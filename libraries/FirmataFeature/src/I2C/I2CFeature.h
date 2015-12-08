@@ -17,8 +17,8 @@
 #ifndef I2CFeature_h
 #define I2CFeature_h
 
-#include <Wire.h>
 #include <FirmataFeature.h>
+#include <Wire.h>
 
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000

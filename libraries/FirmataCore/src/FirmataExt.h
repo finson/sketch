@@ -20,7 +20,6 @@
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
 
-
 #define MAX_FEATURES 100
 
 class FirmataExtClass
