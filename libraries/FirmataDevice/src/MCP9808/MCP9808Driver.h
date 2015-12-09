@@ -2,10 +2,10 @@
 #define MCP9808Driver_h
 
 #include <FirmataCore.h>
-#include <DeviceDriver.h>
+#include <Device/DeviceDriver.h>
 #include <Wire.h>
 
-#define MAX_MCP9808_MINOR_HANDLE_COUNT 8
+#define MAX_MCP9808_LU_COUNT 8
 
 enum class MCP9808Register;
 
@@ -25,10 +25,14 @@ public:
 
     int close(int handle);
 
-    class MCP9808DeviceInfo: public DeviceInfo {
+    class MCP9808LUI: public LogicalUnitInfo {
 
     public:
-        MCP9808DeviceInfo() {
+        MCP9808LUI(const char *name) : LogicalUnitInfo(name) {
+            theDeviceAddress = 0;
+        }
+
+        MCP9808LUI() : LogicalUnitInfo() {
             theDeviceAddress = 0;
         }
 
@@ -44,7 +48,7 @@ public:
         int theDeviceAddress;
     };
 
-    MCP9808DeviceInfo minorDevices[MAX_MCP9808_MINOR_HANDLE_COUNT];
+    MCP9808LUI minorDevices[MAX_MCP9808_LU_COUNT];
 
 };
 

@@ -2,16 +2,17 @@
 #define HelloDriver_h
 
 #include <FirmataCore.h>
-#include <DeviceDriver.h>
+#include <Device/DeviceDriver.h>
 
-#define MAX_HELLO_MINOR_HANDLE_COUNT 8
+#define MAX_HELLO_LU_COUNT 2
+#define MAX_HELLO_TEXT_LENGTH 31
 
 enum class HelloRegister;
 
 class HelloDriver: public DeviceDriver
 {
 public:
-    HelloDriver(char *dNameRoot = "Hello", int count = 5);
+    HelloDriver(char *dNameRoot = "Hello", int count = 1);
 
     int open(char *name, int flags = 0);
 
@@ -23,26 +24,30 @@ public:
 
     int close(int handle);
 
-    class HelloDeviceInfo: public DeviceInfo {
+    class HelloLUI: public LogicalUnitInfo {
 
     public:
-        HelloDeviceInfo() {
-            who = "";
+        HelloLUI(const char *interjection) : LogicalUnitInfo(interjection) {
+            strlcpy(who,"World",MAX_HELLO_TEXT_LENGTH+1);
         }
 
-         void setWho(char *newWho) {
-            who = strdup(newWho);
+        HelloLUI() : LogicalUnitInfo() {
+            strlcpy(who,"World",MAX_HELLO_TEXT_LENGTH+1);
         }
 
-        char *getWho() {
-            return strdup(who);
+        void setWho(const char *newWho) {
+            strlcpy(who,newWho,MAX_HELLO_TEXT_LENGTH+1);
+        }
+
+        const char *getWho() {
+            return who;
         }
 
     private:
-        char *who;
+        char who[MAX_HELLO_TEXT_LENGTH];
     };
 
-    HelloDeviceInfo minorDevices[MAX_HELLO_MINOR_HANDLE_COUNT];
+    HelloLUI minorDevices[MAX_HELLO_LU_COUNT];
 };
 
 #endif

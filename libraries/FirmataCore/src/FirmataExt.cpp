@@ -16,7 +16,7 @@
 
 #include <FirmataCore.h>
 #include <FirmataExt.h>
-#include <DeviceDriver.h>
+#include <Device/DeviceDriver.h>
 
 extern FirmataFeature *selectedFeatures[];
 extern DeviceDriver *selectedDevices[];

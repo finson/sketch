@@ -16,12 +16,12 @@ enum class HelloRegister {
 
 HelloDriver::HelloDriver(char *dNameRoot, int count) :
   DeviceDriver(dNameRoot) {
-  char buf[32];
-  minorDeviceCount = min(MAX_HELLO_MINOR_HANDLE_COUNT, count);
+  char buf[MAX_LU_NAME_LENGTH+1];
+  minorDeviceCount = min(MAX_HELLO_LU_COUNT, count);
   for (int idx = 0; idx < minorDeviceCount; idx++) {
-    sprintf(buf, "%s:%1d", dNameRoot, idx);
-    minorDevices[idx].setDeviceName(strdup(buf));
-    minorDevices[idx].setWho(strdup("World."));
+    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dNameRoot, idx);
+    minorDevices[idx].setLogicalUnitName(buf);
+    minorDevices[idx].setWho("World.");
     minorDevices[idx].setOpen(false);
   }
 }
@@ -35,8 +35,8 @@ int HelloDriver::open(char *name, int flags) {
   int handle;
   for (handle = 0; handle < minorDeviceCount; handle++) {
     Firmata.sendString("Marker 1 from HelloDriver::HelloDriver.");
-    Firmata.sendString(minorDevices[handle].getDeviceName());
-    if (strcmp(minorDevices[handle].getDeviceName(), name) == 0) {
+    Firmata.sendString(minorDevices[handle].getLogicalUnitName());
+    if (strcmp(minorDevices[handle].getLogicalUnitName(), name) == 0) {
       break;
     }
   }
@@ -47,7 +47,7 @@ int HelloDriver::open(char *name, int flags) {
     return -1;
   }
 
-  DeviceInfo currentDevice = minorDevices[handle];
+  LogicalUnitInfo currentDevice = minorDevices[handle];
   if (currentDevice.isOpen()) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
@@ -74,7 +74,7 @@ int HelloDriver::write(int handle, int count, byte *buf) {
 }
 
 int HelloDriver::close(int handle) {
-  HelloDeviceInfo currentDevice = minorDevices[handle];
+  LogicalUnitInfo currentDevice = minorDevices[handle];
   if (currentDevice.isOpen()) {
     currentDevice.setOpen(false);
     return 0;
