@@ -23,26 +23,26 @@ public:
 
     int close(int handle);
 
-protected:
     class HelloDeviceInfo: public DeviceInfo {
+
     public:
-        HelloDeviceInfo(char *interjection = "Hello", char *firstWho = "World") :
-            DeviceInfo(interjection),
-            who(firstWho) {}
-        void setWho(char *newWho) {
-            who = newWho;
+        HelloDeviceInfo() {
+            who = "";
         }
+
+         void setWho(char *newWho) {
+            who = strdup(newWho);
+        }
+
         char *getWho() {
-            return who;
+            return strdup(who);
         }
 
     private:
         char *who;
     };
 
-    HelloDeviceInfo devices[MAX_HELLO_MINOR_HANDLE_COUNT];
-    int actualMinorHandleCount = 0;
-
+    HelloDeviceInfo minorDevices[MAX_HELLO_MINOR_HANDLE_COUNT];
 };
 
 #endif

@@ -1,8 +1,8 @@
 #ifndef MCP9808Driver_h
 #define MCP9808Driver_h
 
+#include <FirmataCore.h>
 #include <DeviceDriver.h>
-#include <I2CDeviceInfo.h>
 #include <Wire.h>
 
 #define MAX_MCP9808_MINOR_HANDLE_COUNT 8
@@ -11,7 +11,7 @@ enum class MCP9808Register;
 
 class MCP9808Driver: public DeviceDriver
 {
-  public:
+public:
     MCP9808Driver(char *dNameRoot = "MCP9808", int baseAddr = 0x18, int addrCount = 8);
     MCP9808Driver(char *dNameRoot, int deviceAddresses[], int addrCount);
 
@@ -25,9 +25,28 @@ class MCP9808Driver: public DeviceDriver
 
     int close(int handle);
 
-  protected:
-    I2CDeviceInfo devices[MAX_MCP9808_MINOR_HANDLE_COUNT];
-    int actualMinorHandleCount = 0;
+    class MCP9808DeviceInfo: public DeviceInfo {
+
+    public:
+        MCP9808DeviceInfo() {
+            theDeviceAddress = 0;
+        }
+
+        void setDeviceAddress(int addr) {
+            theDeviceAddress = addr;
+        }
+
+        int getDeviceAddress() {
+            return theDeviceAddress;
+        }
+
+    private:
+        int theDeviceAddress;
+    };
+
+    MCP9808DeviceInfo minorDevices[MAX_MCP9808_MINOR_HANDLE_COUNT];
+
 };
+
 
 #endif

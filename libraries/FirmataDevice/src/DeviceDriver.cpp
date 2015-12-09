@@ -3,7 +3,8 @@
 
 
 DeviceDriver::DeviceDriver(char *nameRoot) {
-  deviceNameRoot = nameRoot;
+  deviceNameRoot = strdup(nameRoot);
+  minorDeviceCount = 0;
 };
 
 

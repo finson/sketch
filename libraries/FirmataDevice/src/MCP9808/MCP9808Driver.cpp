@@ -18,24 +18,24 @@ enum class MCP9808Register {
 MCP9808Driver::MCP9808Driver(char *dNameRoot, int baseAddr, int addrCount) :
   DeviceDriver(dNameRoot) {
   char buf[32];
-  actualMinorHandleCount = min(MAX_MCP9808_MINOR_HANDLE_COUNT, addrCount);
-  for (int idx = 0; idx < actualMinorHandleCount; idx++) {
+  minorDeviceCount = min(MAX_MCP9808_MINOR_HANDLE_COUNT, addrCount);
+  for (int idx = 0; idx < minorDeviceCount; idx++) {
     sprintf(buf, "%s:%1d", dNameRoot, idx);
-    devices[idx].setDeviceName(buf);
-    devices[idx].setDeviceAddress(baseAddr + idx);
-    devices[idx].setOpen(false);
+    minorDevices[idx].setDeviceName(strdup(buf));
+    minorDevices[idx].setDeviceAddress(baseAddr + idx);
+    minorDevices[idx].setOpen(false);
   }
 }
 
 MCP9808Driver::MCP9808Driver(char *dNameRoot, int deviceAddresses[], int addrCount) :
   DeviceDriver(dNameRoot) {
   char buf[32];
-  actualMinorHandleCount = min(MAX_MCP9808_MINOR_HANDLE_COUNT, addrCount);
-  for (int idx = 0; idx < actualMinorHandleCount; idx++) {
+  minorDeviceCount = min(MAX_MCP9808_MINOR_HANDLE_COUNT, addrCount);
+  for (int idx = 0; idx < minorDeviceCount; idx++) {
     sprintf(buf, "%s:%1d", dNameRoot, idx);
-    devices[idx].setDeviceName(buf);
-    devices[idx].setDeviceAddress(deviceAddresses[idx]);
-    devices[idx].setOpen(false);
+    minorDevices[idx].setDeviceName(strdup(buf));
+    minorDevices[idx].setDeviceAddress(deviceAddresses[idx]);
+    minorDevices[idx].setOpen(false);
   }
 }
 
@@ -45,18 +45,18 @@ int MCP9808Driver::open(char *name, int flags) {
   uint8_t theRegister;
 
   int handle;
-  for (handle = 0; handle < actualMinorHandleCount; handle++) {
-    if (strcmp(devices[handle].getDeviceName(), name) == 0) {
+  for (handle = 0; handle < minorDeviceCount; handle++) {
+    if (strcmp(minorDevices[handle].getDeviceName(), name) == 0) {
       break;
     }
   }
-  if (handle == actualMinorHandleCount) {
+  if (handle == minorDeviceCount) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
     return -1;
   }
 
-  I2CDeviceInfo currentDevice = devices[handle];
+  MCP9808DeviceInfo currentDevice = minorDevices[handle];
   if (currentDevice.isOpen()) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
@@ -98,7 +98,7 @@ int MCP9808Driver::write(int handle, int count, byte *buf) {
 }
 
 int MCP9808Driver::close(int handle) {
-  I2CDeviceInfo currentDevice = devices[handle];
+  MCP9808DeviceInfo currentDevice = minorDevices[handle];
   if (currentDevice.isOpen()) {
     currentDevice.setOpen(false);
     I2CPort.disableI2CPins();

@@ -8,28 +8,37 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFeature::DeviceFeature(char *dNameRoot, int count) : DeviceDriver(dNameRoot), numDevices(0)
+DeviceFeature::DeviceFeature(char *dNameRoot, int count) : DeviceDriver(dNameRoot), majorDeviceCount(0)
 {
-  actualMinorHandleCount = min(MAX_DEVICE_FEATURE_MINOR_HANDLE_COUNT, addrCount);
-  for (int idx = 0; idx < actualMinorHandleCount; idx++) {
-    sprintf(buf, "%s:%1d", dNameRoot, idx);
-    devices[idx].setDeviceName(buf);
-    devices[idx].setOpen(false);
-  }
-}
+char buf[32];
 
-void DeviceFeature::setSelectedDevices(int flags) {
-  numDevices = 0;
-  devices[numDevices++] = this;
+// Copy the list of addresses of installed DeviceDrivers from SelectedFeatures.h
+
+  majorDeviceCount = 0;
+  majorDevices[majorDeviceCount++] = this;
 
   int selectionIndex = 0;
   while (selectedDevices[selectionIndex] != 0) {
-    if (numDevices < MAX_MAJOR_HANDLE_COUNT) {
-      devices[numDevices++] = selectedDevices[selectionIndex];
+    if (majorDeviceCount < MAX_MAJOR_HANDLE_COUNT) {
+      majorDevices[majorDeviceCount++] = selectedDevices[selectionIndex];
     }
     selectionIndex += 1;
   }
+
+// Initialize the available DeviceFeature pseudo-devices
+
+  minorDeviceCount = min(MAX_MINOR_HANDLE_COUNT, count);
+  for (int idx = 0; idx < minorDeviceCount; idx++) {
+    sprintf(buf, "%s:%1d", dNameRoot, idx);
+    minorDevices[idx].setDeviceName(strdup(buf));
+    minorDevices[idx].setOpen(false);
+  }
+
 }
+
+//---------------------------------------------------------------------------
+
+// The following methods implement the FirmataFeature aspects of this class.
 
 void DeviceFeature::reset()
 {
@@ -47,7 +56,7 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   int result;
-  char msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
+  byte msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
 
   if (command != DEVICE_QUERY) {
     return false;
@@ -63,22 +72,21 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 
   //base64_decode(msgBody, (char *)(argv + 3), inputLength);
 
-  result = executeDeviceAction(action, argv[1], argv[2], msgBody);
+  result = dispatchDeviceAction(action, argv[1], argv[2], msgBody);
   sendDeviceResponse(action, result);
   return true;
 }
 
-int DeviceFeature::executeDeviceAction(int act, int minor, int major, char *body) {
+int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *body) {
   int deviceIndex;
   int minorHandle;
   int result;
-  int flags;
+  int flags = (major << 8) | minor;
 
   switch (act) {
   case DD_OPEN:
-    flags = (major << 8) | minor;
-    for (deviceIndex = 0; deviceIndex < numDevices; deviceIndex++) {
-      minorHandle = devices[deviceIndex]->open("Hello:0", flags);//TODO body instead of hello
+    for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
+      minorHandle = majorDevices[deviceIndex]->open("Hello:0", flags);//TODO body instead of hello
       if (minorHandle != -1) break;
     }
     result = (minorHandle == -1) ? -1 : (((deviceIndex & 0x7F) << 8) | (minorHandle & 0x7F));
@@ -88,7 +96,7 @@ int DeviceFeature::executeDeviceAction(int act, int minor, int major, char *body
     result = -1;
     break;
   case DD_CONTROL:
-    result = devices[major]->control(minor,body[0],0,body);
+    result = majorDevices[major]->control(minor,body[0],0,body);
     break;
   case DD_READ:
     result = -1;
@@ -97,7 +105,7 @@ int DeviceFeature::executeDeviceAction(int act, int minor, int major, char *body
     result = -1;
     break;
   case DD_CLOSE:
-    result = (devices[major]->close(minor) == -1) ? -1 : 0;
+    result = (majorDevices[major]->close(minor) == -1) ? -1 : 0;
     break;
   default:
     result = -1;
@@ -115,27 +123,27 @@ void DeviceFeature::sendDeviceResponse(int action, int status) {
 }
 
 //---------------------------------------------------------------------------
-//
-// The following methods implement the DeviceDriver aspect of this class.
+
+// The following methods implement the DeviceDriver aspects of this class.
 // By this means, the DriverFeature can be controlled just like the individual
 // device drivers are.
 
-int open(char *name, int flags) {
+int DeviceFeature::open(char *name, int flags) {
   uint8_t theRegister;
 
   int minorHandle;
-  for (minorHandle = 0; minorHandle < actualMinorHandleCount; minorHandle++) {
-    if (strcmp(devices[minorHandle].getDeviceName(), name) == 0) {
+  for (minorHandle = 0; minorHandle < minorDeviceCount; minorHandle++) {
+    if (strcmp(minorDevices[minorHandle].getDeviceName(), name) == 0) {
       break;
     }
   }
-  if (minorHandle == actualMinorHandleCount) {
+  if (minorHandle == minorDeviceCount) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
     return -1;
   }
 
-  DeviceInfo currentDevice = devices[minorHandle];
+  DeviceInfo currentDevice = minorDevices[minorHandle];
   if (currentDevice.isOpen()) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
@@ -145,17 +153,17 @@ int open(char *name, int flags) {
   return minorHandle;
 }
 
-int status(int handle, int reg, int count, byte *buf) {}
+int DeviceFeature::status(int handle, int reg, int count, byte *buf) {}
 
-int control(int handle, int reg, int count, byte *buf) {
+int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
   int result;
-  DeviceInfo currentDevice = devices[handle & 0x7F];
+  DeviceInfo currentDevice = minorDevices[handle & 0x7F];
   if (!currentDevice.isOpen()) {
     return -1;
   }
   switch (reg) {
   case DDC_INIT:
-    setSelectedDevices(flags);
+    // setSelectedDevices();
     result = max(0,count);
     break;
   default:
@@ -166,11 +174,11 @@ int control(int handle, int reg, int count, byte *buf) {
 
 }
 
-int read(int handle, int count, byte *buf) {}
-int write(int handle, int count, byte *buf) {}
+int DeviceFeature::read(int handle, int count, byte *buf) {}
+int DeviceFeature::write(int handle, int count, byte *buf) {}
 
-int close(int handle) {
-  DeviceInfo currentDevice = devices[handle & 0x7F];
+int DeviceFeature::close(int handle) {
+  DeviceInfo currentDevice = minorDevices[handle & 0x7F];
   if (currentDevice.isOpen()) {
     currentDevice.setOpen(false);
     return 0;

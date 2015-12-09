@@ -14,7 +14,7 @@ AnalogInputFeature analogInput;
 AnalogOutputFeature analogOutput;
 
 #include <DeviceFeature.h>
-DeviceFeature deviceManager;
+DeviceFeature deviceManager("DeviceFeature",1);
 
 // Firmata Features (Communications)
 

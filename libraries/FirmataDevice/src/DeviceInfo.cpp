@@ -1,7 +1,7 @@
 #include "DeviceInfo.h"
 
-DeviceInfo::DeviceInfo(char *name) {
-    deviceName = name;
+DeviceInfo::DeviceInfo() {
+    deviceName = "";
     deviceIsOpen = false;
 }
 
@@ -14,9 +14,9 @@ bool DeviceInfo::isOpen() {
 }
 
 void DeviceInfo::setDeviceName(char *name) {
-    deviceName = name;
+    deviceName = strdup(name);
 }
 
 char *DeviceInfo::getDeviceName() {
-    return deviceName;
+    return strdup(deviceName);
 }

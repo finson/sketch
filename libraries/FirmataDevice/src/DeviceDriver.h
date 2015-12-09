@@ -4,12 +4,16 @@
 #include <arduino.h>
 #include "DeviceInfo.h"
 
-#define  DD_OPEN    0x0000
-#define  DD_STATUS  0x0001
-#define  DD_CONTROL 0x0002
-#define  DD_READ    0x0003
-#define  DD_WRITE   0x0004
-#define  DD_CLOSE   0x0005
+#define  DD_OPEN    0x00
+#define  DD_STATUS  0x01
+#define  DD_CONTROL 0x02
+#define  DD_READ    0x03
+#define  DD_WRITE   0x04
+#define  DD_CLOSE   0x05
+
+class DeviceFeature;
+
+extern DeviceFeature deviceManager;
 
 class DeviceDriver
 {
@@ -28,6 +32,7 @@ class DeviceDriver
 
   protected:
     char *deviceNameRoot;
+    int minorDeviceCount;
 };
 
 #endif

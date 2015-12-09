@@ -1,11 +1,13 @@
 #ifndef DeviceInfo_h
 #define DeviceInfo_h
 
+#include <string.h>
+
 class DeviceInfo {
 
 public:
 
-  DeviceInfo(char *name);
+  DeviceInfo();
 
   void setOpen(bool stateOfOpen);
   bool isOpen();
