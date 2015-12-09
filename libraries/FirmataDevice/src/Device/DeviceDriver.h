@@ -2,7 +2,9 @@
 #define DeviceDriver_h
 
 #include <arduino.h>
-#include "DeviceInfo.h"
+#include "LogicalUnitInfo.h"
+
+#define MAX_DEVICE_NAME_LENGTH (MAX_LU_NAME_LENGTH-3)
 
 #define  DD_OPEN    0x00
 #define  DD_STATUS  0x01
@@ -18,7 +20,7 @@ extern DeviceFeature deviceManager;
 class DeviceDriver
 {
   public:
-    DeviceDriver(char *nameRoot);
+    DeviceDriver(const char *nameRoot);
 
     virtual int open(char *name, int flags) = 0;
 
@@ -31,7 +33,7 @@ class DeviceDriver
     virtual int close(int handle) = 0;
 
   protected:
-    char *deviceNameRoot;
+    char deviceNameRoot[MAX_DEVICE_NAME_LENGTH+1];
     int minorDeviceCount;
 };
 

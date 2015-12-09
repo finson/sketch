@@ -2,7 +2,7 @@
   DeviceFeature.cpp - Firmata library
 */
 
-#include <DeviceFeature.h>
+#include "DeviceFeature.h"
 
 extern DeviceDriver *selectedDevices[];
 
@@ -10,7 +10,7 @@ extern DeviceDriver *selectedDevices[];
 
 DeviceFeature::DeviceFeature(char *dNameRoot, int count) : DeviceDriver(dNameRoot), majorDeviceCount(0)
 {
-char buf[32];
+char buf[MAX_DEVICE_NAME_LENGTH+1];
 
 // Copy the list of addresses of installed DeviceDrivers from SelectedFeatures.h
 
@@ -19,7 +19,7 @@ char buf[32];
 
   int selectionIndex = 0;
   while (selectedDevices[selectionIndex] != 0) {
-    if (majorDeviceCount < MAX_MAJOR_HANDLE_COUNT) {
+    if (majorDeviceCount < MAX_MGR_DEVICE_COUNT) {
       majorDevices[majorDeviceCount++] = selectedDevices[selectionIndex];
     }
     selectionIndex += 1;
@@ -27,13 +27,12 @@ char buf[32];
 
 // Initialize the available DeviceFeature pseudo-devices
 
-  minorDeviceCount = min(MAX_MINOR_HANDLE_COUNT, count);
+  minorDeviceCount = min(MAX_MGR_LU_COUNT, count);
   for (int idx = 0; idx < minorDeviceCount; idx++) {
-    sprintf(buf, "%s:%1d", dNameRoot, idx);
-    minorDevices[idx].setDeviceName(strdup(buf));
+    snprintf(buf, MAX_DEVICE_NAME_LENGTH+1, "%s:%1d", dNameRoot, idx);
+    minorDevices[idx].setLogicalUnitName(buf);
     minorDevices[idx].setOpen(false);
   }
-
 }
 
 //---------------------------------------------------------------------------
@@ -133,7 +132,7 @@ int DeviceFeature::open(char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < minorDeviceCount; minorHandle++) {
-    if (strcmp(minorDevices[minorHandle].getDeviceName(), name) == 0) {
+    if (strcmp(minorDevices[minorHandle].getLogicalUnitName(), name) == 0) {
       break;
     }
   }
@@ -143,7 +142,7 @@ int DeviceFeature::open(char *name, int flags) {
     return -1;
   }
 
-  DeviceInfo currentDevice = minorDevices[minorHandle];
+  LogicalUnitInfo currentDevice = minorDevices[minorHandle];
   if (currentDevice.isOpen()) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
@@ -157,7 +156,7 @@ int DeviceFeature::status(int handle, int reg, int count, byte *buf) {}
 
 int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
   int result;
-  DeviceInfo currentDevice = minorDevices[handle & 0x7F];
+  LogicalUnitInfo currentDevice = minorDevices[handle & 0x7F];
   if (!currentDevice.isOpen()) {
     return -1;
   }
@@ -178,7 +177,7 @@ int DeviceFeature::read(int handle, int count, byte *buf) {}
 int DeviceFeature::write(int handle, int count, byte *buf) {}
 
 int DeviceFeature::close(int handle) {
-  DeviceInfo currentDevice = minorDevices[handle & 0x7F];
+  LogicalUnitInfo currentDevice = minorDevices[handle & 0x7F];
   if (currentDevice.isOpen()) {
     currentDevice.setOpen(false);
     return 0;

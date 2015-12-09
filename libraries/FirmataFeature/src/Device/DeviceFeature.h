@@ -3,14 +3,13 @@
 #define DeviceFeature_h
 
 #include <FirmataFeature.h>
-#include "DeviceDriver.h"
+#include <Device/DeviceDriver.h>
 #include <Base64.h>
 
-#define MAX_MAJOR_HANDLE_COUNT 10
-#define MAX_DEVICE_NAME_LENGTH 32
-#define MAX_DEVICE_QUERY_BODY_LENGTH 128
-#define MAX_MINOR_HANDLE_COUNT 1
+#define MAX_MGR_DEVICE_COUNT 10
+#define MAX_MGR_LU_COUNT 1
 
+#define MAX_DEVICE_QUERY_BODY_LENGTH 128
 #define DDC_INIT 0
 
 class DeviceFeature : public FirmataFeature, public DeviceDriver {
@@ -39,13 +38,12 @@ public:
 
 private:
 
-    DeviceDriver *majorDevices[MAX_MAJOR_HANDLE_COUNT+1];
+    DeviceDriver *majorDevices[MAX_MGR_DEVICE_COUNT+1];
     int majorDeviceCount;
 
     void sendDeviceResponse(int action, int status);
-    // void setSelectedDevices(int flags);
 
-    DeviceInfo minorDevices[MAX_MINOR_HANDLE_COUNT];
+    LogicalUnitInfo minorDevices[MAX_MGR_LU_COUNT];
 };
 
 #endif

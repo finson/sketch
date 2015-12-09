@@ -1,9 +1,8 @@
+#include "DeviceDriver.h"
 
-#include <DeviceDriver.h>
 
-
-DeviceDriver::DeviceDriver(char *nameRoot) {
-  deviceNameRoot = strdup(nameRoot);
+DeviceDriver::DeviceDriver(const char *nameRoot) {
+  strlcpy(deviceNameRoot,nameRoot,(MAX_DEVICE_NAME_LENGTH+1));
   minorDeviceCount = 0;
 };
 
