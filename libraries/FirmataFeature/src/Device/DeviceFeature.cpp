@@ -8,7 +8,7 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFeature::DeviceFeature(char *dNameRoot, int count) : DeviceDriver(dNameRoot), majorDeviceCount(0)
+DeviceFeature::DeviceFeature(char *dName, int count) : DeviceDriver(dName), majorDeviceCount(0)
 {
 char buf[MAX_DEVICE_NAME_LENGTH+1];
 
@@ -29,7 +29,7 @@ char buf[MAX_DEVICE_NAME_LENGTH+1];
 
   minorDeviceCount = min(MAX_MGR_LU_COUNT, count);
   for (int idx = 0; idx < minorDeviceCount; idx++) {
-    snprintf(buf, MAX_DEVICE_NAME_LENGTH+1, "%s:%1d", dNameRoot, idx);
+    snprintf(buf, MAX_DEVICE_NAME_LENGTH+1, "%s:%1d", dName, idx);
     minorDevices[idx].setLogicalUnitName(buf);
     minorDevices[idx].setOpen(false);
   }

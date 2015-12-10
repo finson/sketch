@@ -2,7 +2,7 @@
 
 
 DeviceDriver::DeviceDriver(const char *nameRoot) {
-  strlcpy(deviceNameRoot,nameRoot,(MAX_DEVICE_NAME_LENGTH+1));
+  strlcpy(deviceName,nameRoot,(MAX_DEVICE_NAME_LENGTH+1));
   minorDeviceCount = 0;
 };
 

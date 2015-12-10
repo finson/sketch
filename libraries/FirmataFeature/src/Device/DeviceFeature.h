@@ -14,7 +14,7 @@
 
 class DeviceFeature : public FirmataFeature, public DeviceDriver {
 public:
-    DeviceFeature(char *dNameRoot, int count = 1);
+    DeviceFeature(char *dName, int count = 1);
 
     // Firmata Feature methods
 

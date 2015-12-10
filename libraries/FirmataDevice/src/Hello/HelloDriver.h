@@ -12,7 +12,7 @@ enum class HelloRegister;
 class HelloDriver: public DeviceDriver
 {
 public:
-    HelloDriver(char *dNameRoot = "Hello", int count = 1);
+    HelloDriver(char *dName = "Hello", int count = 1);
 
     int open(char *name, int flags = 0);
 

@@ -15,24 +15,24 @@ enum class MCP9808Register {
 
 //---------------------------------------------------------------------------
 
-MCP9808Driver::MCP9808Driver(char *dNameRoot, int baseAddr, int addrCount) :
-  DeviceDriver(dNameRoot) {
+MCP9808Driver::MCP9808Driver(char *dName, int baseAddr, int addrCount) :
+  DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
   minorDeviceCount = min(MAX_MCP9808_LU_COUNT, addrCount);
   for (int idx = 0; idx < minorDeviceCount; idx++) {
-    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dNameRoot, idx);
+    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dName, idx);
     minorDevices[idx].setLogicalUnitName(buf);
     minorDevices[idx].setDeviceAddress(baseAddr + idx);
     minorDevices[idx].setOpen(false);
   }
 }
 
-MCP9808Driver::MCP9808Driver(char *dNameRoot, int deviceAddresses[], int addrCount) :
-  DeviceDriver(dNameRoot) {
+MCP9808Driver::MCP9808Driver(char *dName, int deviceAddresses[], int addrCount) :
+  DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
   minorDeviceCount = min(MAX_MCP9808_LU_COUNT, addrCount);
   for (int idx = 0; idx < minorDeviceCount; idx++) {
-    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dNameRoot, idx);
+    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dName, idx);
     minorDevices[idx].setLogicalUnitName(buf);
     minorDevices[idx].setDeviceAddress(deviceAddresses[idx]);
     minorDevices[idx].setOpen(false);

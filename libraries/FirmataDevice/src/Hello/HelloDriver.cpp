@@ -14,12 +14,12 @@ enum class HelloRegister {
 
 //---------------------------------------------------------------------------
 
-HelloDriver::HelloDriver(char *dNameRoot, int count) :
-  DeviceDriver(dNameRoot) {
+HelloDriver::HelloDriver(char *dName, int count) :
+  DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
   minorDeviceCount = min(MAX_HELLO_LU_COUNT, count);
   for (int idx = 0; idx < minorDeviceCount; idx++) {
-    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dNameRoot, idx);
+    snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dName, idx);
     minorDevices[idx].setLogicalUnitName(buf);
     minorDevices[idx].setWho("World.");
     minorDevices[idx].setOpen(false);
@@ -31,10 +31,8 @@ HelloDriver::HelloDriver(char *dNameRoot, int count) :
 int HelloDriver::open(char *name, int flags) {
   uint8_t theRegister;
 
-
   int handle;
   for (handle = 0; handle < minorDeviceCount; handle++) {
-    Firmata.sendString("Marker 1 from HelloDriver::HelloDriver.");
     Firmata.sendString(minorDevices[handle].getLogicalUnitName());
     if (strcmp(minorDevices[handle].getLogicalUnitName(), name) == 0) {
       break;

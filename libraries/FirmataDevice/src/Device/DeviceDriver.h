@@ -33,7 +33,7 @@ class DeviceDriver
     virtual int close(int handle) = 0;
 
   protected:
-    char deviceNameRoot[MAX_DEVICE_NAME_LENGTH+1];
+    char deviceName[MAX_DEVICE_NAME_LENGTH+1];
     int minorDeviceCount;
 };
 
