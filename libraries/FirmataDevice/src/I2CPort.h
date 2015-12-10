@@ -22,6 +22,7 @@ public:
 
 private:
 
+// This 'enabled' flag is a count of the number of unpaired enable calls.
 // Calls to enable/disable must be paired if user expects to actually
 // disable I2C again at some point after it has been enabled.
 
