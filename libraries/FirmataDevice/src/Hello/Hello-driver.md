@@ -1,18 +1,18 @@
-##HelloWorld Device Driver
+##Hello Device Driver
 
 Implemented as part of the Device Driver Feature proposed for Firmata 2.6
 
 ##Introduction
 
-This HelloWorld Device Driver provides a simple example of controlling functions  on a remote Firmata server from a client-side application.
+This Hello Device Driver provides a simple example of controlling functions  on a remote Firmata server from a client-side application.
 
 ###Device Driver API
 
 Note that the general Device Driver API is intended to be implemented on both the client side (application host) and on the server side (Firmata micro).  Client-side applications and server-side device drivers always use this API and never compose Firmata messages themselves, instead they rely on Firmata to do that.
 
-If the implementer of a device driver has chosen to implement the main control code on the client, then the client device driver uses  Firmata capabilities and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received.  
+If the implementer of a device driver has chosen to implement the main control code on the client, then the client device driver uses  Firmata Features and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received.  
 
-If the implementer has chosen to implement the main control code on the server, then the client device driver acts as a proxy for the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the component(s) using local capabilities.  In this scenario, the server side Firmata receives the same calls and parameters as were provided to the proxy on the client.
+If the implementer has chosen to implement the main control code on the server, then the client device driver acts as a proxy for the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the component(s) using local capabilities.  In this scenario, the server side device driver receives the same calls and parameters as were provided to the proxy on the client.
 
 ###Method Prototypes
 
@@ -20,9 +20,9 @@ The method prototypes shown for each message are expected to be the primary inte
 
 See device-driver.md for more discussion of how the queries and responses are encoded by Firmata and where the parameter values are placed in each message type.
 
-##HelloWorld Device Driver Methods
+##Hello Device Driver Methods
 
-###HelloWorld - Open
+###Hello - Open
 
 By default, this device driver recognizes names beginning with "Hello", but other prefixes can be specified when the device driver is initialized.
 
@@ -35,11 +35,11 @@ By default, this device driver recognizes names beginning with "Hello", but othe
 **return** The value that is used in future calls to indicate the device driver and specific device being addressed.  On error, returns -1.
 
 ---
-###HelloWorld - Status
+###Hello - Status
 	int status(int handle, int reg, int count, void *buf)
 
 **param** `handle` The device driver selector value returned by Open in a previous call.  
-**param** `reg` The status register address at which to start reading.  
+**param** `reg` The status register address at which to start reading.  This value does not necessarily name a real register, but is used by the device driver to identify the desired status information.  
 **param** `count` The number of bytes to read.  
 **param** `buf` Pointer to the buffer to receive the data read.  Must be large enough to hold `count` bytes.  
 
@@ -47,11 +47,11 @@ By default, this device driver recognizes names beginning with "Hello", but othe
 not open, the handle is invalid, etc.)
 
 ---
-###HelloWorld - Control
+###Hello - Control
 	int control(int handle, int reg, int count, void *buf)
 
 **param** `handle` The device driver selector value returned by Open in a previous call.  
-**param** `reg` The control register address at which to start writing.  
+**param** `reg` The control register address at which to start writing.   This value does not necessarily name a real register, but is used by the device driver to identify the desired control function.  
 **param** `count` The number of bytes to write.  
 **param** `buf` Pointer to the buffer containing the data to write.  
 
@@ -59,7 +59,7 @@ not open, the handle is invalid, etc.)
 
 
 ---
-###HelloWorld - Read
+###Hello - Read
 	int read(int handle, int count, void *buf)
 
 **param** `handle` The device driver selector value returned by Open in a previous call.  
@@ -72,7 +72,7 @@ not open, the handle is invalid, etc.)
 
 
 ---
-###HelloWorld - Write
+###Hello - Write
 	int write(int handle, int count, void *buf)
 
 **param** `handle` The device driver selector value returned by Open in a previous
@@ -84,7 +84,7 @@ call.
 
 
 ---
-###HelloWorld - Close
+###Hello - Close
 	int close(int handle)
 
 **param** `handle` The device driver selector value returned by Open in a previous
@@ -92,7 +92,7 @@ call.  The selected device driver is responsible for deciding what actions if an
 
 **return** On success, returns zero. On error, -1 is returned.
 
-##HelloWorld Library Methods
+##Hello Library Methods
 
 ###Library - readTempC
     double readTempC(int handle)
