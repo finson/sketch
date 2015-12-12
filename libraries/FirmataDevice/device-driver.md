@@ -1,18 +1,19 @@
-byte ##Firmata Feature: Device Driver
+##Firmata Feature: Device Driver
 
 Proposed for addition in Firmata 2.6.
 
-##Introduction
-
 The purpose of this Feature is to facilitate arbitrary additions to Firmata capabilities without requiring a central registration or causing frequent command code conflicts.  The Feature is implemented with a pair of new Sysex commands and the concept of a DeviceDriver abstract class with well defined method signatures.  In effect, this Feature uses Firmata as a remote procedure call mechanism.
 
+##Introduction
+
 Device Drivers are designed to control devices from a client-side application running remotely from a Firmata server to which the devices are connected.
+###Device Driver API
 
-Note especially that the API defined here is to be implemented on both the client side (application host) and on the server side (Firmata micro).  The client-side application always uses this API and never composes Firmata messages itself, instead it relies on the client side device driver to do that.
+Note that the general Device Driver API is intended to be implemented on both the client side (application host) and on the server side (Firmata micro).  Client-side applications and server-side device drivers always use this API and never compose Firmata messages themselves, instead they rely on Firmata to do that.
 
-If the implementer of the device driver has chosen to implement the main control code on the client, then the client device driver uses the Firmata I2C Feature (or other low level protocol) and its associated Sysex commands to control the sensor directly and according to the data sheet.  In this scenario, the server side Firmata responds to the protocol commands as received.  
+If the implementer of a device driver has chosen to implement the main control code on the client, then the client device driver uses  Firmata Features and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received.  
 
-If the implementer has chosen to implement the main control code on the server, then the client device driver acts as a proxy for the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the device using local protocol capabilities.  In this scenario, the server side Firmata receives the same calls and parameters as were provided to the proxy on the client.
+If the implementer has chosen to implement the main control code on the server, then the client device driver acts as a proxy for the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the component(s) using local capabilities.  In this scenario, the server side device driver receives the same calls and parameters as were provided to the proxy on the client.
 
 ###Firmata Messages
 
@@ -159,26 +160,24 @@ From Firmata on the micro (server) to Firmata client.
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_QUERY (0x30)
-	2  0x01 (STATUS Lo7)
-	3  0x00 (STATUS Hi7)
-	4  handle (LSB)
-	5  handle (MSB)
-	6  count (LSB)
-	7  count (MSB) 
-	8  END_SYSEX (0XF7)
+	2  0x01 (STATUS)
+	3  handle (LSB)
+	4  handle (MSB)
+	5  count (LSB)
+	6  count (MSB) 
+	7  END_SYSEX (0XF7)
 
 ####Response
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_RESPONSE (0x31)
-	2  0x01 (STATUS Lo7)
-	3  0x00 (STATUS Hi7)
-	4  handle (LSB)
-	5  handle (MSB) 
-	6  count (LSB)
-	7  count (MSB) 
-	8  status byte 0
-	9  status byte 1
+	2  0x01 (STATUS)
+	3  handle (LSB)
+	4  handle (MSB) 
+	5  count (LSB)
+	6  count (MSB) 
+	7  status byte 0
+	8  status byte 1
 	...
 	n  END_SYSEX (0XF7)
 
@@ -197,21 +196,19 @@ From Firmata on the micro (server) to Firmata client.
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_QUERY (0x30)
-	2  0x02 (CONTROL Lo7)
-	3  0x00 (CONTROL Hi7)
-	4  handle (LSB)
-	5  handle (MSB) 
-	6  END_SYSEX (0XF7)
+	2  0x02 (CONTROL)
+	3  handle (LSB)
+	4  handle (MSB) 
+	5  END_SYSEX (0XF7)
 
 ####Response
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_RESPONSE (0x31)
-	2  0x02 (CONTROL Lo7)
-	3  0x00 (CONTROL Hi7)
-	4  count (LSB)
-	5  count (MSB) 
-	6  END_SYSEX (0XF7)
+	2  0x02 (CONTROL)
+	3  count (LSB)
+	4  count (MSB) 
+	5  END_SYSEX (0XF7)
 
 ---
 ###Device Driver Query - Read
@@ -219,7 +216,7 @@ From Firmata on the micro (server) to Firmata client.
 
 **param** `handle` The device driver selector value returned by Open in a previous
 call.  
-**param** `count` The number of bytes to read.
+**param** `count` The number of bytes to read.  
 **param** `buf` Pointer to the buffer to receive the data read.  Must be large enough to hold `count` bytes.  
 
 **return** The number of bytes just read, or -1 if there was an error (device was 
@@ -229,26 +226,24 @@ not open, the handle is invalid, etc.)
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_QUERY (0x30)
-	2  0x03 (READ Lo7)
-	3  0x00 (READ Hi7)
-	4  handle (LSB)
-	5  handle (MSB)
-	6  count (LSB)
-	7  count (MSB) 
-	8  END_SYSEX (0XF7)
+	2  0x03 (READ)
+	3  handle (LSB)
+	4  handle (MSB)
+	5  count (LSB)
+	6  count (MSB) 
+	7  END_SYSEX (0XF7)
 
 ####Response
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_RESPONSE (0x31)
-	2  0x03 (READ Lo7)
-	3  0x00 (READ Hi7)
-	4  handle (LSB)
-	5  handle (MSB) 
-	6  count (LSB)
-	7  count (MSB) 
-	8  input byte 0
-	9  input byte 1
+	2  0x03 (READ)
+	3  handle (LSB)
+	4  handle (MSB) 
+	5  count (LSB)
+	6  count (MSB) 
+	7  input byte 0
+	8  input byte 1
 	...
 	n  END_SYSEX (0XF7)
 
@@ -270,21 +265,19 @@ call.
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_QUERY (0x30)
-	2  0x04 (READ Lo7)
-	3  0x00 (READ Hi7)
-	4  handle (LSB)
-	5  handle (MSB) 
-	6  END_SYSEX (0XF7)
+	2  0x04 (WRITE)
+	3  handle (LSB)
+	4  handle (MSB) 
+	5  END_SYSEX (0XF7)
 
 ####Response
 
 	0  START_SYSEX (0xF0)
 	1  DEVICE_RESPONSE (0x31)
-	2  0x04 (READ Lo7)
-	3  0x00 (READ Hi7)
-	4  count (LSB)
-	5  count (MSB) 
-	6  END_SYSEX (0XF7)
+	2  0x04 (WRITE)
+	3  count (LSB)
+	4  count (MSB) 
+	5  END_SYSEX (0XF7)
 
 ---
 ###Device Driver Query - Close

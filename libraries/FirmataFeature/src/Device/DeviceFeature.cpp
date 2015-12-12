@@ -10,7 +10,7 @@ extern DeviceDriver *selectedDevices[];
 
 DeviceFeature::DeviceFeature(char *dName, int count) : DeviceDriver(dName), majorDeviceCount(0)
 {
-char buf[MAX_DEVICE_NAME_LENGTH+1];
+  char buf[MAX_DEVICE_NAME_LENGTH + 1];
 
 // Copy the list of addresses of installed DeviceDrivers from SelectedFeatures.h
 
@@ -25,13 +25,13 @@ char buf[MAX_DEVICE_NAME_LENGTH+1];
     selectionIndex += 1;
   }
 
-// Initialize the available DeviceFeature pseudo-devices
+// Initialize the available DeviceFeature logical units
 
-  minorDeviceCount = min(MAX_MGR_LU_COUNT, count);
-  for (int idx = 0; idx < minorDeviceCount; idx++) {
-    snprintf(buf, MAX_DEVICE_NAME_LENGTH+1, "%s:%1d", dName, idx);
-    minorDevices[idx].setLogicalUnitName(buf);
-    minorDevices[idx].setOpen(false);
+  logicalUnitCount = min(MAX_MGR_LU_COUNT, count);
+  for (int idx = 0; idx < logicalUnitCount; idx++) {
+    snprintf(buf, MAX_DEVICE_NAME_LENGTH + 1, "%s:%1d", dName, idx);
+    logicalUnits[idx].setLogicalUnitName(buf);
+    logicalUnits[idx].setOpen(false);
   }
 }
 
@@ -69,7 +69,9 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
     return true;
   }
 
-  //base64_decode(msgBody, (char *)(argv + 3), inputLength);
+  if (inputLength > 0) {
+    base64_decode((char *)msgBody, (char *)(argv + 3), inputLength);
+  }
 
   result = dispatchDeviceAction(action, argv[1], argv[2], msgBody);
   sendDeviceResponse(action, result);
@@ -81,11 +83,12 @@ int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *bod
   int minorHandle;
   int result;
   int flags = (major << 8) | minor;
+  int count;
 
   switch (act) {
   case DD_OPEN:
     for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-      minorHandle = majorDevices[deviceIndex]->open("Hello:0", flags);//TODO body instead of hello
+      minorHandle = majorDevices[deviceIndex]->open((char *)body, flags);
       if (minorHandle != -1) break;
     }
     result = (minorHandle == -1) ? -1 : (((deviceIndex & 0x7F) << 8) | (minorHandle & 0x7F));
@@ -95,10 +98,11 @@ int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *bod
     result = -1;
     break;
   case DD_CONTROL:
-    result = majorDevices[major]->control(minor,body[0],0,body);
+    result = majorDevices[major]->control(minor, body[0], 0, body);
     break;
   case DD_READ:
-    result = -1;
+    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    result = majorDevices[major]->read(minor,count,body);
     break;
   case DD_WRITE:
     result = -1;
@@ -111,6 +115,8 @@ int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *bod
   }
   return result;
 }
+
+------> add the body of the message to this too.
 
 void DeviceFeature::sendDeviceResponse(int action, int status) {
   Firmata.write(START_SYSEX);
@@ -131,24 +137,24 @@ int DeviceFeature::open(char *name, int flags) {
   uint8_t theRegister;
 
   int minorHandle;
-  for (minorHandle = 0; minorHandle < minorDeviceCount; minorHandle++) {
-    if (strcmp(minorDevices[minorHandle].getLogicalUnitName(), name) == 0) {
+  for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
+    if (strcmp(logicalUnits[minorHandle].getLogicalUnitName(), name) == 0) {
       break;
     }
   }
-  if (minorHandle == minorDeviceCount) {
+  if (minorHandle == logicalUnitCount) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
     return -1;
   }
 
-  LogicalUnitInfo currentDevice = minorDevices[minorHandle];
-  if (currentDevice.isOpen()) {
+  LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
+  if (currentDevice->isOpen()) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
     return -1;
   }
-  currentDevice.setOpen(true);
+  currentDevice->setOpen(true);
   return minorHandle;
 }
 
@@ -156,14 +162,14 @@ int DeviceFeature::status(int handle, int reg, int count, byte *buf) {}
 
 int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
   int result;
-  LogicalUnitInfo currentDevice = minorDevices[handle & 0x7F];
-  if (!currentDevice.isOpen()) {
+  LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
+  if (!currentDevice->isOpen()) {
     return -1;
   }
   switch (reg) {
   case DDC_INIT:
     // setSelectedDevices();
-    result = max(0,count);
+    result = max(0, count);
     break;
   default:
     result = -1;
@@ -177,9 +183,9 @@ int DeviceFeature::read(int handle, int count, byte *buf) {}
 int DeviceFeature::write(int handle, int count, byte *buf) {}
 
 int DeviceFeature::close(int handle) {
-  LogicalUnitInfo currentDevice = minorDevices[handle & 0x7F];
-  if (currentDevice.isOpen()) {
-    currentDevice.setOpen(false);
+  LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
+  if (currentDevice->isOpen()) {
+    currentDevice->setOpen(false);
     return 0;
   } else {
     return -1;

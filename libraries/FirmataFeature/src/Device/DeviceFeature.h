@@ -10,7 +10,6 @@
 #define MAX_MGR_LU_COUNT 1
 
 #define MAX_DEVICE_QUERY_BODY_LENGTH 128
-#define DDC_INIT 0
 
 class DeviceFeature : public FirmataFeature, public DeviceDriver {
 public:
@@ -43,7 +42,7 @@ private:
 
     void sendDeviceResponse(int action, int status);
 
-    LogicalUnitInfo minorDevices[MAX_MGR_LU_COUNT];
+    LogicalUnitInfo logicalUnits[MAX_MGR_LU_COUNT];
 };
 
 #endif

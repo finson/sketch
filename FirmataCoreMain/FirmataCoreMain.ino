@@ -50,6 +50,8 @@ Firmata.reset();
 
 FirmataExt.addSelectedFeatures();
 
+Firmata.sendString("Setup function complete.");
+
 }
 
 /*==============================================================================

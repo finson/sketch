@@ -1,4 +1,4 @@
-##Hello Device Driver
+##Device Driver Example - Hello
 
 Implemented as part of the Device Driver Feature proposed for Firmata 2.6
 
@@ -6,17 +6,10 @@ Implemented as part of the Device Driver Feature proposed for Firmata 2.6
 
 This Hello Device Driver provides a simple example of controlling functions  on a remote Firmata server from a client-side application.
 
-###Device Driver API
-
-Note that the general Device Driver API is intended to be implemented on both the client side (application host) and on the server side (Firmata micro).  Client-side applications and server-side device drivers always use this API and never compose Firmata messages themselves, instead they rely on Firmata to do that.
-
-If the implementer of a device driver has chosen to implement the main control code on the client, then the client device driver uses  Firmata Features and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received.  
-
-If the implementer has chosen to implement the main control code on the server, then the client device driver acts as a proxy for the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the component(s) using local capabilities.  In this scenario, the server side device driver receives the same calls and parameters as were provided to the proxy on the client.
 
 ###Method Prototypes
 
-The method prototypes shown for each message are expected to be the primary interface for all Device Drivers.  The type identifier `int` is used to indicate a signed integer value of at least 16 bits.  Only the low order 16 bits (the two low order bytes) are transmitted for these values by Firmata.
+The method prototypes shown below are the primary interface for the Device Driver.  The type identifier `int` is used to indicate a signed integer value of at least 16 bits.  Only the two low order bytes are transmitted for these values by Firmata.
 
 See device-driver.md for more discussion of how the queries and responses are encoded by Firmata and where the parameter values are placed in each message type.
 
@@ -30,6 +23,7 @@ By default, this device driver recognizes names beginning with "Hello", but othe
     int open(char* name, int flags)
 
 **param** `name` Name of the device to open.  UTF-8 encoded.  
+
 **param** `flags` Flags associated with the open, if any.
 
 **return** The value that is used in future calls to indicate the device driver and specific device being addressed.  On error, returns -1.
@@ -92,16 +86,3 @@ call.  The selected device driver is responsible for deciding what actions if an
 
 **return** On success, returns zero. On error, -1 is returned.
 
-##Hello Library Methods
-
-###Library - readTempC
-    double readTempC(int handle)
-
-**param** `handle` The device driver selector value returned by Open in a previous
-call.  
-
-**return** Reads the 16-bit ambient temperature register and returns the Centigrade temperature as a floating point value.
-
-**throws** Throws a `DeviceException` in the event of an error while reading the device.
-
----
