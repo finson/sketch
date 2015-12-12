@@ -47,7 +47,7 @@ public:
         char who[MAX_HELLO_TEXT_LENGTH];
     };
 
-    HelloLUI minorDevices[MAX_HELLO_LU_COUNT];
+    HelloLUI logicalUnits[MAX_HELLO_LU_COUNT];
 };
 
 #endif

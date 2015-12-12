@@ -3,7 +3,7 @@
 
 DeviceDriver::DeviceDriver(const char *nameRoot) {
   strlcpy(deviceName,nameRoot,(MAX_DEVICE_NAME_LENGTH+1));
-  minorDeviceCount = 0;
+  logicalUnitCount = 0;
 };
 
 

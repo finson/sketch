@@ -48,7 +48,7 @@ public:
         int theDeviceAddress;
     };
 
-    MCP9808LUI minorDevices[MAX_MCP9808_LU_COUNT];
+    MCP9808LUI logicalUnits[MAX_MCP9808_LU_COUNT];
 
 };
 

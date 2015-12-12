@@ -13,6 +13,10 @@
 #define  DD_WRITE   0x04
 #define  DD_CLOSE   0x05
 
+#define DDO_FORCE_OPEN 0x01
+
+#define DDC_INIT 0
+
 class DeviceFeature;
 
 extern DeviceFeature deviceManager;
@@ -34,7 +38,7 @@ class DeviceDriver
 
   protected:
     char deviceName[MAX_DEVICE_NAME_LENGTH+1];
-    int minorDeviceCount;
+    int logicalUnitCount;
 };
 
 #endif

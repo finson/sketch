@@ -18,24 +18,24 @@ enum class MCP9808Register {
 MCP9808Driver::MCP9808Driver(char *dName, int baseAddr, int addrCount) :
   DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
-  minorDeviceCount = min(MAX_MCP9808_LU_COUNT, addrCount);
-  for (int idx = 0; idx < minorDeviceCount; idx++) {
+  logicalUnitCount = min(MAX_MCP9808_LU_COUNT, addrCount);
+  for (int idx = 0; idx < logicalUnitCount; idx++) {
     snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dName, idx);
-    minorDevices[idx].setLogicalUnitName(buf);
-    minorDevices[idx].setDeviceAddress(baseAddr + idx);
-    minorDevices[idx].setOpen(false);
+    logicalUnits[idx].setLogicalUnitName(buf);
+    logicalUnits[idx].setDeviceAddress(baseAddr + idx);
+    logicalUnits[idx].setOpen(false);
   }
 }
 
 MCP9808Driver::MCP9808Driver(char *dName, int deviceAddresses[], int addrCount) :
   DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
-  minorDeviceCount = min(MAX_MCP9808_LU_COUNT, addrCount);
-  for (int idx = 0; idx < minorDeviceCount; idx++) {
+  logicalUnitCount = min(MAX_MCP9808_LU_COUNT, addrCount);
+  for (int idx = 0; idx < logicalUnitCount; idx++) {
     snprintf(buf, MAX_LU_NAME_LENGTH+1, "%s:%1d", dName, idx);
-    minorDevices[idx].setLogicalUnitName(buf);
-    minorDevices[idx].setDeviceAddress(deviceAddresses[idx]);
-    minorDevices[idx].setOpen(false);
+    logicalUnits[idx].setLogicalUnitName(buf);
+    logicalUnits[idx].setDeviceAddress(deviceAddresses[idx]);
+    logicalUnits[idx].setOpen(false);
   }
 }
 
@@ -44,20 +44,25 @@ MCP9808Driver::MCP9808Driver(char *dName, int deviceAddresses[], int addrCount) 
 int MCP9808Driver::open(char *name, int flags) {
   uint8_t theRegister;
 
-  int handle;
-  for (handle = 0; handle < minorDeviceCount; handle++) {
-    if (strcmp(minorDevices[handle].getLogicalUnitName(), name) == 0) {
+  int lun;
+  for (lun = 0; lun < logicalUnitCount; lun++) {
+    if (strcmp(logicalUnits[lun].getLogicalUnitName(), name) == 0) {
       break;
     }
   }
-  if (handle == minorDeviceCount) {
+  if (lun == logicalUnitCount) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
     return -1;
   }
 
-  MCP9808LUI currentDevice = minorDevices[handle];
-  if (currentDevice.isOpen()) {
+  MCP9808LUI *currentDevice = &logicalUnits[lun];
+
+  if (flags & DDO_FORCE_OPEN != 0) {
+    currentDevice->setOpen(false);
+  }
+
+  if (currentDevice->isOpen()) {
     // throw new DeviceException(
     //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
     return -1;
@@ -65,7 +70,7 @@ int MCP9808Driver::open(char *name, int flags) {
 
   I2CPort.enableI2CPins();
 
-  int address = currentDevice.getDeviceAddress();
+  int address = currentDevice->getDeviceAddress();
   theRegister = static_cast<uint8_t>(MCP9808Register::MANUF_ID);
   if (I2CPort.read16(address, theRegister) != 0x0054) {
     I2CPort.disableI2CPins();
@@ -78,8 +83,8 @@ int MCP9808Driver::open(char *name, int flags) {
     return -1;
   }
 
-  currentDevice.setOpen(true);
-  return handle;
+  currentDevice->setOpen(true);
+  return lun;
 }
 
 int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
@@ -97,10 +102,10 @@ int MCP9808Driver::write(int handle, int count, byte *buf) {
   return -1;
 }
 
-int MCP9808Driver::close(int handle) {
-  MCP9808LUI currentDevice = minorDevices[handle];
-  if (currentDevice.isOpen()) {
-    currentDevice.setOpen(false);
+int MCP9808Driver::close(int lun) {
+  MCP9808LUI *currentDevice = &logicalUnits[lun];
+  if (currentDevice->isOpen()) {
+    currentDevice->setOpen(false);
     I2CPort.disableI2CPins();
     return 0;
   } else {
