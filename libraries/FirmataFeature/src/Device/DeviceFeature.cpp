@@ -54,27 +54,33 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
 
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
+  byte dpv[MAX_DPV_LENGTH];  // decoded parameter vector
   int result;
-  byte msgBody[MAX_DEVICE_QUERY_BODY_LENGTH + 1];
 
   if (command != DEVICE_QUERY) {
     return false;
   }
 
+  // The first three bytes of argv are: action, handle-low, handle-high.  They
+  // are all constrained to 7-bit values and are not encoded.  The bytes that
+  // follow, if any, are the parameter vector. The parameter vector is encoded
+  // with base-64 in the sysex message body during transmission to and from this
+  // Firmata server.
+
   int action = argv[0];
-  int inputLength = argc - 3;
-  int outputLength = base64_dec_len((char *)(argv + 3), inputLength);
-  if (outputLength > MAX_DEVICE_QUERY_BODY_LENGTH) {
+  int dpc = base64_dec_len((char *)(argv + 3), argc-3);
+  if (dpc > MAX_DPV_LENGTH) {
     sendDeviceResponse(action, -1);
     return true;
   }
 
-  if (inputLength > 0) {
-    base64_decode((char *)msgBody, (char *)(argv + 3), inputLength);
+  if (dpc > 0) {
+    dpc = base64_decode((char *)dpv, (char *)(argv + 3), argc-3);
   }
 
-  result = dispatchDeviceAction(action, argv[1], argv[2], msgBody);
-  sendDeviceResponse(action, result);
+  result = dispatchDeviceAction(action, argv[1], argv[2], dpc, dpv);
+
+  sendDeviceResponse(action, result, dpv);
   return true;
 }
 
@@ -118,7 +124,9 @@ int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *bod
 
 ------> add the body of the message to this too.
 
-void DeviceFeature::sendDeviceResponse(int action, int status) {
+void DeviceFeature::sendDeviceResponse(int action, int status, byte *dpv) {
+  byte encodeBuffer[((MAX_DPV_LENGTH+2)/3)*4];
+
   Firmata.write(START_SYSEX);
   Firmata.write(DEVICE_RESPONSE);
   Firmata.write(action & 0x7F);

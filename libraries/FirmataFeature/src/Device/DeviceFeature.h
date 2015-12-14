@@ -9,7 +9,7 @@
 #define MAX_MGR_DEVICE_COUNT 10
 #define MAX_MGR_LU_COUNT 1
 
-#define MAX_DEVICE_QUERY_BODY_LENGTH 128
+#define MAX_DPV_LENGTH 128  // Device Query parameter vector (not encoded)
 
 class DeviceFeature : public FirmataFeature, public DeviceDriver {
 public:
@@ -24,7 +24,7 @@ public:
 
     // For direct (non-Sysex) use by DeviceDrivers and other local objects
 
-    int dispatchDeviceAction(int act, int minor, int major, byte *body);
+    int dispatchDeviceAction(int act, int minor, int major, byte *pv);
 
     // Device Driver methods
 
