@@ -54,48 +54,56 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
 
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
-  byte dpv[MAX_DPV_LENGTH];  // decoded parameter vector
+  byte dpb[MAX_DPB_LENGTH];  // decoded parameter block
   int result;
 
   if (command != DEVICE_QUERY) {
     return false;
   }
 
-  // The first three bytes of argv are: action, handle-low, handle-high.  They
-  // are all constrained to 7-bit values and are not encoded.  The bytes that
-  // follow, if any, are the parameter vector. The parameter vector is encoded
+  // The first four bytes of argv are: action, reserved, handle-low, handle-high.
+  // They are all constrained to 7-bit values and are not encoded.  The bytes
+  // that follow, if any, are the parameter block. The parameter block is encoded
   // with base-64 in the sysex message body during transmission to and from this
   // Firmata server.
 
   int action = argv[0];
-  int dpc = base64_dec_len((char *)(argv + 3), argc-3);
-  if (dpc > MAX_DPV_LENGTH) {
-    sendDeviceResponse(action, -1);
+  int dpc = base64_dec_len((char *)(argv + 4), argc-4);
+  if (dpc > MAX_DPB_LENGTH) {
+    sendDeviceResponse(action, EMSGSIZE);
     return true;
   }
 
   if (dpc > 0) {
-    dpc = base64_decode((char *)dpv, (char *)(argv + 3), argc-3);
+    dpc = base64_decode((char *)dpb, (char *)(argv + 4), argc-4);
   }
 
-  result = dispatchDeviceAction(action, argv[1], argv[2], dpc, dpv);
+  result = dispatchDeviceAction(action, argv[2], argv[3], dpc, dpb);
 
-  sendDeviceResponse(action, result, dpv);
+  sendDeviceResponse(action, result, dpb);
   return true;
 }
 
-int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *body) {
+int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, int count, byte *body) {
+  int flags;
   int deviceIndex;
-  int minorHandle;
+  int status;
+  int handle;
+
   int result;
-  int flags = (major << 8) | minor;
   int count;
 
   switch (act) {
   case DD_OPEN:
+    flags = (major << 8) | minor;
     for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-      minorHandle = majorDevices[deviceIndex]->open((char *)body, flags);
-      if (minorHandle != -1) break;
+      status = majorDevices[deviceIndex]->open(&handle, (char *)body, flags);
+      if (status == ESUCCESS) break;
+      if (status == ENXIO || status == ENODEV) {
+        continue;
+      } else {
+        return status;
+      }
     }
     result = (minorHandle == -1) ? -1 : (((deviceIndex & 0x7F) << 8) | (minorHandle & 0x7F));
     break;
@@ -124,7 +132,7 @@ int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, byte *bod
 
 ------> add the body of the message to this too.
 
-void DeviceFeature::sendDeviceResponse(int action, int status, byte *dpv) {
+void DeviceFeature::sendDeviceResponse(int action, int status, byte *dpb) {
   byte encodeBuffer[((MAX_DPV_LENGTH+2)/3)*4];
 
   Firmata.write(START_SYSEX);

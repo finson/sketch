@@ -3,6 +3,7 @@
 
 #include <arduino.h>
 #include "LogicalUnitInfo.h"
+#include "DeviceError.h"
 
 #define MAX_DEVICE_NAME_LENGTH (MAX_LU_NAME_LENGTH-3)
 

@@ -9,7 +9,7 @@
 #define MAX_MGR_DEVICE_COUNT 10
 #define MAX_MGR_LU_COUNT 1
 
-#define MAX_DPV_LENGTH 128  // Device Query parameter vector (not encoded)
+#define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
 
 class DeviceFeature : public FirmataFeature, public DeviceDriver {
 public:
@@ -37,12 +37,12 @@ public:
 
 private:
 
-    DeviceDriver *majorDevices[MAX_MGR_DEVICE_COUNT+1];
     int majorDeviceCount;
+    DeviceDriver *majorDevices[MAX_MGR_DEVICE_COUNT+1];
+    LogicalUnitInfo logicalUnits[MAX_MGR_LU_COUNT];
 
     void sendDeviceResponse(int action, int status);
 
-    LogicalUnitInfo logicalUnits[MAX_MGR_LU_COUNT];
 };
 
 #endif
