@@ -54,80 +54,94 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
 
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
-  byte dpb[MAX_DPB_LENGTH];  // decoded parameter block
-  int result;
+  byte dpBlock[MAX_DPB_LENGTH];  // decoded parameter block
 
   if (command != DEVICE_QUERY) {
     return false;
   }
 
-  // The first four bytes of argv are: action, reserved, handle-low, handle-high.
-  // They are all constrained to 7-bit values and are not encoded.  The bytes
-  // that follow, if any, are the parameter block. The parameter block is encoded
-  // with base-64 in the sysex message body during transmission to and from this
-  // Firmata server.
+  // The first four bytes of argv for DEVICE_QUERY messages are: action,
+  // reserved, handle-low, handle-high. They are all constrained to 7-bit
+  // values and are not encoded.  The bytes that follow, if any, are the
+  // parameter block. The parameter block is encoded with base-64 in the
+  // sysex message body during transmission to and from this Firmata
+  // server.
 
   int action = argv[0];
-  int dpc = base64_dec_len((char *)(argv + 4), argc-4);
-  if (dpc > MAX_DPB_LENGTH) {
+  int dpCount = base64_dec_len((char *)(argv + 4), argc-4);
+  if (dpCount > MAX_DPB_LENGTH) {
     sendDeviceResponse(action, EMSGSIZE);
     return true;
   }
 
-  if (dpc > 0) {
-    dpc = base64_decode((char *)dpb, (char *)(argv + 4), argc-4);
+  if (dpCount > 0) {
+    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 4), argc-4);
   }
 
-  result = dispatchDeviceAction(action, argv[2], argv[3], dpc, dpb);
+  int handle = (argv[3] << 8) | argv[2];
+  int status = dispatchDeviceAction(action, &handle, &dpCount, dpBlock);
 
-  sendDeviceResponse(action, result, dpb);
+  sendDeviceResponse(action, status, handle, dpCount, dpBlock);
   return true;
 }
 
-int DeviceFeature::dispatchDeviceAction(int act, int minor, int major, int count, byte *body) {
+int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount, byte *body) {
   int flags;
   int deviceIndex;
   int status;
-  int handle;
+  int unitHandle = (*handle & 0x7F);
+  int deviceHandle = ((*handle >> 8) & 0x7F);
 
-  int result;
-  int count;
-
-  switch (act) {
+  switch (action) {
   case DD_OPEN:
-    flags = (major << 8) | minor;
+    flags = *handle;
     for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-      status = majorDevices[deviceIndex]->open(&handle, (char *)body, flags);
+      status = majorDevices[deviceIndex]->open(&unitHandle, (char *)body, flags);
       if (status == ESUCCESS) break;
       if (status == ENXIO || status == ENODEV) {
         continue;
       } else {
-        return status;
+        break;
       }
     }
-    result = (minorHandle == -1) ? -1 : (((deviceIndex & 0x7F) << 8) | (minorHandle & 0x7F));
-    break;
+    *handle = (status == ESUCCESS) ? ((deviceIndex & 0x7F) << 8) | (unitHandle & 0x7F) : 0;
+    *bodyCount = 0;
+    return status;
+
   case DD_STATUS:
-    // use the handle to address the driver directly and capture response
-    result = -1;
-    break;
+    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    int reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
+    status = majorDevices[deviceHandle]->status(unitHandle,reg,count,body);
+    *bodyCount = (status == ESUCCESS) ? count : 0;
+    return status;
+
   case DD_CONTROL:
-    result = majorDevices[major]->control(minor, body[0], 0, body);
-    break;
+    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    int reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
+    status = majorDevices[major]->control(unitHandle, reg, count, body);
+    *bodyCount = 0;
+    return status;
+
   case DD_READ:
-    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    result = majorDevices[major]->read(minor,count,body);
-    break;
+    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    status = majorDevices[major]->read(unitHandle,count,body);
+    *bodyCount = (status == ESUCCESS) ? count : 0;
+    return status;
+
   case DD_WRITE:
-    result = -1;
-    break;
+    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    status = majorDevices[major]->read(unitHandle,count,body);
+    *bodyCount =  0;
+    return status;
+
   case DD_CLOSE:
-    result = (majorDevices[major]->close(minor) == -1) ? -1 : 0;
-    break;
+    status = majorDevices[major]->close(unitHandle);
+    *bodyCount =  0;
+    return status;
+
   default:
-    result = -1;
+    return ENOSYS;
   }
-  return result;
 }
 
 ------> add the body of the message to this too.

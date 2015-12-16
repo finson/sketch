@@ -57,7 +57,7 @@ To the extent practical, the error code values and meanings are taken directly f
 
 **param** (out) `hPtr` Handle pointer.  Address of the integer variable to receive the newly assigned handle value.  The handle is used in future calls to indicate the device driver and specific device being addressed.
 
-**param** (in) `name` Name of the logical unit to open.  UTF-8 encoded.
+**param** (in) `name` Name of the logical unit to open.  UTF-8 encoded, null terminated.
 
 **param** (in) `flags` Flags associated with the open.  Default: 0.
 
