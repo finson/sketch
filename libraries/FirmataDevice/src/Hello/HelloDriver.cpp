@@ -28,8 +28,7 @@ HelloDriver::HelloDriver(char *dName, int count) :
 
 //---------------------------------------------------------------------------
 
-int HelloDriver::open(char *name, int flags) {
-  uint8_t theRegister;
+int HelloDriver::open(int *handle, char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
@@ -40,42 +39,43 @@ int HelloDriver::open(char *name, int flags) {
   }
 
   if (minorHandle == logicalUnitCount) {
-    // throw new DeviceException(
-    //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
-    return -1;
+    return ENXIO;
   }
 
   LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
-  if (currentDevice->isOpen()) {
-    // throw new DeviceException(
-    //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
-    return -1;
+
+  if (flags & DDO_FORCE_OPEN != 0) {
+    currentDevice->setOpen(false);
   }
+  if (currentDevice->isOpen()) {
+    return EADDRINUSE;
+  }
+
+  *handle = minorHandle;
   currentDevice->setOpen(true);
-  return minorHandle;
+  return ESUCCESS;
 }
 
 int HelloDriver::status(int handle, int reg, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 
 int HelloDriver::control(int handle, int reg, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 
 int HelloDriver::read(int handle, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 int HelloDriver::write(int handle, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 
 int HelloDriver::close(int handle) {
   LogicalUnitInfo *currentDevice = &logicalUnits[(handle & 0x7F)];
   if (currentDevice->isOpen()) {
     currentDevice->setOpen(false);
-    return 0;
-  } else {
-    return -1;
   }
+  return ESUCCESS;
+
 }

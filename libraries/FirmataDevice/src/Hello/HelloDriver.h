@@ -12,16 +12,14 @@ enum class HelloRegister;
 class HelloDriver: public DeviceDriver
 {
 public:
+
     HelloDriver(char *dName = "Hello", int count = 1);
 
-    int open(char *name, int flags = 0);
-
+    int open(int *handle, char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
     int control(int handle, int reg, int count, byte *buf);
-
     int read(int handle, int count, byte *buf);
     int write(int handle, int count, byte *buf);
-
     int close(int handle);
 
     class HelloLUI: public LogicalUnitInfo {

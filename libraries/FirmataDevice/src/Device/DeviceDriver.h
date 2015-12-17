@@ -27,14 +27,11 @@ class DeviceDriver
   public:
     DeviceDriver(const char *nameRoot);
 
-    virtual int open(char *name, int flags) = 0;
-
+    virtual int open(int *handle, char *name, int flags) = 0;
     virtual int status(int handle, int reg, int count, byte *buf) = 0;
     virtual int control(int handle, int reg, int count, byte *buf) = 0;
-
     virtual int read(int handle, int count, byte *buf) = 0;
     virtual int write(int handle, int count, byte *buf) = 0;
-
     virtual int close(int handle) = 0;
 
   protected:

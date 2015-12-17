@@ -41,9 +41,8 @@ MCP9808Driver::MCP9808Driver(char *dName, int deviceAddresses[], int addrCount) 
 
 //---------------------------------------------------------------------------
 
-int MCP9808Driver::open(char *name, int flags) {
+int MCP9808Driver::open(int *handle, char *name, int flags) {
   uint8_t theRegister;
-
   int lun;
   for (lun = 0; lun < logicalUnitCount; lun++) {
     if (strcmp(logicalUnits[lun].getLogicalUnitName(), name) == 0) {
@@ -51,9 +50,7 @@ int MCP9808Driver::open(char *name, int flags) {
     }
   }
   if (lun == logicalUnitCount) {
-    // throw new DeviceException(
-    //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
-    return -1;
+    return ENXIO;
   }
 
   MCP9808LUI *currentDevice = &logicalUnits[lun];
@@ -63,9 +60,7 @@ int MCP9808Driver::open(char *name, int flags) {
   }
 
   if (currentDevice->isOpen()) {
-    // throw new DeviceException(
-    //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
-    return -1;
+    return EADDRINUSE;
   }
 
   I2CPort.enableI2CPins();
@@ -74,153 +69,64 @@ int MCP9808Driver::open(char *name, int flags) {
   theRegister = static_cast<uint8_t>(MCP9808Register::MANUF_ID);
   if (I2CPort.read16(address, theRegister) != 0x0054) {
     I2CPort.disableI2CPins();
-    return -1;
+    return ECONNREFUSED;
   }
 
   theRegister = static_cast<uint8_t>(MCP9808Register::DEVICE_ID);
   if (I2CPort.read16(address, theRegister) != 0x0400) {
     I2CPort.disableI2CPins();
-    return -1;
+    return ECONNREFUSED;
   }
 
   currentDevice->setOpen(true);
-  return lun;
+  *handle = lun;
+  return ESUCCESS;
 }
-
+/**
+ * Read a status register on the device. For the MCP9808, there are nine
+ * registers accessible.
+ */
 int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
-  return -1;
+  MCP9808LUI *currentDevice = &logicalUnits[handle & 0x7F];
+  if (!currentDevice->isOpen()) {
+    return ENOTCONN;
+  }
+  if (static_cast<MCP9808Register>(reg) == MCP9808Register::RESOLUTION && count != 1) {
+    return EMSGSIZE;
+  } else if (count != 2) {
+    return EMSGSIZE;
+  }
+
+  int address = currentDevice->getDeviceAddress();
+  if (count == 1) {
+    buf[0] = I2CPort.read8(address, reg);
+  } else {
+    int v = I2CPort.read16(address, reg);
+    buf[0] = (v >> 8) & 0x7F;
+    buf[1] = v & 0x7F;
+  }
+  return ESUCCESS;
 }
 
 int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 
 int MCP9808Driver::read(int handle, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 int MCP9808Driver::write(int handle, int count, byte *buf) {
-  return -1;
+  return ENOSYS;
 }
 
 int MCP9808Driver::close(int lun) {
-  MCP9808LUI *currentDevice = &logicalUnits[lun];
+  MCP9808LUI *currentDevice = &logicalUnits[lun & 0x7F];
   if (currentDevice->isOpen()) {
     currentDevice->setOpen(false);
     I2CPort.disableI2CPins();
-    return 0;
-  } else {
-    return -1;
   }
+  return ESUCCESS;
 }
-
-//     @Override
-//     public int open(String name, int flags) throws IOException {
-//         I2CDeviceInfo currentDevice;
-//         FirmataMessage request;
-//         FirmataMessage response;
-
-//         int handle = super.open(name);
-//         currentDevice = (I2CDeviceInfo) devices.get(handle);
-
-//         int mfgr = -1;
-//         int devid = -1;
-
-//         request = new I2CRequestRead(currentDevice.getDeviceAddress(), MCP9808Register.MANUF_ID.ordinal(), 2);
-//         logger.trace("Request mfgr: {}", request.toString());
-//         qOut.writeMessage(request);
-
-//         do {
-//             response = qIn.readMessage();
-//         } while (!I2CReply.class.isAssignableFrom(response.getClass()));
-
-//         I2CReply msg = (I2CReply) response;
-//         if (msg.getRegister() == MCP9808Register.MANUF_ID.ordinal()) {
-//             mfgr = (msg.getData(0) << 8) | (msg.getData(1));
-//         }
-
-//         request = new I2CRequestRead(currentDevice.getDeviceAddress(), MCP9808Register.DEVICE_ID.ordinal(), 2);
-//         qOut.writeMessage(request);
-
-//         do {
-//             response = qIn.readMessage();
-//         } while (!I2CReply.class.isAssignableFrom(response.getClass()));
-
-//         msg = (I2CReply) response;
-//         if (msg.getRegister() == MCP9808Register.DEVICE_ID.ordinal()) {
-//             devid = msg.getData(0);
-//         }
-
-//         logger.debug("Device manufacturer: expected: 0x0054, actual:{}, Device ID: expected: 0x04, actual: {}",
-//                 Integer.toHexString(mfgr), Integer.toHexString(devid));
-
-//         if ((mfgr != 0x0054) || (devid != 0x04)) {
-//             currentDevice.setOpen(false);
-//             throw new DeviceException("Could not open '" + name + "', " + DeviceStatus.UNKNOWN_DEVICE_TYPE);
-//         } else {
-//             currentDevice.setOpen(true);
-//         }
-//         logger.info("Device {} opened successfully.  Handle is {}.", name, handle);
-//         return handle;
-//     }
-
-//     /**
-//      * Read a status register on the device. For the MCP9808, there are nine registers accessible.
-//      *
-//      * @throws IOException
-//      *
-//      * @see ws.tuxi.lib.firmata.device.DeviceDriver#status(int, byte[], int)
-//      */
-//     @Override
-//     public int status(int handle, int reg, int count, byte[] buf) throws IOException {
-//         FirmataMessage query;
-//         FirmataMessage response;
-
-//         I2CDeviceInfo currentDevice = (I2CDeviceInfo) devices.get(handle);
-
-//         if (!currentDevice.isOpen()) {
-//             throw new DeviceException("Device must be open to read status: " + currentDevice.getDeviceName());
-//         }
-//         if (buf.length < count) {
-//             throw new DeviceException(
-//                     "Buffer length '" + buf.length + "' too small for requested count '" + count + "'.");
-//         }
-
-//         if (reg != MCP9808Register.RESOLUTION.ordinal() && count != 2) {
-//             throw new ProtocolException("MCP9808 register " + reg + " status message is 2 bytes long, not " + count
-//                     + " as requested in this call.");
-//         }
-
-//         if (reg == MCP9808Register.RESOLUTION.ordinal() && count != 1) {
-//             throw new ProtocolException(
-//                     "MCP9808 resolution status message is 1 byte long, not " + count + " as requested in this call.");
-//         }
-
-//         logger.trace("Status read. Handle: {}, reg: {}, count: {}, buf.length: {}", handle, reg, count, buf.length);
-
-//         query = new I2CRequestRead(currentDevice.getDeviceAddress(), reg, count);
-//         qOut.writeMessage(query);
-
-//         do {
-//             response = qIn.readMessage();
-//         } while (!I2CReply.class.isAssignableFrom(response.getClass()));
-
-//         I2CReply msg = (I2CReply) response;
-//         if (msg.getRegister() == reg) {
-//             if (count == 1) {
-//                 buf[0] = (byte) msg.getData(0);
-//                 logger.trace("Read 1 status byte: 0x{}", Integer.toHexString(msg.getData(0)));
-//             } else {
-//                 buf[0] = (byte) msg.getData(0);
-//                 buf[1] = (byte) msg.getData(1);
-//                 logger.trace("Read 2 status bytes: 0x{}, 0x{}", Integer.toHexString(msg.getData(0)),
-//                         Integer.toHexString(msg.getData(1)));
-//             }
-//         } else {
-//             throw new ProtocolException(
-//                     "Register in request (" + reg + ") does not match register in reply (" + msg.getRegister() + ").");
-//         }
-//         return count;
-//     }
 
 //     /**
 //      * @throws IOException

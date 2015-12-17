@@ -52,6 +52,13 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
+  // The first four bytes of argv for DEVICE_QUERY messages are: action,
+  // reserved, handle-low, handle-high. They are all constrained to 7-bit
+  // values and are not encoded.  The bytes that follow, if any, are the
+  // parameter block. The parameter block is encoded with base-64 in the
+  // sysex message body during transmission to and from this Firmata
+  // server.
+
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   byte dpBlock[MAX_DPB_LENGTH];  // decoded parameter block
@@ -60,17 +67,12 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
     return false;
   }
 
-  // The first four bytes of argv for DEVICE_QUERY messages are: action,
-  // reserved, handle-low, handle-high. They are all constrained to 7-bit
-  // values and are not encoded.  The bytes that follow, if any, are the
-  // parameter block. The parameter block is encoded with base-64 in the
-  // sysex message body during transmission to and from this Firmata
-  // server.
-
   int action = argv[0];
+  int handle = (argv[3] << 8) | argv[2];
+
   int dpCount = base64_dec_len((char *)(argv + 4), argc-4);
   if (dpCount > MAX_DPB_LENGTH) {
-    sendDeviceResponse(action, EMSGSIZE);
+    sendDeviceResponse(action, EMSGSIZE, handle);
     return true;
   }
 
@@ -78,7 +80,6 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
     dpCount = base64_decode((char *)dpBlock, (char *)(argv + 4), argc-4);
   }
 
-  int handle = (argv[3] << 8) | argv[2];
   int status = dispatchDeviceAction(action, &handle, &dpCount, dpBlock);
 
   sendDeviceResponse(action, status, handle, dpCount, dpBlock);
@@ -89,6 +90,8 @@ int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount,
   int flags;
   int deviceIndex;
   int status;
+  int count;
+  int reg;
   int unitHandle = (*handle & 0x7F);
   int deviceHandle = ((*handle >> 8) & 0x7F);
 
@@ -109,33 +112,33 @@ int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount,
     return status;
 
   case DD_STATUS:
-    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    int reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
+    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
     status = majorDevices[deviceHandle]->status(unitHandle,reg,count,body);
     *bodyCount = (status == ESUCCESS) ? count : 0;
     return status;
 
   case DD_CONTROL:
-    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    int reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
-    status = majorDevices[major]->control(unitHandle, reg, count, body);
+    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
+    status = majorDevices[deviceHandle]->control(unitHandle, reg, count, body);
     *bodyCount = 0;
     return status;
 
   case DD_READ:
-    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    status = majorDevices[major]->read(unitHandle,count,body);
+    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    status = majorDevices[deviceHandle]->read(unitHandle,count,body);
     *bodyCount = (status == ESUCCESS) ? count : 0;
     return status;
 
   case DD_WRITE:
-    int count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    status = majorDevices[major]->read(unitHandle,count,body);
+    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
+    status = majorDevices[deviceHandle]->read(unitHandle,count,body);
     *bodyCount =  0;
     return status;
 
   case DD_CLOSE:
-    status = majorDevices[major]->close(unitHandle);
+    status = majorDevices[deviceHandle]->close(unitHandle);
     *bodyCount =  0;
     return status;
 
@@ -144,16 +147,25 @@ int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount,
   }
 }
 
-------> add the body of the message to this too.
+void DeviceFeature::sendDeviceResponse(int action, int status, int handle) {
+  sendDeviceResponse(action,status,handle, 0 , 0);
+}
 
-void DeviceFeature::sendDeviceResponse(int action, int status, byte *dpb) {
-  byte encodeBuffer[((MAX_DPV_LENGTH+2)/3)*4];
+void DeviceFeature::sendDeviceResponse(int action, int status, int handle, int dpCount, byte *dpBlock) {
+  byte encodeBuffer[1+((MAX_DPB_LENGTH+2)/3)*4];
 
   Firmata.write(START_SYSEX);
   Firmata.write(DEVICE_RESPONSE);
   Firmata.write(action & 0x7F);
   Firmata.write(status & 0x7F);
-  Firmata.write((status >> 8) & 0x7F);
+  Firmata.write(handle & 0x7F);
+  Firmata.write((handle >> 8) & 0x7F);
+  if (dpCount > 0 && dpCount <= MAX_DPB_LENGTH) {
+    int epCount = base64_encode((char *)encodeBuffer, (char *)dpBlock, dpCount);
+    for (int idx=0; idx < epCount; idx++) {
+      Firmata.write(encodeBuffer[idx]);
+    }
+  }
   Firmata.write(END_SYSEX);
 }
 
@@ -163,8 +175,7 @@ void DeviceFeature::sendDeviceResponse(int action, int status, byte *dpb) {
 // By this means, the DriverFeature can be controlled just like the individual
 // device drivers are.
 
-int DeviceFeature::open(char *name, int flags) {
-  uint8_t theRegister;
+int DeviceFeature::open(int *handle, char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
@@ -173,19 +184,22 @@ int DeviceFeature::open(char *name, int flags) {
     }
   }
   if (minorHandle == logicalUnitCount) {
-    // throw new DeviceException(
-    //         "Could not open '" + name + "', " + DeviceStatus.NO_SUCH_DEVICE);
-    return -1;
+    return ENXIO;
   }
 
   LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
-  if (currentDevice->isOpen()) {
-    // throw new DeviceException(
-    //         "Could not open '" + name + "', " + DeviceStatus.DEVICE_ALREADY_OPEN);
-    return -1;
+
+  if (flags & DDO_FORCE_OPEN != 0) {
+    currentDevice->setOpen(false);
   }
+
+  if (currentDevice->isOpen()) {
+    return EADDRINUSE;
+  }
+
   currentDevice->setOpen(true);
-  return minorHandle;
+  *handle = minorHandle;
+  return ESUCCESS;
 }
 
 int DeviceFeature::status(int handle, int reg, int count, byte *buf) {}
@@ -194,19 +208,14 @@ int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
   int result;
   LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
   if (!currentDevice->isOpen()) {
-    return -1;
+    return ENOTCONN;
   }
   switch (reg) {
   case DDC_INIT:
-    // setSelectedDevices();
-    result = max(0, count);
-    break;
+    return ESUCCESS;
   default:
-    result = -1;
-    break;
+    return ESUCCESS;
   }
-  return result;
-
 }
 
 int DeviceFeature::read(int handle, int count, byte *buf) {}
@@ -216,8 +225,6 @@ int DeviceFeature::close(int handle) {
   LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
   if (currentDevice->isOpen()) {
     currentDevice->setOpen(false);
-    return 0;
-  } else {
-    return -1;
   }
+  return ESUCCESS;
 }

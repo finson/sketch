@@ -7,7 +7,31 @@ DeviceDriver::DeviceDriver(const char *nameRoot) {
 };
 
 
-// int DeviceDriver::open(char *name, int flags) {};
+// int DeviceDriver::open(int *handle, char *name, int flags) {
+//   int lun;
+//   for (lun = 0; lun < logicalUnitCount; lun++) {
+//     if (strcmp(logicalUnits[lun].getLogicalUnitName(), name) == 0) {
+//       break;
+//     }
+//   }
+//   if (lun == logicalUnitCount) {
+//     return ENXIO;
+//   }
+
+//   LogicalUnitInfo *currentDevice = &logicalUnits[lun];
+
+//   if (flags & DDO_FORCE_OPEN != 0) {
+//     currentDevice->setOpen(false);
+//   }
+
+//   if (currentDevice->isOpen()) {
+//     return EADDRINUSE;
+//   }
+
+//   currentDevice->setOpen(true);
+//   *handle = lun;
+//   return ESUCCESS;
+// }
 
 // int DeviceDriver::status(int handle, int reg, int count, byte *buf){};
 // int DeviceDriver::control(int handle, int reg, int count, byte *buf){};
