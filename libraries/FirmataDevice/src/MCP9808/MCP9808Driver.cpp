@@ -91,8 +91,10 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
   if (!currentDevice->isOpen()) {
     return ENOTCONN;
   }
-  if (static_cast<MCP9808Register>(reg) == MCP9808Register::RESOLUTION && count != 1) {
-    return EMSGSIZE;
+  if (static_cast<MCP9808Register>(reg) == MCP9808Register::RESOLUTION) {
+    if (count != 1) {
+      return EMSGSIZE;
+    }
   } else if (count != 2) {
     return EMSGSIZE;
   }
@@ -102,8 +104,8 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
     buf[0] = I2CPort.read8(address, reg);
   } else {
     int v = I2CPort.read16(address, reg);
-    buf[0] = (v >> 8) & 0x7F;
-    buf[1] = v & 0x7F;
+    buf[0] = (v >> 8) & 0xFF;
+    buf[1] = v & 0xFF;
   }
   return ESUCCESS;
 }
