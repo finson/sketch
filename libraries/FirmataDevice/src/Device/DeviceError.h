@@ -9,6 +9,7 @@
 #define EADDRINUSE  98  /* Address already in use */
 #define EISCONN     106 /* Transport endpoint is already connected */
 #define ENOTCONN    107 /* Transport endpoint is not connected */
+#define ETIMEDOUT   110 /* Connection timed out */
 #define ECONNREFUSED    111 /* Connection refused */
 #define EREMOTEIO   121 /* Remote I/O error */
 
