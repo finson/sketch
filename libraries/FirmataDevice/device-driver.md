@@ -66,6 +66,14 @@ To the extent practical, the error code values and meanings are taken directly f
 ---
 ###Status
 
+Read information from a register (or virtual register) in the device or device driver.  Most often, device register numbering starts at 0 and maxes out at about 32, but this depends entirely on the device.  Virtual registers, on the other hand, are used in this DeviceDriver API to identify various virtual quantities associated with the device.  Common virtual status register identifiers include:
+
+    -1  Device default name and a.b.c version number
+    -2  Actual device name and logical unit count
+    -3  Open Logical Units and their state
+
+The method and its parameters are as follows.
+
     byte status(int handle, int reg, int count, byte *buf)
 
 **param** (in) `handle` The device driver selector value returned by Open in a previous call.

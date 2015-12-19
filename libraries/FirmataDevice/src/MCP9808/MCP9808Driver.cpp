@@ -111,7 +111,25 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
 }
 
 int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
-  return ENOSYS;
+  MCP9808LUI *currentDevice = &logicalUnits[handle & 0x7F];
+  if (!currentDevice->isOpen()) {
+    return ENOTCONN;
+  }
+  if (static_cast<MCP9808Register>(reg) == MCP9808Register::RESOLUTION) {
+    if (count != 1) {
+      return EMSGSIZE;
+    }
+  } else if (count != 2) {
+    return EMSGSIZE;
+  }
+
+  int address = currentDevice->getDeviceAddress();
+  if (count == 1) {
+    I2CPort.write8(address, reg,buf[0]);
+  } else {
+    I2CPort.write16(address, reg, ((buf[1] & 0xFF) << 8) | (buf[0] & 0xFF));
+  }
+  return ESUCCESS;
 }
 
 int MCP9808Driver::read(int handle, int count, byte *buf) {
