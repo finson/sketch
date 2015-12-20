@@ -16,11 +16,11 @@ AnalogOutputFeature analogOutput;
 #include <Device/DeviceFeature.h>
 DeviceFeature deviceManager("DeviceFeature",1);
 
-//#include <I2C/I2CFeature.h>
-//I2CFeature pI2C;
+#include <I2C/I2CFeature.h>
+I2CFeature pI2C;
 
-FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&deviceManager,0};
-// FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&deviceManager,0};
+//FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&deviceManager,0};
+FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&deviceManager,0};
 
 // Device Drivers
 

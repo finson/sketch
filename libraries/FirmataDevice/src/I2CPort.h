@@ -5,7 +5,7 @@
 #include <FirmataFeature.h>
 
 class I2CPortClass {
-
+// make this a Feature subclass **********************************
 public:
 
   I2CPortClass();
