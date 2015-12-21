@@ -112,16 +112,16 @@ int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount,
     return status;
 
   case DD_STATUS:
-    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
+    count = ((body[1] & 0xFF) << 8) | (body[0] & 0xFF);
+    reg =   ((body[3] & 0xFF) << 8) | (body[2] & 0xFF);
     status = majorDevices[deviceHandle]->status(unitHandle,reg,count,body);
     *bodyCount = (status == ESUCCESS) ? count : 0;
     return status;
 
   case DD_CONTROL:
-    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    reg = ((body[3] << 8) & 0xFF) | (body[2] & 0xFF);
-    status = majorDevices[deviceHandle]->control(unitHandle, reg, count, body);
+    count = ((body[1] & 0xFF) << 8)  | (body[0] & 0xFF);
+    reg =   ((body[3] & 0xFF) << 8)  | (body[2] & 0xFF);
+    status = majorDevices[deviceHandle]->control(unitHandle, reg, count, body+4);
     *bodyCount = 0;
     return status;
 
@@ -133,7 +133,7 @@ int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount,
 
   case DD_WRITE:
     count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    status = majorDevices[deviceHandle]->read(unitHandle,count,body);
+    status = majorDevices[deviceHandle]->read(unitHandle,count,body+2);
     *bodyCount =  0;
     return status;
 
