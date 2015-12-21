@@ -37,9 +37,9 @@ void I2CPortClass::disableI2CPins()
 void I2CPortClass::write8(int addr, uint8_t reg, uint8_t val) {
   if (!isEnabled()) return;
 
-  Wire.beginTransmission(addr);
+  Wire.beginTransmission((uint8_t)addr);
   Wire.write((uint8_t)reg);
-  Wire.write(val);
+  Wire.write((uint8_t)val);
   Wire.endTransmission();
 }
 
@@ -59,7 +59,7 @@ uint8_t I2CPortClass::read8(int addr, uint8_t reg) {
 void I2CPortClass::write16(int addr, uint8_t reg, uint16_t val) {
   if (!isEnabled()) return;
 
-  Wire.beginTransmission(addr);
+  Wire.beginTransmission((uint8_t)addr);
   Wire.write((uint8_t)reg);
   Wire.write(val >> 8);
   Wire.write(val & 0xFF);

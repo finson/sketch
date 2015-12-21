@@ -127,7 +127,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   if (count == 1) {
     I2CPort.write8(address, reg,buf[0]);
   } else {
-    I2CPort.write16(address, reg, ((buf[0] & 0xFF) | (buf[1] & 0xFF) << 8));
+    I2CPort.write16(address, reg, (((buf[0] & 0xFF) << 8) | (buf[1] & 0xFF)));
   }
   return ESUCCESS;
 }
