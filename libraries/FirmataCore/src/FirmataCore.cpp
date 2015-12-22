@@ -65,7 +65,7 @@ FirmataClass::FirmataClass()
   firmwareVersionVector = 0;
   reset();
 //  setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
-  setFirmwareVersion(0,3);    // Development version of the implementation, not the protocol
+  setFirmwareVersion(0,4);    // Development version of the implementation, not the protocol
 }
 
 // resets the system state upon a SYSTEM_RESET message from the host software
