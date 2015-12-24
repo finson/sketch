@@ -1,4 +1,8 @@
 
+// Pin Modes
+
+#include <Mode/I2CMode.h>
+
 // Features
 
 #include <GPIO/DigitalInputFeature.h>
@@ -20,7 +24,7 @@ DeviceFeature deviceManager("DeviceFeature",1);
 I2CFeature pI2C;
 
 //FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&deviceManager,0};
-FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&deviceManager,0};
+FirmataFeature *selectedFeatures[] = {&I2CMode, &digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&deviceManager,0};
 
 // Device Drivers
 

@@ -15,7 +15,7 @@
 */
 
 #include "I2CFeature.h"
-#include "I2CPort.h"
+#include <Mode/I2CMode.h>
 
 //----------------------------------------------------------------------------
 
@@ -27,26 +27,26 @@ I2CFeature::I2CFeature() : queryIndex(-1), i2cReadDelayTime(0)
 
 void I2CFeature::handleGetCapability(byte pin)
 {
-  if (IS_PIN_I2C(pin)) {
-    Firmata.write(I2C);
-    Firmata.write(1);  // to do: determine appropriate value
-  }
+  // if (IS_PIN_I2C(pin)) {
+  //   Firmata.write(I2C);
+  //   Firmata.write(1);  // to do: determine appropriate value
+  // }
 }
 
 boolean I2CFeature::handleSetPinMode(byte pin, int mode)
 {
-  if (IS_PIN_I2C(pin)) {
-    if (mode == I2C) {
-      // the user must call I2C_CONFIG to enable I2C for a device
-      return true;
-    } else if (I2CPort.isEnabled()) {
-      // disable i2c so pins can be used for other functions
-      // the following if statements should reconfigure the pins properly
-      if (Firmata.getPinMode(pin) == I2C) {
-        I2CPort.disableI2CPins();
-      }
-    }
-  }
+  // if (IS_PIN_I2C(pin)) {
+  //   if (mode == I2C) {
+  //     // the user must call I2C_CONFIG to enable I2C for a device
+  //     return true;
+  //   } else if (I2CMode.isEnabled()) {
+  //     // disable i2c so pins can be used for other functions
+  //     // the following if statements should reconfigure the pins properly
+  //     if (Firmata.getPinMode(pin) == I2C) {
+  //       I2CMode.disableI2CPins();
+  //     }
+  //   }
+  // }
   return false;
 }
 
@@ -54,7 +54,7 @@ boolean I2CFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
   switch (command) {
   case I2C_REQUEST:
-    if (I2CPort.isEnabled()) {
+    if (I2CMode.isEnabled()) {
       handleI2CRequest(argc, argv);
       return true;
     }
@@ -68,7 +68,7 @@ void I2CFeature::reset()
 {
   queryIndex = -1;
   i2cReadDelayTime = 0;
-  I2CPort.disableI2CPins();
+  // I2CMode.disableI2CPins();
 
   // if (isI2CEnabled) {
   //   disableI2CPins();
@@ -85,8 +85,8 @@ boolean I2CFeature::handleI2CConfig(byte argc, byte *argv)
     i2cReadDelayTime = delayTime;
   }
 
-  I2CPort.enableI2CPins();
-  return I2CPort.isEnabled();
+  I2CMode.enableI2CPins();
+  return I2CMode.isEnabled();
 }
 
 void I2CFeature::handleI2CRequest(byte argc, byte *argv)
@@ -197,7 +197,7 @@ void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes)
     sprintf(errorMsg, "I2C info: address: %1d, theRegister: %1d, numBytes: %1d", address, theRegister, numBytes);
     Firmata.sendString(errorMsg);
 
-    int value = I2CPort.read16(address, theRegister);
+    int value = I2CMode.read16(address, theRegister);
 
     i2cRxData[0] = address;
     i2cRxData[1] = theRegister;

@@ -1,5 +1,5 @@
 #include "MCP9808Driver.h"
-#include <I2CPort.h>
+#include <Mode/I2CMode.h>
 
 enum class MCP9808Register {
   RESERVED,
@@ -63,18 +63,18 @@ int MCP9808Driver::open(int *handle, const char *name, int flags) {
     return EADDRINUSE;
   }
 
-  I2CPort.enableI2CPins();
+  I2CMode.enableI2CPins();
 
   int address = currentDevice->getDeviceAddress();
   theRegister = static_cast<uint8_t>(MCP9808Register::MANUF_ID);
-  if (I2CPort.read16(address, theRegister) != 0x0054) {
-    I2CPort.disableI2CPins();
+  if (I2CMode.read16(address, theRegister) != 0x0054) {
+    I2CMode.disableI2CPins();
     return ECONNREFUSED;
   }
 
   theRegister = static_cast<uint8_t>(MCP9808Register::DEVICE_ID);
-  if (I2CPort.read16(address, theRegister) != 0x0400) {
-    I2CPort.disableI2CPins();
+  if (I2CMode.read16(address, theRegister) != 0x0400) {
+    I2CMode.disableI2CPins();
     return ECONNREFUSED;
   }
 
@@ -101,9 +101,9 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
 
   int address = currentDevice->getDeviceAddress();
   if (count == 1) {
-    buf[0] = I2CPort.read8(address, reg);
+    buf[0] = I2CMode.read8(address, reg);
   } else {
-    int v = I2CPort.read16(address, reg);
+    int v = I2CMode.read16(address, reg);
     buf[0] = (v >> 8) & 0xFF;
     buf[1] = v & 0xFF;
   }
@@ -125,9 +125,9 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
 
   int address = currentDevice->getDeviceAddress();
   if (count == 1) {
-    I2CPort.write8(address, reg,buf[0]);
+    I2CMode.write8(address, reg,buf[0]);
   } else {
-    I2CPort.write16(address, reg, (((buf[0] & 0xFF) << 8) | (buf[1] & 0xFF)));
+    I2CMode.write16(address, reg, (((buf[0] & 0xFF) << 8) | (buf[1] & 0xFF)));
   }
   return ESUCCESS;
 }
@@ -144,7 +144,7 @@ int MCP9808Driver::read(int handle, int count, byte *buf) {
 
   int address = currentDevice->getDeviceAddress();
   int reg = static_cast<uint8_t>(MCP9808Register::AMBIENT_TEMP);
-  int v = I2CPort.read16(address, reg);
+  int v = I2CMode.read16(address, reg);
   buf[0] = (v >> 8) & 0xFF;
   buf[1] = v & 0xFF;
 
@@ -159,7 +159,7 @@ int MCP9808Driver::close(int lun) {
   MCP9808LUI *currentDevice = &logicalUnits[lun & 0x7F];
   if (currentDevice->isOpen()) {
     currentDevice->setOpen(false);
-    I2CPort.disableI2CPins();
+    I2CMode.disableI2CPins();
   }
   return ESUCCESS;
 }

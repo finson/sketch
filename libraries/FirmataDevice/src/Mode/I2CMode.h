@@ -1,14 +1,24 @@
-#ifndef I2CPort_h
-#define I2CPort_h
+#ifndef I2CMode_h
+#define I2CMode_h
 
 #include <Wire.h>
 #include <FirmataFeature.h>
 
-class I2CPortClass {
-// make this a Feature subclass **********************************
+class I2CModeClass: public FirmataFeature {
+
 public:
 
-  I2CPortClass();
+  I2CModeClass();
+
+  // External access to capabilities
+
+  boolean handleSetPinMode(byte pin, int mode);
+  void handleGetCapability(byte pin);
+  void reset();
+
+  boolean handleFeatureSysex(byte command, byte argc, byte *argv) { return false;}
+
+  // Implementation of capabilities
 
   bool isEnabled();
   void enableI2CPins();
@@ -30,6 +40,6 @@ private:
 
 };
 
-extern I2CPortClass I2CPort;
+extern I2CModeClass I2CMode;
 
 #endif
