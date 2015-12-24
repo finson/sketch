@@ -14,7 +14,7 @@ enum class HelloRegister {
 
 //---------------------------------------------------------------------------
 
-HelloDriver::HelloDriver(char *dName, int count) :
+HelloDriver::HelloDriver(const char *dName, int count) :
   DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
   logicalUnitCount = min(MAX_HELLO_LU_COUNT, count);
@@ -28,7 +28,7 @@ HelloDriver::HelloDriver(char *dName, int count) :
 
 //---------------------------------------------------------------------------
 
-int HelloDriver::open(int *handle, char *name, int flags) {
+int HelloDriver::open(int *handle, const char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
@@ -44,7 +44,7 @@ int HelloDriver::open(int *handle, char *name, int flags) {
 
   LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
 
-  if (flags & DDO_FORCE_OPEN != 0) {
+  if ((flags & DDO_FORCE_OPEN) != 0) {
     currentDevice->setOpen(false);
   }
   if (currentDevice->isOpen()) {

@@ -15,7 +15,7 @@ enum class MCP9808Register {
 
 //---------------------------------------------------------------------------
 
-MCP9808Driver::MCP9808Driver(char *dName, int baseAddr, int addrCount) :
+MCP9808Driver::MCP9808Driver(const char *dName, int baseAddr, int addrCount) :
   DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
   logicalUnitCount = min(MAX_MCP9808_LU_COUNT, addrCount);
@@ -27,7 +27,7 @@ MCP9808Driver::MCP9808Driver(char *dName, int baseAddr, int addrCount) :
   }
 }
 
-MCP9808Driver::MCP9808Driver(char *dName, int deviceAddresses[], int addrCount) :
+MCP9808Driver::MCP9808Driver(const char *dName, int deviceAddresses[], int addrCount) :
   DeviceDriver(dName) {
   char buf[MAX_LU_NAME_LENGTH+1];
   logicalUnitCount = min(MAX_MCP9808_LU_COUNT, addrCount);
@@ -41,7 +41,7 @@ MCP9808Driver::MCP9808Driver(char *dName, int deviceAddresses[], int addrCount) 
 
 //---------------------------------------------------------------------------
 
-int MCP9808Driver::open(int *handle, char *name, int flags) {
+int MCP9808Driver::open(int *handle, const char *name, int flags) {
   uint8_t theRegister;
   int lun;
   for (lun = 0; lun < logicalUnitCount; lun++) {
@@ -55,7 +55,7 @@ int MCP9808Driver::open(int *handle, char *name, int flags) {
 
   MCP9808LUI *currentDevice = &logicalUnits[lun];
 
-  if (flags & DDO_FORCE_OPEN != 0) {
+  if ((flags & DDO_FORCE_OPEN) != 0) {
     currentDevice->setOpen(false);
   }
 

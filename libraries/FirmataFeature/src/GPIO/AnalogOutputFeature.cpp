@@ -63,9 +63,8 @@ boolean AnalogOutputFeature::handleFeatureSysex(byte command, byte argc, byte* a
       analogWrite(argv[0], val);
       return true;
     }
-  } else {
-    return false;
   }
+  return false;
 }
 
 void AnalogOutputFeature::analogWrite(byte pin, int value)

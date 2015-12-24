@@ -29,7 +29,9 @@ void I2CPortClass::enableI2CPins() {
 void I2CPortClass::disableI2CPins()
 {
   if (isEnabled()) {
+#if (defined WIRE_HAS_END) && (WIRE_HAS_END == 1)
     Wire.end();
+#endif
     enabled -= 1;
   }
 }

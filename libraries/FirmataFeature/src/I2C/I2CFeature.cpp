@@ -162,6 +162,7 @@ void I2CFeature::handleI2CRequest(byte argc, byte *argv)
       // if read continuous mode is enabled for multiple devices,
       // determine which device to stop reading and remove it's data from
       // the array, shifiting other array data to fill the space
+      queryIndexToSkip = -1;
       for (byte i = 0; i < queryIndex + 1; i++) {
         if (query[i].addr == slaveAddress) {
           queryIndexToSkip = i;
@@ -169,11 +170,13 @@ void I2CFeature::handleI2CRequest(byte argc, byte *argv)
         }
       }
 
-      for (byte i = queryIndexToSkip; i < queryIndex + 1; i++) {
-        if (i < MAX_QUERIES) {
-          query[i].addr = query[i + 1].addr;
-          query[i].reg = query[i + 1].reg;
-          query[i].bytes = query[i + 1].bytes;
+      if (queryIndexToSkip >= 0) {
+        for (byte i = queryIndexToSkip; i < queryIndex + 1; i++) {
+          if (i < MAX_QUERIES) {
+            query[i].addr = query[i + 1].addr;
+            query[i].reg = query[i + 1].reg;
+            query[i].bytes = query[i + 1].bytes;
+          }
         }
       }
       queryIndex--;

@@ -89,8 +89,12 @@
 
 // pin modes
 
+#ifndef INPUT
 #define INPUT                   0x00 // defined in wiring.h
+#endif
+#ifndef OUTPUT
 #define OUTPUT                  0x01 // defined in wiring.h
+#endif
 #define ANALOG                  0x02 // analog pin in analogInput mode
 #define PWM                     0x03 // digital pin in PWM output mode
 #define SERVO                   0x04 // digital pin in Servo output mode
@@ -181,9 +185,9 @@ class FirmataClass
     int pinState[TOTAL_PINS];       // any value that has been written
 
     /* timer variables */
-    unsigned long currentMillis;   // store the current value from millis()
-    unsigned long previousMillis;  // for comparison with currentMillis
-    int samplingInterval;          // how often to run the main loop (in ms)
+    unsigned long currentMillis;    // store the current value from millis()
+    unsigned long previousMillis;   // for comparison with currentMillis
+    unsigned long samplingInterval; // how often to run the main loop (in ms)
 
     boolean resetting;
 

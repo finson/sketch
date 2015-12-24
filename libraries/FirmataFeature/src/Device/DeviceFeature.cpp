@@ -8,7 +8,7 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFeature::DeviceFeature(char *dName, int count) : DeviceDriver(dName), majorDeviceCount(0)
+DeviceFeature::DeviceFeature(const char *dName, int count) : DeviceDriver(dName), majorDeviceCount(0)
 {
   char buf[MAX_DEVICE_NAME_LENGTH + 1];
 
@@ -89,7 +89,7 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount, byte *body) {
   int flags;
   int deviceIndex;
-  int status;
+  int status = ENODEV;
   int count;
   int reg;
   int unitHandle = (*handle & 0x7F);
@@ -175,7 +175,7 @@ void DeviceFeature::sendDeviceResponse(int action, int status, int handle, int d
 // By this means, the DriverFeature can be controlled just like the individual
 // device drivers are.
 
-int DeviceFeature::open(int *handle, char *name, int flags) {
+int DeviceFeature::open(int *handle, const char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
@@ -189,7 +189,7 @@ int DeviceFeature::open(int *handle, char *name, int flags) {
 
   LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
 
-  if (flags & DDO_FORCE_OPEN != 0) {
+  if ((flags & DDO_FORCE_OPEN) != 0) {
     currentDevice->setOpen(false);
   }
 
@@ -202,10 +202,11 @@ int DeviceFeature::open(int *handle, char *name, int flags) {
   return ESUCCESS;
 }
 
-int DeviceFeature::status(int handle, int reg, int count, byte *buf) {}
+int DeviceFeature::status(int handle, int reg, int count, byte *buf) {
+  return ESUCCESS;
+}
 
 int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
-  int result;
   LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
   if (!currentDevice->isOpen()) {
     return ENOTCONN;
@@ -218,8 +219,13 @@ int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
   }
 }
 
-int DeviceFeature::read(int handle, int count, byte *buf) {}
-int DeviceFeature::write(int handle, int count, byte *buf) {}
+int DeviceFeature::read(int handle, int count, byte *buf) {
+  return ESUCCESS;
+}
+
+int DeviceFeature::write(int handle, int count, byte *buf) {
+  return ESUCCESS;
+}
 
 int DeviceFeature::close(int handle) {
   LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];

@@ -12,10 +12,10 @@ enum class MCP9808Register;
 class MCP9808Driver: public DeviceDriver
 {
 public:
-    MCP9808Driver(char *dName = "MCP9808", int baseAddr = 0x18, int addrCount = 8);
-    MCP9808Driver(char *dName, int deviceAddresses[], int addrCount);
+    MCP9808Driver(const char *dName = "MCP9808", int baseAddr = 0x18, int addrCount = 8);
+    MCP9808Driver(const char *dName, int deviceAddresses[], int addrCount);
 
-    int open(int *handle, char *name, int flags = 0);
+    int open(int *handle, const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
     int control(int handle, int reg, int count, byte *buf);
     int read(int handle, int count, byte *buf);
