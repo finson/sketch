@@ -20,7 +20,7 @@
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
 
-#define MAX_FEATURES 100
+#define MAX_FEATURES 20
 
 class FirmataExtClass
 {
@@ -31,12 +31,15 @@ class FirmataExtClass
     void dispatchReset();
     boolean dispatchSetPinMode(byte pin, int mode);
     boolean dispatchFeatureSysex(byte command, byte argc, byte* argv);
+    void dispatchLoopUpdate(unsigned long ms);
 
   private:
     boolean handleFeatureSysex(byte cmd, byte argc, byte* argv);
 
     FirmataFeature *features[MAX_FEATURES];
     byte numFeatures;
+
+    unsigned long previousMillis;
 
 };
 

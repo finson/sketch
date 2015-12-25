@@ -34,6 +34,8 @@ class DeviceDriver
     virtual int write(int handle, int count, byte *buf) = 0;
     virtual int close(int handle) = 0;
 
+    virtual int millisecondTimeBase(unsigned long ms) { return ESUCCESS; }
+
   protected:
     char deviceName[MAX_DEVICE_NAME_LENGTH+1];
     int logicalUnitCount;

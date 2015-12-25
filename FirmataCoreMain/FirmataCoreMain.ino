@@ -46,9 +46,9 @@ void setup()
 
 Firmata.begin(57600);
 
-Firmata.reset();
-
 FirmataExt.addSelectedFeatures();
+
+Firmata.reset();
 
 Firmata.sendString("Setup function complete.");
 
@@ -87,4 +87,5 @@ while (Firmata.available()) {
 //#endif
 //  }
 
+FirmataExt.dispatchLoopUpdate(millis());
 }

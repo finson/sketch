@@ -22,6 +22,8 @@ public:
     boolean handleSetPinMode(byte pin, int mode);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
 
+    void loopUpdate(unsigned long ms);
+
     // For direct (non-Sysex) use by DeviceDrivers and other local objects
 
     int dispatchDeviceAction(int act, int *minor, int *pc, byte *pv);

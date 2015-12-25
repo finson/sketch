@@ -52,6 +52,14 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
+void DeviceFeature::loopUpdate(unsigned long ms) {
+  for (int idx = 0; idx < majorDeviceCount; idx++) {
+    majorDevices[idx]->millisecondTimeBase(ms);
+  }
+}
+
+//---------------------------------------------------------------------------
+
   // The first four bytes of argv for DEVICE_QUERY messages are: action,
   // reserved, handle-low, handle-high. They are all constrained to 7-bit
   // values and are not encoded.  The bytes that follow, if any, are the

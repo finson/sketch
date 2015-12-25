@@ -30,6 +30,18 @@ In the most common architecture, the device driver implements the main device co
 
 On the other hand, it is also possible for a device driver to implement the main control code on the client and provide access there using the same API. In this case the client device driver uses existing Firmata Features and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received and there is no specific device driver needed on the server.
 
+###Status and Control Registers
+
+The status and control methods operate based on register numbers.  On an actual device, physical register numbers usually start at 0 and max out at a relatively low value like 16 or 32, depending on the device.  In addition to the positive physical register numbers, this DeviceDriver API also uses negative register numbers to identify virtual quantities and actions associated with the device.  Common virtual status register identifiers include:
+
+    -1  Device default name and a.b.c version number
+    -2  Get LUN configuration 
+
+  Common virtual control register identifiers include:
+
+    -1  Reset the device hardware to power-on defaults if possible.
+    -2  Modify LUN configuration
+
 ###Firmata Messages
 
 Two new Sysex sub-commands are added by this feature: `DEVICE_QUERY` and `DEVICE_RESPONSE`.
@@ -38,7 +50,6 @@ There is a small set of action codes that specify what the driver is to do after
 
 The first action is always `OPEN`.  The caller supplies a logical unit name that can be recognized by a device driver, and upon success, a handle is returned for use in future calls. After the handle has been received, the caller can read status (`STATUS`), write control (`CONTROL`), read data stream (`READ`), and write data stream (`WRITE`).  Once the caller has completed its operations on a device, it can use `CLOSE` to make the logical unit available for another client.
 
----
 ##Method Prototypes
 
 The method prototypes shown below are the primary interface to each Device Driver on both the server and, with suitable modifications for language syntax, the client.
@@ -66,11 +77,7 @@ To the extent practical, the error code values and meanings are taken directly f
 ---
 ###Status
 
-Read information from a register (or virtual register) in the device or device driver.  Most often, device register numbering starts at 0 and maxes out at about 32, but this depends entirely on the device.  Virtual registers, on the other hand, are used in this DeviceDriver API to identify various virtual quantities associated with the device.  Common virtual status register identifiers include:
-
-    -1  Device default name and a.b.c version number
-    -2  Actual device name and logical unit count
-    -3  Open Logical Units and their state
+Read information from a register (or virtual register) in the device or device driver.  
 
 The method and its parameters are as follows.
 

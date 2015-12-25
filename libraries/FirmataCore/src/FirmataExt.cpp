@@ -23,7 +23,7 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-FirmataExtClass::FirmataExtClass() : numFeatures(0)
+FirmataExtClass::FirmataExtClass() : numFeatures(0), previousMillis(0)
 {
 }
 
@@ -69,6 +69,16 @@ boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* arg
     }
   }
   return false;
+}
+
+void FirmataExtClass::dispatchLoopUpdate(unsigned long ms) {
+  unsigned long currentMillis = ms;
+  if (currentMillis > previousMillis) {
+    for (byte i = 0; i < numFeatures; i++) {
+      features[i]->loopUpdate(currentMillis);
+    }
+  }
+  previousMillis = currentMillis;
 }
 
 boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)

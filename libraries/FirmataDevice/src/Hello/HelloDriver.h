@@ -6,6 +6,7 @@
 
 #define MAX_HELLO_LU_COUNT 2
 #define MAX_HELLO_TEXT_LENGTH 31
+#define SAMPLE_COUNT 16
 
 enum class HelloRegister;
 
@@ -21,6 +22,9 @@ public:
     int read(int handle, int count, byte *buf);
     int write(int handle, int count, byte *buf);
     int close(int handle);
+
+    int millisecondTimeBase(unsigned long ms);
+
 
     class HelloLUI: public LogicalUnitInfo {
 
@@ -44,6 +48,15 @@ public:
     private:
         char who[MAX_HELLO_TEXT_LENGTH];
     };
+
+private:
+
+    unsigned long samples[SAMPLE_COUNT+1];
+    int sampleIndex;
+    boolean isSampleBufferFull;
+    unsigned long previousMS;
+    int visitCount;
+
 
     HelloLUI logicalUnits[MAX_HELLO_LU_COUNT];
 };

@@ -4,7 +4,7 @@
 * **Done**.  Write simple device driver to control device from client (java).
 * **Done**.  Make provisions for multiple command input streams (Firmata and direct call)
 * Write simple device driver to control virtual device on the server (Hello).
-* Write simple device driver to control device from server (MCP9808).
+* **Done** v0.3.  Write simple device driver to control device from server (MCP9808).
 * Implement board level libraries as Features of type Port.  I2C, Stepper
 * Write Stepper device driver
 * Wire, SPI, OneWire Port Features

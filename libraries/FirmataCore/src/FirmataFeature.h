@@ -10,6 +10,7 @@ class FirmataFeature
     virtual boolean handleSetPinMode(byte pin, int mode) = 0;
     virtual boolean handleFeatureSysex(byte command, byte argc, byte* argv) = 0;
     virtual void reset() = 0;
+    virtual void loopUpdate(unsigned long ms) {};
 };
 
 #endif
