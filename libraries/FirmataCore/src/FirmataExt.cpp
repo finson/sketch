@@ -17,14 +17,19 @@
 #include <FirmataCore.h>
 #include <FirmataExt.h>
 #include <Device/DeviceDriver.h>
+#include <limits.h>
 
 extern FirmataFeature *selectedFeatures[];
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-FirmataExtClass::FirmataExtClass() : numFeatures(0), previousMillis(0)
+FirmataExtClass::FirmataExtClass() : numFeatures(0)
 {
+  previousTime[0] = 0;
+  previousTime[1] = 0;
+  intervalTime[0] = DEFAULT_REPORT_INTERVAL;
+  intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
 }
 
 void FirmataExtClass::addSelectedFeatures()
@@ -43,8 +48,42 @@ void FirmataExtClass::addSelectedFeatures()
 
 void FirmataExtClass::dispatchReset()
 {
+
+  previousTime[0] = millis();
+  previousTime[1] = micros();
+  intervalTime[0] = DEFAULT_REPORT_INTERVAL;
+  intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
+
   for (byte i = 0; i < numFeatures; i++) {
     features[i]->reset();
+  }
+}
+
+void FirmataExtClass::dispatchTimers() {
+  currentTime[0] = millis();
+  currentTime[1] = micros();
+
+  unsigned long elapsedTime;
+
+  for (int idx=0; idx<2; idx++) {
+    if (currentTime[idx] >= previousTime[idx]) {
+      elapsedTime = currentTime[idx]-previousTime[idx];
+    } else {
+      elapsedTime = (ULONG_MAX - previousTime[idx])+(currentTime[idx]+1);
+    }
+
+    if (elapsedTime >= intervalTime[idx]) {
+      if (idx==0) {
+        for (int n = 0; n < numFeatures; n++) {
+          features[n]->report();
+        }
+      } else {
+        for (int n = 0; n < numFeatures; n++) {
+          features[n]->update(elapsedTime);
+        }
+      }
+      previousTime[idx] = currentTime[idx];
+    }
   }
 }
 
@@ -69,16 +108,6 @@ boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* arg
     }
   }
   return false;
-}
-
-void FirmataExtClass::dispatchLoopUpdate(unsigned long ms) {
-  unsigned long currentMillis = ms;
-  if (currentMillis > previousMillis) {
-    for (byte i = 0; i < numFeatures; i++) {
-      features[i]->loopUpdate(currentMillis);
-    }
-  }
-  previousMillis = currentMillis;
 }
 
 boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)
@@ -122,6 +151,12 @@ boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)
       Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
     }
     Firmata.write(END_SYSEX);
+    break;
+
+  case SAMPLING_INTERVAL:
+    if (argc >= 2) {
+      intervalTime[0] = max(argv[0] + (argv[1] << 7), MINIMUM_REPORT_INTERVAL);
+    }
     break;
 
   default:

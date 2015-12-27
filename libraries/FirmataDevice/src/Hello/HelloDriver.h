@@ -23,8 +23,7 @@ public:
     int write(int handle, int count, byte *buf);
     int close(int handle);
 
-    int millisecondTimeBase(unsigned long ms);
-
+    int millisecondTimeBase();
 
     class HelloLUI: public LogicalUnitInfo {
 
@@ -51,12 +50,12 @@ public:
 
 private:
 
+    unsigned long previousTime[2];   // the time the last interval expired
+    unsigned long currentTime[2];    // the current values from millis() and micros()
     unsigned long samples[SAMPLE_COUNT+1];
     int sampleIndex;
     boolean isSampleBufferFull;
-    unsigned long previousMS;
-    int visitCount;
-
+    unsigned long calculateAverageInterval();
 
     HelloLUI logicalUnits[MAX_HELLO_LU_COUNT];
 };

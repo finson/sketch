@@ -22,7 +22,8 @@ public:
     boolean handleSetPinMode(byte pin, int mode);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
 
-    void loopUpdate(unsigned long ms);
+    void report();
+    void update() {}
 
     // For direct (non-Sysex) use by DeviceDrivers and other local objects
 

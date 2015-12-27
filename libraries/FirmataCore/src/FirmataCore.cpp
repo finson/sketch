@@ -102,9 +102,6 @@ void FirmataClass::reset(void)
     }
   }
 
-previousMillis = millis();
-samplingInterval = DEFAULT_SAMPLING_INTERVAL;
-
 FirmataExt.dispatchReset();
 
 resetting = false;
@@ -326,11 +323,6 @@ boolean FirmataClass::executeCoreSysex(byte cmd, byte argc, byte* argv)
     case REPORT_FIRMWARE:
       printFirmwareVersion();
       break;
-    case SAMPLING_INTERVAL:
-      if (argc >= 2) {
-        samplingInterval = max(argv[0] + (argv[1] << 7),MINIMUM_SAMPLING_INTERVAL);
-      }
-      break;
     case STRING_DATA:
       if (currentStringCallback) {
         byte bufferLength = argc / 2;
@@ -504,24 +496,6 @@ void FirmataClass::setPinState(byte pin, int state)
 {
   pinState[pin] = state;
 }
-
-void FirmataClass::setSamplingInterval(int interval)
-{
-  samplingInterval = max(interval, MINIMUM_SAMPLING_INTERVAL);
-}
-
-boolean FirmataClass::elapsed()
-{
-  currentMillis = millis();
-  if (currentMillis - previousMillis > samplingInterval) {
-    previousMillis += samplingInterval;
-    if (currentMillis - previousMillis > samplingInterval)
-      previousMillis = currentMillis - samplingInterval;
-    return true;
-  }
-  return false;
-}
-
 
 // sysex callbacks
 /*

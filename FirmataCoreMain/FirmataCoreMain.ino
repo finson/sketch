@@ -87,5 +87,5 @@ while (Firmata.available()) {
 //#endif
 //  }
 
-FirmataExt.dispatchLoopUpdate(millis());
+FirmataExt.dispatchTimers();
 }

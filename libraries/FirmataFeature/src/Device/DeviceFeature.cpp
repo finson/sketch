@@ -52,9 +52,9 @@ boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void DeviceFeature::loopUpdate(unsigned long ms) {
+void DeviceFeature::report() {
   for (int idx = 0; idx < majorDeviceCount; idx++) {
-    majorDevices[idx]->millisecondTimeBase(ms);
+    majorDevices[idx]->millisecondTimeBase();
   }
 }
 

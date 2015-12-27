@@ -1,5 +1,7 @@
 #include "HelloDriver.h"
 
+#include <limits.h>
+
 enum class HelloRegister {
   INTERJECTION = 0,
   OBJECT = 1,
@@ -21,26 +23,10 @@ HelloDriver::HelloDriver(const char *dName, int count) :
 
 // Set up to calculate loop time average
 
-  previousMS = 0;
+  previousTime[0] = 0;
+  previousTime[1] = 0;
   isSampleBufferFull = false;
   sampleIndex = 0;
-  visitCount = 0;
-}
-
-// Collect an interval sample, ignoring the very first sample and any
-// sample that happens after a rollover (once every 50 days or so).
-
-int HelloDriver::millisecondTimeBase(unsigned long ms) {
-  visitCount = (visitCount + 1) % 10;
- if (visitCount == 0) {
-    if ((ms > previousMS)) {
-      samples[sampleIndex] = ms - previousMS;
-      isSampleBufferFull |= (sampleIndex == SAMPLE_COUNT);
-      sampleIndex = 1 + ((sampleIndex) % SAMPLE_COUNT);
-    }
-    previousMS = ms;
- }
-  return ESUCCESS;
 }
 
 //---------------------------------------------------------------------------
@@ -74,15 +60,11 @@ int HelloDriver::open(int *handle, const char *name, int flags) {
 }
 
 int HelloDriver::status(int handle, int reg, int count, byte *buf) {
-  int sum = 0;
   if (static_cast<HelloRegister>(reg) == HelloRegister::AVG_LOOP_TIME) {
     if (count != 4) {
       return EMSGSIZE;
     } else if (isSampleBufferFull) {
-      for (int idx = 1; idx <= SAMPLE_COUNT; idx++) {
-        sum += samples[idx];
-      }
-      unsigned long avg = sum / SAMPLE_COUNT;
+      unsigned long avg = calculateAverageInterval();
       buf[0] = avg & 0xFF;
       buf[1] = (avg >> 8) & 0xFF;
       buf[2] = (avg >> 16) & 0xFF;
@@ -112,4 +94,39 @@ int HelloDriver::close(int handle) {
     currentDevice->setOpen(false);
   }
   return ESUCCESS;
+}
+
+//---------------------------------------------------------------------------
+
+// Collect an interval sample.  The sample array is actually 0..SAMPLE_COUNT,
+// and the useful samples are in 1..SAMPLE_COUNT.
+
+int HelloDriver::millisecondTimeBase() {
+  currentTime[0] = millis();
+  currentTime[1] = micros();
+
+  unsigned long elapsedTime;
+
+  if (currentTime[0] >= previousTime[0]) {
+    elapsedTime = currentTime[0]-previousTime[0];
+  } else {
+    elapsedTime = (ULONG_MAX - previousTime[0])+(currentTime[0]+1);
+  }
+
+  samples[sampleIndex] = elapsedTime;
+  isSampleBufferFull |= (sampleIndex == SAMPLE_COUNT);
+  sampleIndex = 1 + ((sampleIndex) % SAMPLE_COUNT);
+  previousTime[0] = currentTime[0];
+
+  return ESUCCESS;
+}
+
+//---------------------------------------------------------------------------
+
+unsigned long HelloDriver::calculateAverageInterval() {
+  int sum = 0;
+  for (int idx = 1; idx <= SAMPLE_COUNT; idx++) {
+    sum += samples[idx];
+  }
+  return sum / SAMPLE_COUNT;
 }

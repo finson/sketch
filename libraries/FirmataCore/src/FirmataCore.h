@@ -26,9 +26,7 @@
 #define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES            64 // max number of data bytes in incoming messages
-#define MINIMUM_SAMPLING_INTERVAL 10  // milliseconds
-#define DEFAULT_SAMPLING_INTERVAL 19
+#define MAX_DATA_BYTES         64 // max number of data bytes in incoming messages
 
 // Core Direct commands
 
@@ -159,10 +157,6 @@ class FirmataClass
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
 
-    /* Sampling interval */
-    void setSamplingInterval(int interval);
-    boolean elapsed();
-
   private:
     Stream *FirmataStream;
 
@@ -183,11 +177,6 @@ class FirmataClass
     /* pins configuration */
     byte pinConfig[TOTAL_PINS];     // configuration of every pin
     int pinState[TOTAL_PINS];       // any value that has been written
-
-    /* timer variables */
-    unsigned long currentMillis;    // store the current value from millis()
-    unsigned long previousMillis;   // for comparison with currentMillis
-    unsigned long samplingInterval; // how often to run the main loop (in ms)
 
     boolean resetting;
 
