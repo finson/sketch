@@ -25,30 +25,7 @@ I2CFeature::I2CFeature() : queryIndex(-1), i2cReadDelayTime(0)
   // i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
 
-void I2CFeature::handleGetCapability(byte pin)
-{
-  // if (IS_PIN_I2C(pin)) {
-  //   Firmata.write(I2C);
-  //   Firmata.write(1);  // to do: determine appropriate value
-  // }
-}
-
-boolean I2CFeature::handleSetPinMode(byte pin, int mode)
-{
-  // if (IS_PIN_I2C(pin)) {
-  //   if (mode == I2C) {
-  //     // the user must call I2C_CONFIG to enable I2C for a device
-  //     return true;
-  //   } else if (I2CMode.isEnabled()) {
-  //     // disable i2c so pins can be used for other functions
-  //     // the following if statements should reconfigure the pins properly
-  //     if (Firmata.getPinMode(pin) == I2C) {
-  //       I2CMode.disableI2CPins();
-  //     }
-  //   }
-  // }
-  return false;
-}
+//----------------------------------------------------------------------------
 
 boolean I2CFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {

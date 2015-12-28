@@ -43,10 +43,11 @@ class I2CFeature: public FirmataFeature
   public:
     I2CFeature();
 
-    void handleGetCapability(byte pin);
-    boolean handleSetPinMode(byte pin, int mode);
     boolean handleFeatureSysex(byte command, byte argc, byte* argv);
     void reset();
+
+    void handleGetCapability(byte pin){}
+    boolean handleSetPinMode(byte pin, int mode){return false;}
 
   private:
     signed char queryIndex;
