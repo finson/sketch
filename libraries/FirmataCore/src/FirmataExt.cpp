@@ -14,18 +14,20 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include <FirmataCore.h>
 #include <FirmataExt.h>
+#include <FirmataMode.h>
 #include <Device/DeviceDriver.h>
 #include <limits.h>
 
+extern FirmataMode *selectedModes[];
 extern FirmataFeature *selectedFeatures[];
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-FirmataExtClass::FirmataExtClass() : numFeatures(0)
+FirmataExtClass::FirmataExtClass()
 {
+  numFeatures = 0;
   previousTime[0] = 0;
   previousTime[1] = 0;
   intervalTime[0] = DEFAULT_REPORT_INTERVAL;
@@ -35,9 +37,17 @@ FirmataExtClass::FirmataExtClass() : numFeatures(0)
 void FirmataExtClass::addSelectedFeatures()
 {
 
-// Install the user-selected FirmataFeatures.
+// Install the user-selected FirmataModes and FirmataFeatures.
 
   int selectionIndex = 0;
+  while (selectedModes[selectionIndex] != 0) {
+    if (numFeatures < MAX_FEATURES) {
+      features[numFeatures++] = selectedModes[selectionIndex];
+    }
+    selectionIndex += 1;
+  }
+
+  selectionIndex = 0;
   while (selectedFeatures[selectionIndex] != 0) {
     if (numFeatures < MAX_FEATURES) {
       features[numFeatures++] = selectedFeatures[selectionIndex];
