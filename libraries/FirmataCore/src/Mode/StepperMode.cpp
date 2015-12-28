@@ -17,6 +17,12 @@
 #include "StepperMode.h"
 // #include "utility/FirmataStepper.h"
 
+StepperModeClass::StepperModeClass() {
+
+}
+
+//---------------------------------------------------------------------------
+
 boolean StepperModeClass::handleSetPinMode(byte pin, int mode)
 {
   if (mode == STEPPER) {
@@ -69,3 +75,7 @@ void StepperModeClass::update()
   //   }
   // }
 }
+
+// make one instance to coordinate enable/disable and IO across the app.
+
+StepperModeClass StepperMode;

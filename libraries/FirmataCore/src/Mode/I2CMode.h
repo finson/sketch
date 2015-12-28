@@ -1,25 +1,23 @@
 #ifndef I2CMode_h
 #define I2CMode_h
 
+#include <FirmataMode.h>
 #include <Wire.h>
-#include <FirmataFeature.h>
 
-class I2CModeClass: public FirmataFeature {
+class I2CModeClass: public FirmataMode {
 
 public:
 
   I2CModeClass();
 
-  // External access to capabilities
+  // Firmata access to capabilities
 
   boolean handleSetPinMode(byte pin, int mode);
   void handleGetCapability(byte pin);
-  void reset();
-
-  boolean handleFeatureSysex(byte command, byte argc, byte *argv) { return false;}
 
   // Implementation of capabilities
 
+  void reset();
   bool isEnabled();
   void enableI2CPins();
   void disableI2CPins();

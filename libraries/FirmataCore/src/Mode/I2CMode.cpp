@@ -31,6 +31,8 @@ boolean I2CModeClass::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
+//---------------------------------------------------------------------------
+
 void I2CModeClass::reset()
 {
   // queryIndex = -1;
@@ -41,8 +43,6 @@ void I2CModeClass::reset()
   //   disableI2CPins();
   // }
 }
-
-//---------------------------------------------------------------------------
 
 bool I2CModeClass::isEnabled() {
   return (enabled > 0);
@@ -135,6 +135,6 @@ uint16_t I2CModeClass::read16(int addr, uint8_t reg) {
   return val;
 }
 
-// make one instance to coordinate I2C enable/disable and IO across the app.
+// make one instance to coordinate enable/disable and IO across the app.
 
 I2CModeClass I2CMode;
