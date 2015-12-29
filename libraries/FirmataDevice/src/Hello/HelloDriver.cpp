@@ -5,7 +5,7 @@
 enum class HelloRegister {
   INTERJECTION = 0,
   OBJECT = 1,
-  AVG_LOOP_TIME = 10
+  AVG_REPORT_INTERVAL = 10
 };
 
 //---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ int HelloDriver::open(int *handle, const char *name, int flags) {
 }
 
 int HelloDriver::status(int handle, int reg, int count, byte *buf) {
-  if (static_cast<HelloRegister>(reg) == HelloRegister::AVG_LOOP_TIME) {
+  if (static_cast<int>(HelloRegister::AVG_REPORT_INTERVAL) == reg) {
     if (count != 4) {
       return EMSGSIZE;
     } else if (isSampleBufferFull) {
