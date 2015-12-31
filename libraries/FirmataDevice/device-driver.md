@@ -8,7 +8,7 @@ In effect, `DeviceFeature` uses Firmata as a remote procedure call mechanism.
 
  The `DeviceFeature` module receives, decodes, and dispatches incoming `DEVICE_QUERY` messages to the appropriate device driver.  The concrete sub-classes of DeviceDriver implement the various capabilities and make them available to callers through the API documented below.  After a request has been processed by the device driver, the `DeviceFeature` module captures the result, encodes, and sends the outgoing `DEVICE_RESPONSE` messages back to the host.
 
-Also note that any other module on the server can use the device driver API directly to access any device capabilities it might require, without having to go through the Sysex reformatting.
+Also note that any other module on the server can use the device driver API directly to access any device capabilities it might require.  In this case, there is no reformatting, encoding, transmission, or other involvement by Firmata, it's just one module calling another directly.
 
 ##Introduction
 
@@ -30,7 +30,7 @@ In the most common architecture, the device driver implements the main device co
 
 On the other hand, it is also possible for a device driver to implement the main control code on the client and provide access there using the same API. In this case the client device driver uses existing Firmata Features and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received and there is no specific device driver needed on the server.
 
-###Status and Control Registers
+####Device Status and Control Registers
 
 The status and control methods operate based on register numbers.  On an actual device, physical register numbers usually start at 0 and max out at a relatively low value like 16 or 32, depending on the device.  In addition to the positive physical register numbers, this DeviceDriver API also uses negative register numbers to identify virtual quantities and actions associated with the device.  Common virtual status register identifiers include:
 
@@ -42,37 +42,41 @@ The status and control methods operate based on register numbers.  On an actual 
     -1  Reset the device hardware to power-on defaults if possible.
     -2  Modify LUN configuration
 
-###Firmata Messages
+####Status Return from Methods
 
-Two new Sysex sub-commands are added by this feature: `DEVICE_QUERY` and `DEVICE_RESPONSE`.
+Each of the device driver methods returns an `int` value to the caller.  If the value is negative, then the call failed and the value is an error code.  If the value is greater than or equal to 0, then the call succeeded.  The meaning of the non-negative value depends on the call.  For example, the `open` method returns a handle for future use and the `read` method returns the number of bytes read.  The details for each method are documented below.
+
+####Firmata Messages
+
+Two Sysex sub-commands are used by this feature: `DEVICE_QUERY` and `DEVICE_RESPONSE`.
 
 There is a small set of action codes that specify what the driver is to do after it receives the message.  
 
 The first action is always `OPEN`.  The caller supplies a logical unit name that can be recognized by a device driver, and upon success, a handle is returned for use in future calls. After the handle has been received, the caller can read status (`STATUS`), write control (`CONTROL`), read data stream (`READ`), and write data stream (`WRITE`).  Once the caller has completed its operations on a device, it can use `CLOSE` to make the logical unit available for another client.
 
+The detailed message formats for each action are provided at the end of this document.
+
 ##Method Prototypes
 
-The method prototypes shown below are the primary interface to each Device Driver on both the server and, with suitable modifications for language syntax, the client.
+The method prototypes shown below are the primary interface to each Device Driver on the server and, with suitable modifications for language syntax, on the client.
 
-The type identifier `int` is used to indicate a signed integer value of at least 16 bits.  Only the low order 16 bits (the two low order bytes) are transmitted for these values by Firmata.
+The type identifier `int` is used to indicate a signed integer value of at least 16 bits.  Only the low order 16 bits (the two low order bytes) are transmitted for these values by Firmata.  The type identifier `byte` is used to indicate an integer value of at least 8 bits.  Only the low order 8 bits (one byte) are transmitted for these values by Firmata.
 
-The type identifier `byte` is used to indicate an integer value of at least 8 bits.  Only the low order 8 bits (one byte) are transmitted for these values by Firmata.  In the case of error codes, the high order bit must be 0 since these values are transmitted without any encoding.  In the case of parameter blocks (the actual values that are read/written from/to the devices) there is no restriction on the values because these values are encoded in Base-64 before transmission.
+To the extent practical, the error code values and meanings are taken directly from the Linux/C error codes documented in errno.h and errno-base.h, except that the actual values are negated for use in this application.
 
-To the extent practical, the error code values and meanings are taken directly from the Linux/C error codes documented in errno.h and errno-base.h.  However, since only 7 bits are allocated for the error codes in the device messages, the range of errors is limited to 1..127.
+There are a few parameters whose values are constrained to 14-bit or 7-bit limits because of the way they are transmitted by Firmata.  However, they are always presented to the caller as fully sign-extended 16-bit or 8-bit values as documented below.  The actual data values being read/written are never constrained because they are always encoded for transmission.
 
 ---
 ###Open
 
-    byte open(int *hPtr, char* name)
-    byte open(int *hPtr, char* name, int flags)
-
-**param** (out) `hPtr` Handle pointer.  Address of the integer variable to receive the newly assigned handle value.  The handle is used in future calls to indicate the device driver and specific device being addressed.
+    int open(const char* name)
+    int open(const char* name, int flags)
 
 **param** (in) `name` Name of the logical unit to open.  UTF-8 encoded, null terminated.
 
 **param** (in) `flags` Flags associated with the open.  Default: 0.
 
-**return** (out) Success: 0.  Error: error code, 1..127.
+**return** *Success*: The newly assigned handle value.  The handle is used in future calls to indicate the device driver and specific device being addressed.  *Error*: error code.
 
 ---
 ###Status
@@ -81,7 +85,7 @@ Read information from a register (or virtual register) in the device or device d
 
 The method and its parameters are as follows.
 
-    byte status(int handle, int reg, int count, byte *buf)
+    int status(int handle, int reg, int count, byte *buf)
 
 **param** (in) `handle` The device driver selector value returned by Open in a previous call.
 
@@ -91,12 +95,12 @@ The method and its parameters are as follows.
 
 **param** (out) `buf` Pointer to the buffer to receive the data read.  Must be large enough to hold `count` bytes.
 
-**return** (out)  Success: 0.  Error: error code, 1..127.
+**return**  *Success*: The number of bytes actually read.  A short count does not in itself cause an error, since the caller can determine that not everything requested was read which may not actually be an error.  *Error*: error code.
 
 ---
 ###Control
 
-    byte control(int handle, int reg, int count, byte *buf)
+    int control(int handle, int reg, int count, byte *buf)
 
 **param** (in) `handle` The device driver selector value returned by Open in a previous call.
 
@@ -106,12 +110,12 @@ The method and its parameters are as follows.
 
 **param** (in) `buf` Pointer to the buffer containing the data to write.
 
-**return** (out)  Success: 0.  Error: error code, 1..127.
+**return**  *Success*: The number of bytes actually written.  Ordinarily, this will be equal to the requested number of bytes to write.  If it is short due to some device error (eg, physical write failure), then the driver will return an error code (eg, `EIO`).  However, under some unique circumstances for some drivers, it may be reasonable for a short count to occur in which case the driver will return the short count and no error code.  *Error*: error code.
 
 ---
 ###Read
 
-    byte read(int handle, int count, byte *buf)
+    int read(int handle, int count, byte *buf)
 
 **param** (in) `handle` The device driver selector value returned by Open in a previous call.
 
@@ -119,12 +123,12 @@ The method and its parameters are as follows.
 
 **param** (out) `buf` Pointer to the buffer to receive the data read.  Must be large enough to hold `count` bytes.
 
-**return** (out)  Success: 0.  Error: error code, 1..127.
+**return**  *Success*: The number of bytes actually read.  A short count does not in itself cause an error, since the caller can determine that not everything requested was read which may not actually be an error.  *Error*: error code.
 
 ---
 ###Write
 
-    byte write(int handle, int count, byte *buf)
+    int write(int handle, int count, byte *buf)
 
 **param** (in) `handle` The device driver selector value returned by Open in a previous call.
 
@@ -132,43 +136,49 @@ The method and its parameters are as follows.
 
 **param** (in) `buf` Pointer to the buffer containing the data to write.  Must contain at least `count` bytes.
 
-**return** (out)  Success: 0.  Error: error code, 1..127.
+**return**  *Success*: The number of bytes actually written.  Ordinarily, this will be equal to the requested number of bytes to write.  If it is short due to some device error (eg, physical write failure), then the driver will return an error code (eg, `EIO`).  However, under some unique circumstances for some drivers, it may be reasonable for a short count to occur in which case the driver will return the short count and no error code.  *Error*: error code.
 
 ---
 ###Close
 
-    byte close(int handle)
+    int close(int handle)
 
 **param** (in) `handle` The device driver selector value returned by Open in a previous call.  The selected device driver is responsible for deciding what actions if any are needed to "close" the connection.  After a close, the only valid action on the device is another open.
 
-**return** (out)  Success: 0.  Error: error code, 1..127.
+**return**  Success: 0.  *Error*: error code.
 
 ---
 ##Message Formats
 
 The arguments provided by the caller of an API method are formatted into a `DEVICE_QUERY` message on the client side by the proxy device driver, then transmitted to the server.  Firmata dispatches the Sysex message to the DeviceFeature module, which decodes it and dispatches the API call to the proper device driver.  After processing by the device driver, DeviceFeature captures the results and formats them as a `DEVICE_RESPONSE` message, and transmits the message back to the client host where the proxy device driver decodes the message and returns the result to the original caller.
 
+In the case of header values, the high order bit in a byte must be 0 since these values are transmitted without any encoding.  In the case of parameter blocks (the actual values that are read/written from/to the devices) there is no restriction on the values because these values are encoded in Base-64 before transmission.
+
 ###Header
 
-The `DEVICE_QUERY` and `DEVICE_RESPONSE` message headers are Sysex message bytes 0 to 5.
+The `DEVICE_QUERY` and `DEVICE_RESPONSE` message headers are Sysex message bytes 0 to 7.
 
 **DEVICE\_QUERY** header
 
     0 START_SYSEX byte (0xF0).
-    1 Sysex command byte DEVICE_QUERY.
-    2 Device Action byte, with values as described below.  The highest order bit must be 0.
-    3 Reserved for future use and is set to 0.
-    4 Least significant byte of the 2-byte flags or handle value.  The highest order bit must be 0.
-    5 Most significant byte of the 2-byte flags or handle value.  The highest order bit must be 0.
+    1 Sysex command byte DEVICE_QUERY (0x30).
+    2 Device Action byte, with values as described below.
+    3 Reserved (0)
+    4 LSB of the 2-byte flags or handle value.  The highest order bit is 0.
+    5 MSB of the 2-byte flags or handle value.  The highest order bit is 0.
+    6 Reserved (0)
+    7 Reserved (0)
 
 **DEVICE\_RESPONSE** header
 
     0 START_SYSEX byte (0xF0).
-    1 Sysex command byte DEVICE_RESPONSE.
-    2 Device Action byte that was provided in the associated DEVICE_QUERY.  The highest order bit must be 0.
-    3 Status return value: 0 for success, or a non-zero error code 1..127 for failure.
-    4 Least significant byte of the 2-byte handle value.  The highest order bit must be 0.
-    5 Most significant byte of the 2-byte handle value.  The highest order bit must be 0.
+    1 Sysex command byte DEVICE_RESPONSE (0x31).
+    2 Device Action byte that was provided in the associated DEVICE_QUERY.
+    3 Reserved (0)
+    4 LSB of the 2-byte handle value.  The highest order bit is 0.
+    5 MSB of the 2-byte handle value.  The highest order bit is 0.
+    6 LSB of the 14-bit return/status value.  The highest order bit is 0.
+    7 MSB of the 14-bit return/status value.  The highest order bit is 0.
 
 ####Device Action Types
 
@@ -193,16 +203,19 @@ or
     4 handle (minor) (LSB, bit 7 = 0)
     5 handle (major) (MSB, bit 15 = 0)
 
+####Status / Return Value from Methods
+
+Each of the device driver methods returns an `int` value to the caller.  For transmission by Firmata, the `int` is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The high-order 6 bits and a sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing back to the original caller.
 
 ###Parameter Block
 
 The parameter block contains the extra information needed to complete a request such as register numbers, byte counts, and the actual data read or written.  
 
-The parameter block is transmitted in the body of the message (all bytes after offset 5 except the final END\_SYSEX).  This block is encoded before transmission using an 8-bit to 7-bit encoder.  The standard encoder is Base-64.  This encode/decode is handled entirely by the Firmata libraries right before and after transmission of the Sysex messages and should not ordinarily be visible to the client application.
+The parameter block is transmitted in the body of the message (all bytes after offset 7 except the final END\_SYSEX).  This block is encoded before transmission using an 8-bit to 7-bit encoder.  The standard encoder is Base-64.  This encode/decode is handled entirely by the Firmata libraries right before and after transmission of the Sysex messages and should not ordinarily be visible to the client application.
 
 Character strings are stored on the server in UTF-8.  All eight bits in a UTF-8 byte are significant.  A '0' in the high order bit indicates a character in the first group of 127 characters (the ASCII character set).  A '1' in the high order bit indicates that the byte is part of a multi-byte sequence. Unfortunately, it might also indicate a Firmata control byte.  Encoding in Base-64 avoids this problem.
 
-In the following message tables, the message contents are all shown one byte per row.  Remember that all bytes starting at offset 6 are encoded prior to transmission. The values shown in the tables below starting at offset 6 are **the 8-bit values before or after encoding / decoding**, they are **_not_** the 7-bit quantities that are actually transmitted.
+In the following message tables, the message contents are all shown one byte per row.  Remember that all bytes starting at offset 8 are encoded prior to transmission. The values shown in the tables below starting at offset 8 are **the 8-bit values before or after encoding / decoding**, they are **_not_** the 7-bit quantities that are actually transmitted.
 
 ---
 
@@ -213,12 +226,14 @@ In the following message tables, the message contents are all shown one byte per
 ####_Query_
 > **Message Header** (Plain text)
 > 
->     0   START_SYSEX (0xF0)
->     1   DEVICE_QUERY (0x30)
->     2   0x00 (OPEN)
->     3   0 (Reserved)
->     4   flags (LSB)
->     5   flags (MSB)
+>     0  START_SYSEX (0xF0)
+>     1  DEVICE_QUERY (0x30)
+>     2  0x00 (OPEN)
+>     3  0 (Reserved)
+>     4  flags (LSB)
+>     5  flags (MSB)
+>     6  0 (Reserved)
+>     7  0 (Reserved)
 > 
 > **Parameter Block** (before encoding)
 > 
@@ -226,7 +241,7 @@ In the following message tables, the message contents are all shown one byte per
 > 
 > **Message End** (Plain text)
 > 
->     n+6 END_SYSEX (0XF7)
+>     k  END_SYSEX (0XF7)
 > 
 
 ####_Response_
@@ -236,12 +251,15 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x00 (OPEN)
->     3  success/error
+>     3  reserved (0)
 >     4  handle (LSB)
 >     5  handle (MSB)
+>     6  return/status (LSB)
+>     7  return/status (MSB)
+
 > **Message End** (Plain text)
 > 
->     6  END_SYSEX (0XF7)
+>     8  END_SYSEX (0XF7)
 
 ---
 ###Device Driver - Status
@@ -255,6 +273,8 @@ In the following message tables, the message contents are all shown one byte per
 >     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB)
+>     6  0 (Reserved)
+>     7  0 (Reserved)
 > 
 > **Parameter Block** (encoded during transmission with Base-64)
  
@@ -265,7 +285,7 @@ In the following message tables, the message contents are all shown one byte per
  
 > **Message End** (Plain text)
 > 
->     14  END_SYSEX (0XF7)
+>     16  END_SYSEX (0XF7)
 > 
 
 ####_Response_
@@ -275,16 +295,18 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x01 (STATUS)
->     3  success/error
+>     3  reserved (0)
 >     4  handle (LSB)
 >     5  handle (MSB)
+>     6  return/status (LSB)
+>     7  return/status (MSB)
 > 
 > **Parameter Block** (encoded during transmission with Base-64)
 >>     0..n Status data bytes read, if any
 >
 > **Message End** (Plain text)
 > 
->     n+6  END_SYSEX (0XF7)
+>     k  END_SYSEX (0XF7)
 
 ---
 ###Device Driver - Control
@@ -298,7 +320,9 @@ In the following message tables, the message contents are all shown one byte per
 >     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB) 
-> 
+>     6  0 (Reserved)
+>     7  0 (Reserved)
+>  
 > **Parameter Block** (encoded during transmission with Base-64)
 > 
 >>     0  count (LSB)
@@ -309,7 +333,7 @@ In the following message tables, the message contents are all shown one byte per
 >
 > **Message End** (Plain text)
 > 
->     n+6  END_SYSEX (0XF7)
+>     k  END_SYSEX (0XF7)
 > 
 ####_Response_
 
@@ -318,13 +342,15 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x02 (CONTROL)
->     3  success/error
+>     3  reserved (0)
 >     4  handle (LSB)
 >     5  handle (MSB)
+>     6  return/status (LSB)
+>     7  return/status (MSB)
 > 
 > **Message End** (Plain text)
 > 
->     6  END_SYSEX (0XF7)
+>     8  END_SYSEX (0XF7)
 
 ---
 ###Device Driver - Read
@@ -337,7 +363,9 @@ In the following message tables, the message contents are all shown one byte per
 >     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB)
-> 
+>     6  0 (Reserved)
+>     7  0 (Reserved)
+>
 > **Parameter Block** (encoded during transmission with Base-64)
  
 >>     0  count (LSB)
@@ -345,7 +373,7 @@ In the following message tables, the message contents are all shown one byte per
  
 > **Message End** (Plain text)
 > 
->     14  END_SYSEX (0XF7)
+>     12  END_SYSEX (0XF7)
 > 
 
 ####_Response_
@@ -355,16 +383,18 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x03 (READ)
->     3  success/error
+>     3  reserved (0)
 >     4  handle (LSB)
 >     5  handle (MSB)
+>     6  return/status (LSB)
+>     7  return/status (MSB)
 > 
 > **Parameter Block** (encoded during transmission with Base-64)
 >>     0..n Data bytes read, if any
 >
 > **Message End** (Plain text)
 > 
->     n+6  END_SYSEX (0XF7)
+>     k  END_SYSEX (0XF7)
 
 
 ---
@@ -378,7 +408,9 @@ In the following message tables, the message contents are all shown one byte per
 >     2  0x04 (WRITE)
 >     3  0 (Reserved)
 >     4  handle (LSB)
->     5  handle (MSB) 
+>     5  handle (MSB)
+>     6  0 (Reserved)
+>     7  0 (Reserved)
 > 
 > **Parameter Block** (encoded during transmission with Base-64)
 > 
@@ -388,7 +420,7 @@ In the following message tables, the message contents are all shown one byte per
 >
 > **Message End** (Plain text)
 > 
->     n+6  END_SYSEX (0XF7)
+>     k  END_SYSEX (0XF7)
 > 
 ####_Response_
 
@@ -397,13 +429,15 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x04 (WRITE)
->     3  success/error
+>     3  reserved (0)
 >     4  handle (LSB)
 >     5  handle (MSB)
+>     6  return/status (LSB)
+>     7  return/status (MSB)
 > 
 > **Message End** (Plain text)
 > 
->     6  END_SYSEX (0XF7)
+>     8  END_SYSEX (0XF7)
 
 
 ---
@@ -419,10 +453,12 @@ In the following message tables, the message contents are all shown one byte per
 >     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB) 
+>     6  0 (Reserved)
+>     7  0 (Reserved)
 > 
 > **Message End** (Plain text)
 > 
->     6  END_SYSEX (0XF7)
+>     8  END_SYSEX (0XF7)
 
 ####_Response_
 
@@ -431,12 +467,14 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  CLOSE (0x05)
->     3  success/error
+>     3  reserved (0)
 >     4  handle (LSB)
 >     5  handle (MSB) 
+>     6  return/status (LSB)
+>     7  return/status (MSB)
 > 
 > **Message End** (Plain text)
 > 
->     6  END_SYSEX (0XF7)
+>     8  END_SYSEX (0XF7)
 
 

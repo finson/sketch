@@ -60,12 +60,12 @@ void DeviceFeature::report() {
 
 //---------------------------------------------------------------------------
 
-  // The first four bytes of argv for DEVICE_QUERY messages are: action,
-  // reserved, handle-low, handle-high. They are all constrained to 7-bit
-  // values and are not encoded.  The bytes that follow, if any, are the
-  // parameter block. The parameter block is encoded with base-64 in the
-  // sysex message body during transmission to and from this Firmata
-  // server.
+  // The first six bytes of argv for DEVICE_QUERY messages are: action,
+  // reserved, handle-low, handle-high, reserved, reserved. They are all
+  // constrained to 7-bit values and are not encoded.  The bytes that follow,
+  // if any, are the parameter block. The parameter block is encoded with
+  // base-64 in the sysex message body during transmission to and from this
+  // Firmata server.
 
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 {
@@ -78,15 +78,17 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
   int action = argv[0];
   int handle = (argv[3] << 8) | argv[2];
 
-  int dpCount = base64_dec_len((char *)(argv + 4), argc-4);
+  int dpCount = base64_dec_len((char *)(argv + 6), argc-6);
   if (dpCount > MAX_DPB_LENGTH) {
     sendDeviceResponse(action, EMSGSIZE, handle);
     return true;
   }
 
   if (dpCount > 0) {
-    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 4), argc-4);
+    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 6), argc-6);
   }
+
+#error continue editing here
 
   int status = dispatchDeviceAction(action, &handle, &dpCount, dpBlock);
 

@@ -31,11 +31,11 @@ HelloDriver::HelloDriver(const char *dName, int count) :
 
 //---------------------------------------------------------------------------
 
-int HelloDriver::open(int *handle, const char *name, int flags) {
+int HelloDriver::open(const char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
-    Firmata.sendString(logicalUnits[minorHandle].getLogicalUnitName());
+    // Firmata.sendString(logicalUnits[minorHandle].getLogicalUnitName());
     if (strcmp(logicalUnits[minorHandle].getLogicalUnitName(), name) == 0) {
       break;
     }
@@ -54,9 +54,8 @@ int HelloDriver::open(int *handle, const char *name, int flags) {
     return EADDRINUSE;
   }
 
-  *handle = minorHandle;
   currentDevice->setOpen(true);
-  return ESUCCESS;
+  return minorHandle;
 }
 
 int HelloDriver::status(int handle, int reg, int count, byte *buf) {
@@ -69,7 +68,7 @@ int HelloDriver::status(int handle, int reg, int count, byte *buf) {
       buf[1] = (avg >> 8) & 0xFF;
       buf[2] = (avg >> 16) & 0xFF;
       buf[3] = (avg >> 24) & 0xFF;
-      return ESUCCESS;
+      return count;
     } else {
       return ENODATA;
     }
