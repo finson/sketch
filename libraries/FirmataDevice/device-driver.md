@@ -205,7 +205,9 @@ or
 
 ####Status / Return Value from Methods
 
-Each of the device driver methods returns an `int` value to the caller.  For transmission by Firmata, the `int` is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The high-order 6 bits and a sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing back to the original caller.
+Each of the device driver methods returns an `int` value to the caller.  For transmission by Firmata, the `int` is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The high-order 6 bits and a sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing back to the original caller.  
+
+Note that the byte count returned by the various methods is the number of actual bytes read or written, it is not the length of the encoded message body.  Once the message body is decoded back to the raw values on the client, the two lengths will again be equal.  The encode/decode should all happen outside the view of the caller, so this won't be a problem except as something to remember when debugging and looking at the messages as they are transmitted.
 
 ###Parameter Block
 
