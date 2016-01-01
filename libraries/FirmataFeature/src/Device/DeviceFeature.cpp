@@ -70,8 +70,8 @@ void DeviceFeature::report() {
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
 
-boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
-{
+boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
+
   byte dpBlock[1+MAX_DPB_LENGTH];  // decoded parameter block
 
   if (command != DEVICE_QUERY) {
@@ -98,18 +98,19 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
 }
 
 int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
-  int deviceIndex;
+  int deviceIndex = 0;
   int status = ENODEV;
-  int count;
-  int reg;
+  int count = 0;
+  int reg = 0;
   int unitHandle = (handle & 0x7F);
   int deviceHandle = ((handle >> 8) & 0x7F);
+  int flags = 0;
 
   switch (action) {
   case DD_OPEN:
-    int flags = handle;
+    flags = handle;
     for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-      status = majorDevices[deviceIndex]->open(const (char *)dpBlock, flags);
+      status = majorDevices[deviceIndex]->open((char *)dpBlock, flags);
       if (status == ENXIO || status == ENODEV) {
         continue;
       } else {
@@ -120,12 +121,12 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
 
   case DD_STATUS:
     count = ((dpBlock[1] & 0xFF) << 8) | (dpBlock[0] & 0xFF);
-    reg =   ((dpBlock[3] & 0xFF) << 8) | (dpBlock[2] & 0xFF);
+    reg   = ((dpBlock[3] & 0xFF) << 8) | (dpBlock[2] & 0xFF);
     return majorDevices[deviceHandle]->status(unitHandle,reg,count,dpBlock);
 
   case DD_CONTROL:
     count = ((dpBlock[1] & 0xFF) << 8)  | (dpBlock[0] & 0xFF);
-    reg =   ((dpBlock[3] & 0xFF) << 8)  | (dpBlock[2] & 0xFF);
+    reg   = ((dpBlock[3] & 0xFF) << 8)  | (dpBlock[2] & 0xFF);
     return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock+4);
 
   case DD_READ:
@@ -148,7 +149,7 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
 //  epB -> encoded parameter block
 
 void DeviceFeature::sendDeviceResponse(int action, int handle, int status) {
-  sendDeviceResponse(action,handle,status, 0 , 0);
+  sendDeviceResponse(action,handle,status, 0);
 }
 
 void DeviceFeature::sendDeviceResponse(int action, int handle, int status, const byte *dpB) {
@@ -165,8 +166,8 @@ void DeviceFeature::sendDeviceResponse(int action, int handle, int status, const
     Firmata.write(status & 0x7F);
     Firmata.write((status >> 8) & 0x7F);
   } else {                                     // status is error or bytecount
-    Firmata.write(status & 0x7F)
-    Firmata.write((status >> 7) & 0x7F)
+    Firmata.write(status & 0x7F);
+    Firmata.write((status >> 7) & 0x7F);
     if (status > 0 && status <= MAX_DPB_LENGTH) {  // status is bytecount
       int epCount = base64_encode((char *)epB, (char *)dpB, status);
       for (int idx=0; idx < epCount; idx++) {

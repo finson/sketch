@@ -27,7 +27,7 @@ public:
 
     // For direct (non-Sysex) use by DeviceDrivers and other local objects
 
-    int dispatchDeviceAction(int act, int minor, int *pc, byte *pv);
+    int dispatchDeviceAction(int act, int minor, int pc, byte *pv);
 
     // Device Driver methods
 

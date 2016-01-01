@@ -41,7 +41,7 @@ MCP9808Driver::MCP9808Driver(const char *dName, int deviceAddresses[], int addrC
 
 //---------------------------------------------------------------------------
 
-int MCP9808Driver::open(int *handle, const char *name, int flags) {
+int MCP9808Driver::open(const char *name, int flags) {
   uint8_t theRegister;
   int lun;
   for (lun = 0; lun < logicalUnitCount; lun++) {
