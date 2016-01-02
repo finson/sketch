@@ -164,8 +164,8 @@ The `DEVICE_QUERY` and `DEVICE_RESPONSE` message headers are Sysex message bytes
     1 Sysex command byte DEVICE_QUERY (0x30).
     2 Device Action byte, with values as described below.
     3 Reserved (0)
-    4 LSB of the 2-byte flags or handle value.  The highest order bit is 0.
-    5 MSB of the 2-byte flags or handle value.  The highest order bit is 0.
+    4 LSB of the 14-bit flags or handle value.  The highest order bit is 0.
+    5 MSB of the 14-bit flags or handle value.  The highest order bit is 0.
     6 Reserved (0)
     7 Reserved (0)
 
@@ -175,8 +175,8 @@ The `DEVICE_QUERY` and `DEVICE_RESPONSE` message headers are Sysex message bytes
     1 Sysex command byte DEVICE_RESPONSE (0x31).
     2 Device Action byte that was provided in the associated DEVICE_QUERY.
     3 Reserved (0)
-    4 LSB of the 2-byte handle value.  The highest order bit is 0.
-    5 MSB of the 2-byte handle value.  The highest order bit is 0.
+    4 LSB of the 14-bit handle value.  The highest order bit is 0.
+    5 MSB of the 14-bit handle value.  The highest order bit is 0.
     6 LSB of the 14-bit return/status value.  The highest order bit is 0.
     7 MSB of the 14-bit return/status value.  The highest order bit is 0.
 
@@ -193,21 +193,23 @@ These are 7-bit values, stored in Firmata `DEVICE_QUERY` and `DEVICE_RESPONSE` m
 
 ####Flags or Handle
 
-These are 7-bit values, stored in the Firmata `DEVICE_QUERY` and `DEVICE_QUERY` messages at offsets 4 and 5.  For convenience the two bytes can be stored together on the client in a single, wider integer variable (`int16_t`, `int32_t`, etc).
+These are signed 14-bit values, stored in the Firmata `DEVICE_QUERY` and `DEVICE_QUERY` messages at offsets 4 and 5.  The values are stored on the client in a single, wider integer variable (`int16_t`, `int32_t`, etc).
 
     4 flags (LSB, bit 7 = 0)
-    5 flags (MSB, bit 15 = 0)
+    5 flags (MSB, bit 7 = 0)
 
 or
 
-    4 handle (minor) (LSB, bit 7 = 0)
-    5 handle (major) (MSB, bit 15 = 0)
+    4 handle (LSB, bit 7 = 0)
+    5 handle (MSB, bit 7 = 0, bit 6 = 0 (sign bit))
 
 ####Status / Return Value from Methods
 
-Each of the device driver methods returns an `int` value to the caller.  For transmission by Firmata, the `int` is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The high-order 6 bits and a sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing back to the original caller.  
+Each of the device driver methods returns an `int` value to the caller.  The meaning of the returned `int` varies depending on the method called.  Handles, byte counts, and error status returns are all handled by Firmata the same way.  Handle values and byte counts are always positive, to distinguish them from error return values.
 
-Note that the byte count returned by the various methods is the number of actual bytes read or written, it is not the length of the encoded message body.  Once the message body is decoded back to the raw values on the client, the two lengths will again be equal.  The encode/decode should all happen outside the view of the caller, so this won't be a problem except as something to remember when debugging and looking at the messages as they are transmitted.
+For transmission by Firmata, the `int` is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The higher-order 6 bits and the sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing it back to the original caller.  
+
+Note that the byte count returned by the various methods is the number of actual bytes read or written, it is *not* the length of the encoded message body.  Once the message body is decoded back to the raw values on the client, the two lengths will again be equal.  The encode/decode should all happen outside the view of the caller, so this won't be a problem except as something to remember when debugging and looking at the messages as they are transmitted.
 
 ###Parameter Block
 
@@ -253,9 +255,9 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x00 (OPEN)
->     3  reserved (0)
->     4  handle (LSB)
->     5  handle (MSB)
+>     3  0 (Reserved)
+>     4  0 (Reserved)
+>     5  0 (Reserved)
 >     6  return/status (LSB)
 >     7  return/status (MSB)
 
@@ -297,7 +299,7 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x01 (STATUS)
->     3  reserved (0)
+>     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB)
 >     6  return/status (LSB)
@@ -344,7 +346,7 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x02 (CONTROL)
->     3  reserved (0)
+>     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB)
 >     6  return/status (LSB)
@@ -385,7 +387,7 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x03 (READ)
->     3  reserved (0)
+>     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB)
 >     6  return/status (LSB)
@@ -431,7 +433,7 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  0x04 (WRITE)
->     3  reserved (0)
+>     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB)
 >     6  return/status (LSB)
@@ -469,7 +471,7 @@ In the following message tables, the message contents are all shown one byte per
 >     0  START_SYSEX (0xF0)
 >     1  DEVICE_RESPONSE (0x31)
 >     2  CLOSE (0x05)
->     3  reserved (0)
+>     3  0 (Reserved)
 >     4  handle (LSB)
 >     5  handle (MSB) 
 >     6  return/status (LSB)

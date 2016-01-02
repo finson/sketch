@@ -60,12 +60,11 @@ void DeviceFeature::report() {
 
 //---------------------------------------------------------------------------
 
-  // The first six bytes of argv for DEVICE_QUERY messages are: action,
-  // reserved, handle-low, handle-high, reserved, reserved. They are all
-  // constrained to 7-bit values and are not encoded.  The bytes that follow,
-  // if any, are the parameter block. The parameter block is encoded with
-  // base-64 in the sysex message body during transmission to and from this
-  // Firmata server.
+// The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
+// handle-low, handle-high, reserved, reserved. They are all constrained to
+// 7-bit values.The bytes that follow, if any, are the parameter block. The
+// parameter block is encoded with base-64 in the sysex message body during
+// transmission to and from this Firmata server.
 
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
@@ -79,7 +78,7 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
   }
 
   int action = argv[0];
-  int handle = (argv[3] << 8) | argv[2];
+  int handle = (argv[3] << 7) | argv[2];
 
   int dpCount = base64_dec_len((char *)(argv + 6), argc-6);
   if (dpCount > MAX_DPB_LENGTH) {
@@ -103,7 +102,7 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
   int count = 0;
   int reg = 0;
   int unitHandle = (handle & 0x7F);
-  int deviceHandle = ((handle >> 8) & 0x7F);
+  int deviceHandle = ((handle >> 7) & 0x7F);
   int flags = 0;
 
   switch (action) {
@@ -117,7 +116,7 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
         break;
       }
     }
-    return (status < 0) ? status : ((deviceIndex & 0x7F) << 8) | (status & 0x7F);
+    return (status < 0) ? status : ((deviceIndex & 0x7F) << 7) | (status & 0x7F);
 
   case DD_STATUS:
     count = ((dpBlock[1] & 0xFF) << 8) | (dpBlock[0] & 0xFF);
@@ -160,19 +159,13 @@ void DeviceFeature::sendDeviceResponse(int action, int handle, int status, const
   Firmata.write(action & 0x7F);
   Firmata.write(0);
   Firmata.write(handle & 0x7F);
-  Firmata.write((handle >> 8) & 0x7F);
-
-  if (action == DD_OPEN && status >= 0) {      // status is handle
-    Firmata.write(status & 0x7F);
-    Firmata.write((status >> 8) & 0x7F);
-  } else {                                     // status is error or bytecount
-    Firmata.write(status & 0x7F);
-    Firmata.write((status >> 7) & 0x7F);
-    if (status > 0 && status <= MAX_DPB_LENGTH) {  // status is bytecount
-      int epCount = base64_encode((char *)epB, (char *)dpB, status);
-      for (int idx=0; idx < epCount; idx++) {
-        Firmata.write(epB[idx]);
-      }
+  Firmata.write((handle >> 7) & 0x7F);
+  Firmata.write(status & 0x7F);
+  Firmata.write((status >> 7) & 0x7F);
+  if (status > 0 && status <= MAX_DPB_LENGTH) {  // status is bytecount
+    int epCount = base64_encode((char *)epB, (char *)dpB, status);
+    for (int idx=0; idx < epCount; idx++) {
+      Firmata.write(epB[idx]);
     }
   }
   Firmata.write(END_SYSEX);
