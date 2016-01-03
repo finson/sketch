@@ -71,7 +71,7 @@ void DeviceFeature::report() {
 
 boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
 
-  byte dpBlock[1+MAX_DPB_LENGTH];  // decoded parameter block
+  byte dpBlock[1 + MAX_DPB_LENGTH]; // decoded parameter block
 
   if (command != DEVICE_QUERY) {
     return false;
@@ -80,14 +80,14 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
   int action = argv[0];
   int handle = (argv[3] << 7) | argv[2];
 
-  int dpCount = base64_dec_len((char *)(argv + 6), argc-6);
+  int dpCount = base64_dec_len((char *)(argv + 6), argc - 6);
   if (dpCount > MAX_DPB_LENGTH) {
     sendDeviceResponse(action, handle, EMSGSIZE);
     return true;
   }
 
   if (dpCount > 0) {
-    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 6), argc-6);
+    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 6), argc - 6);
   }
 
   int status = dispatchDeviceAction(action, handle, dpCount, dpBlock);
@@ -121,20 +121,20 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
   case DD_STATUS:
     count = ((dpBlock[1] & 0xFF) << 8) | (dpBlock[0] & 0xFF);
     reg   = ((dpBlock[3] & 0xFF) << 8) | (dpBlock[2] & 0xFF);
-    return majorDevices[deviceHandle]->status(unitHandle,reg,count,dpBlock);
+    return majorDevices[deviceHandle]->status(unitHandle, reg, count, dpBlock);
 
   case DD_CONTROL:
     count = ((dpBlock[1] & 0xFF) << 8)  | (dpBlock[0] & 0xFF);
     reg   = ((dpBlock[3] & 0xFF) << 8)  | (dpBlock[2] & 0xFF);
-    return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock+4);
+    return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock + 4);
 
   case DD_READ:
     count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
-    return majorDevices[deviceHandle]->read(unitHandle,count,dpBlock);
+    return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock);
 
   case DD_WRITE:
     count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
-    return majorDevices[deviceHandle]->read(unitHandle,count,dpBlock+2);
+    return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
 
   case DD_CLOSE:
     return majorDevices[deviceHandle]->close(unitHandle);
@@ -148,24 +148,32 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
 //  epB -> encoded parameter block
 
 void DeviceFeature::sendDeviceResponse(int action, int handle, int status) {
-  sendDeviceResponse(action,handle,status, 0);
+  sendDeviceResponse(action, handle, status, 0);
 }
 
 void DeviceFeature::sendDeviceResponse(int action, int handle, int status, const byte *dpB) {
-  byte epB[1+((MAX_DPB_LENGTH+2)/3)*4];
+  byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
 
   Firmata.write(START_SYSEX);
   Firmata.write(DEVICE_RESPONSE);
   Firmata.write(action & 0x7F);
   Firmata.write(0);
-  Firmata.write(handle & 0x7F);
-  Firmata.write((handle >> 7) & 0x7F);
-  Firmata.write(status & 0x7F);
-  Firmata.write((status >> 7) & 0x7F);
-  if (status > 0 && status <= MAX_DPB_LENGTH) {  // status is bytecount
-    int epCount = base64_encode((char *)epB, (char *)dpB, status);
-    for (int idx=0; idx < epCount; idx++) {
-      Firmata.write(epB[idx]);
+  if (action == DD_OPEN) {
+    Firmata.write(0);
+    Firmata.write(0);
+    Firmata.write(status & 0x7F);                   // status is handle or error
+    Firmata.write((status >> 7) & 0x7F);
+  } else {
+    Firmata.write(handle & 0x7F);
+    Firmata.write((handle >> 7) & 0x7F);
+    Firmata.write(status & 0x7F);                   // status is bytecount or error
+    Firmata.write((status >> 7) & 0x7F);
+
+    if (status > 0 && status <= MAX_DPB_LENGTH) {   // status is bytecount
+      int epCount = base64_encode((char *)epB, (char *)dpB, status);
+      for (int idx = 0; idx < epCount; idx++) {
+        Firmata.write(epB[idx]);
+      }
     }
   }
   Firmata.write(END_SYSEX);
