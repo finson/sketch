@@ -42,7 +42,7 @@
 // Core Sysex commands (none have an associated pin mode)
 
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware (FirmataCore)
-#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataCore)
+#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataExt)
 #define STRING_DATA             0x71 // a string message with 14-bits per char (FirmataCore)
 
 #define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers (FirmataExt)

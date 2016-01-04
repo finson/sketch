@@ -51,8 +51,7 @@
 #define EIDRM       (-43)  /* Identifier removed */
 #define ECHRNG      (-44)  /* Channel number out of range */
 #define EL2NSYNC    (-45)  /* Level 2 not synchronized */
-#define EL3HLT      (-46)  /* Level 3 halted.  Note: DeviceFeature uses this value for ENOTSUP also */
-#define ENOTSUP EL3HLT  /* Parameter values are valid, but the functionality they request is not available */
+#define EL3HLT      (-46)  /* Level 3 halted */
 #define EL3RST      (-47)  /* Level 3 reset */
 #define ELNRNG      (-48)  /* Link number out of range */
 #define EUNATCH     (-49)  /* Protocol driver not attached */
@@ -136,6 +135,7 @@
 #define EKEYREVOKED    (-128)  /* Key has been revoked */
 #define EKEYREJECTED   (-129)  /* Key was rejected by service */
 #define EOWNERDEAD     (-130)  /* Owner died */
-#define ENOTRECOVERABLE (-131)  /* State not recoverable */
+#define ENOTRECOVERABLE (-131) /* State not recoverable */
+#define ENOTSUP        (-132)  /*Parameter values are valid, but the functionality they request is not available */
 
 #endif
