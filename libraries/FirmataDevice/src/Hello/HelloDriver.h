@@ -16,7 +16,7 @@ public:
 
     HelloDriver(const char *dName = "Hello", int count = 1);
 
-    int open(int *handle, const char *name, int flags = 0);
+    int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
     int control(int handle, int reg, int count, byte *buf);
     int read(int handle, int count, byte *buf);

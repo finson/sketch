@@ -31,11 +31,11 @@ HelloDriver::HelloDriver(const char *dName, int count) :
 
 //---------------------------------------------------------------------------
 
-int HelloDriver::open(int *handle, const char *name, int flags) {
+int HelloDriver::open(const char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
-    Firmata.sendString(logicalUnits[minorHandle].getLogicalUnitName());
+    // Firmata.sendString(logicalUnits[minorHandle].getLogicalUnitName());
     if (strcmp(logicalUnits[minorHandle].getLogicalUnitName(), name) == 0) {
       break;
     }
@@ -54,9 +54,8 @@ int HelloDriver::open(int *handle, const char *name, int flags) {
     return EADDRINUSE;
   }
 
-  *handle = minorHandle;
   currentDevice->setOpen(true);
-  return ESUCCESS;
+  return minorHandle;
 }
 
 int HelloDriver::status(int handle, int reg, int count, byte *buf) {
@@ -69,7 +68,7 @@ int HelloDriver::status(int handle, int reg, int count, byte *buf) {
       buf[1] = (avg >> 8) & 0xFF;
       buf[2] = (avg >> 16) & 0xFF;
       buf[3] = (avg >> 24) & 0xFF;
-      return ESUCCESS;
+      return 4;
     } else {
       return ENODATA;
     }
@@ -98,19 +97,18 @@ int HelloDriver::close(int handle) {
 
 //---------------------------------------------------------------------------
 
-// Collect an interval sample.  The sample array is actually 0..SAMPLE_COUNT,
-// and the useful samples are in 1..SAMPLE_COUNT.
+// Collect a millisecond interval (report()) duration sample.  The sample array
+// is actually 0..SAMPLE_COUNT, and the useful samples are in 1..SAMPLE_COUNT.
 
 int HelloDriver::millisecondTimeBase() {
   currentTime[0] = millis();
-  currentTime[1] = micros();
 
   unsigned long elapsedTime;
 
   if (currentTime[0] >= previousTime[0]) {
     elapsedTime = currentTime[0]-previousTime[0];
   } else {
-    elapsedTime = (ULONG_MAX - previousTime[0])+(currentTime[0]+1);
+    elapsedTime = (ULONG_MAX - (previousTime[0]-currentTime[0])) + 1;
   }
 
   samples[sampleIndex] = elapsedTime;

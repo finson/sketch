@@ -2,9 +2,10 @@
 // Pin Modes
 
 #include <Mode/I2CMode.h>
-#include <Mode/StepperMode.h>
+//#include <Mode/StepperMode.h>
 
-FirmataMode *selectedModes[] = {&I2CMode, &StepperMode,0};
+FirmataMode *selectedModes[] = {&I2CMode,0};
+// FirmataMode *selectedModes[] = {&I2CMode, &StepperMode,0};
 
 // Features
 
@@ -34,12 +35,12 @@ FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,
 
 // Device Drivers
 
-#include <Hello/HelloDriver.h>
-HelloDriver ddHello("Hello",2);
+// #include <Hello/HelloDriver.h>
+// HelloDriver ddHello("Hello",2);
 
-// #include <MCP9808/MCP9808Driver.h>
-// MCP9808Driver ddMCP9808("MCP9808",0x18,1);
+#include <MCP9808/MCP9808Driver.h>
+MCP9808Driver ddMCP9808("MCP9808",0x18,1);
 
-DeviceDriver *selectedDevices[] = {&ddHello,0};
-//DeviceDriver *selectedDevices[] = {&ddMCP9808,0};
-// DeviceDriver *selectedDevices[] = {&ddHello,&ddMCP9808,0};
+// DeviceDriver *selectedDevices[] = {&ddHello,0};
+DeviceDriver *selectedDevices[] = {&ddMCP9808,0};
+//DeviceDriver *selectedDevices[] = {&ddHello,&ddMCP9808,0};

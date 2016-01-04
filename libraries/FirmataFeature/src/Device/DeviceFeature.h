@@ -27,25 +27,25 @@ public:
 
     // For direct (non-Sysex) use by DeviceDrivers and other local objects
 
-    int dispatchDeviceAction(int act, int *minor, int *pc, byte *pv);
+    int dispatchDeviceAction(int act, int minor, int pc, byte *pv);
 
     // Device Driver methods
 
-    int open(int *handle, const char *name, int flags = 0);
+    int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
     int control(int handle, int reg, int count, byte *buf);
     int read(int handle, int count, byte *buf);
     int write(int handle, int count, byte *buf);
     int close(int handle);
 
+    void sendDeviceResponse(int handle, int action, int status);
+    void sendDeviceResponse(int handle, int action, int status, const byte *dpBlock);
+
 private:
 
     int majorDeviceCount;
     DeviceDriver *majorDevices[MAX_MGR_DEVICE_COUNT+1];
     LogicalUnitInfo logicalUnits[MAX_MGR_LU_COUNT];
-
-    void sendDeviceResponse(int action, int status, int handle, int dpCount, byte *dpBlock);
-    void sendDeviceResponse(int action, int status, int handle);
 
 };
 

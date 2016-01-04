@@ -60,118 +60,120 @@ void DeviceFeature::report() {
 
 //---------------------------------------------------------------------------
 
-  // The first four bytes of argv for DEVICE_QUERY messages are: action,
-  // reserved, handle-low, handle-high. They are all constrained to 7-bit
-  // values and are not encoded.  The bytes that follow, if any, are the
-  // parameter block. The parameter block is encoded with base-64 in the
-  // sysex message body during transmission to and from this Firmata
-  // server.
+// The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
+// handle-low, handle-high, reserved, reserved. They are all constrained to
+// 7-bit values.The bytes that follow, if any, are the parameter block. The
+// parameter block is encoded with base-64 in the sysex message body during
+// transmission to and from this Firmata server.
 
-boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
-{
-  byte dpBlock[MAX_DPB_LENGTH];  // decoded parameter block
+//  dpB -> decoded parameter block
+//  epB -> encoded parameter block
+
+boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
+
+  byte dpBlock[1 + MAX_DPB_LENGTH]; // decoded parameter block
 
   if (command != DEVICE_QUERY) {
     return false;
   }
 
   int action = argv[0];
-  int handle = (argv[3] << 8) | argv[2];
+  int handle = (argv[3] << 7) | argv[2];
 
-  int dpCount = base64_dec_len((char *)(argv + 4), argc-4);
+  int dpCount = base64_dec_len((char *)(argv + 6), argc - 6);
   if (dpCount > MAX_DPB_LENGTH) {
-    sendDeviceResponse(action, EMSGSIZE, handle);
+    sendDeviceResponse(handle, action, EMSGSIZE);
     return true;
   }
 
   if (dpCount > 0) {
-    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 4), argc-4);
+    dpCount = base64_decode((char *)dpBlock, (char *)(argv + 6), argc - 6);
   }
 
-  int status = dispatchDeviceAction(action, &handle, &dpCount, dpBlock);
+  int status = dispatchDeviceAction(action, handle, dpCount, dpBlock);
 
-  sendDeviceResponse(action, status, handle, dpCount, dpBlock);
+  sendDeviceResponse(handle, action, status, dpBlock);
   return true;
 }
 
-int DeviceFeature::dispatchDeviceAction(int action, int *handle, int *bodyCount, byte *body) {
-  int flags;
-  int deviceIndex;
+int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
+  int deviceIndex = 0;
   int status = ENODEV;
-  int count;
-  int reg;
-  int unitHandle = (*handle & 0x7F);
-  int deviceHandle = ((*handle >> 8) & 0x7F);
+  int count = 0;
+  int reg = 0;
+  int unitHandle = (handle & 0x7F);
+  int deviceHandle = ((handle >> 7) & 0x7F);
+  int flags = 0;
 
   switch (action) {
   case DD_OPEN:
-    flags = *handle;
+    flags = handle;
     for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-      status = majorDevices[deviceIndex]->open(&unitHandle, (char *)body, flags);
-      if (status == ESUCCESS) break;
+      status = majorDevices[deviceIndex]->open((char *)dpBlock, flags);
       if (status == ENXIO || status == ENODEV) {
         continue;
       } else {
         break;
       }
     }
-    *handle = (status == ESUCCESS) ? ((deviceIndex & 0x7F) << 8) | (unitHandle & 0x7F) : 0;
-    *bodyCount = 0;
-    return status;
+    return (status < 0) ? status : ((deviceIndex & 0x7F) << 7) | (status & 0x7F);
 
   case DD_STATUS:
-    count = ((body[1] & 0xFF) << 8) | (body[0] & 0xFF);
-    reg =   ((body[3] & 0xFF) << 8) | (body[2] & 0xFF);
-    status = majorDevices[deviceHandle]->status(unitHandle,reg,count,body);
-    *bodyCount = (status == ESUCCESS) ? count : 0;
-    return status;
+    count = ((dpBlock[1] & 0xFF) << 8) | (dpBlock[0] & 0xFF);
+    reg   = ((dpBlock[3] & 0xFF) << 8) | (dpBlock[2] & 0xFF);
+    return majorDevices[deviceHandle]->status(unitHandle, reg, count, dpBlock);
 
   case DD_CONTROL:
-    count = ((body[1] & 0xFF) << 8)  | (body[0] & 0xFF);
-    reg =   ((body[3] & 0xFF) << 8)  | (body[2] & 0xFF);
-    status = majorDevices[deviceHandle]->control(unitHandle, reg, count, body+4);
-    *bodyCount = 0;
-    return status;
+    count = ((dpBlock[1] & 0xFF) << 8)  | (dpBlock[0] & 0xFF);
+    reg   = ((dpBlock[3] & 0xFF) << 8)  | (dpBlock[2] & 0xFF);
+    return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock + 4);
 
   case DD_READ:
-    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    status = majorDevices[deviceHandle]->read(unitHandle,count,body);
-    *bodyCount = (status == ESUCCESS) ? count : 0;
-    return status;
+    count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
+    return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock);
 
   case DD_WRITE:
-    count = ((body[1] & 0xFF) << 8) | ((body[0] & 0xFF));
-    status = majorDevices[deviceHandle]->read(unitHandle,count,body+2);
-    *bodyCount =  0;
-    return status;
+    count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
+    return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
 
   case DD_CLOSE:
-    status = majorDevices[deviceHandle]->close(unitHandle);
-    *bodyCount =  0;
-    return status;
+    return majorDevices[deviceHandle]->close(unitHandle);
 
   default:
     return ENOSYS;
   }
 }
 
-void DeviceFeature::sendDeviceResponse(int action, int status, int handle) {
-  sendDeviceResponse(action,status,handle, 0 , 0);
+//  dpB -> decoded parameter block
+//  epB -> encoded parameter block
+
+void DeviceFeature::sendDeviceResponse(int handle, int action, int status) {
+  sendDeviceResponse(handle, action, status, 0);
 }
 
-void DeviceFeature::sendDeviceResponse(int action, int status, int handle, int dpCount, byte *dpBlock) {
-  byte encodeBuffer[1+((MAX_DPB_LENGTH+2)/3)*4];
+void DeviceFeature::sendDeviceResponse(int handle, int action, int status, const byte *dpB) {
+  byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
 
   Firmata.write(START_SYSEX);
   Firmata.write(DEVICE_RESPONSE);
   Firmata.write(action & 0x7F);
-  Firmata.write(status & 0x7F);
-  Firmata.write(handle & 0x7F);
-  Firmata.write((handle >> 8) & 0x7F);
-  if (dpCount > 0 && dpCount <= MAX_DPB_LENGTH) {
-    int epCount = base64_encode((char *)encodeBuffer, (char *)dpBlock, dpCount);
-    for (int idx=0; idx < epCount; idx++) {
-      Firmata.write(encodeBuffer[idx]);
+  Firmata.write(0);
+  if (action == DD_OPEN) {
+    Firmata.write(0);
+    Firmata.write(0);
+    Firmata.write(status & 0x7F);                   // status is handle or error
+    Firmata.write((status >> 7) & 0x7F);
+  } else {
+    Firmata.write(handle & 0x7F);
+    Firmata.write((handle >> 7) & 0x7F);
+    Firmata.write(status & 0x7F);                   // status is bytecount or error
+    Firmata.write((status >> 7) & 0x7F);
+
+    if (status > 0 && status <= MAX_DPB_LENGTH) {   // status is bytecount
+      int epCount = base64_encode((char *)epB, (char *)dpB, status);
+      for (int idx = 0; idx < epCount; idx++) {
+        Firmata.write(epB[idx]);
+      }
     }
   }
   Firmata.write(END_SYSEX);
@@ -183,7 +185,7 @@ void DeviceFeature::sendDeviceResponse(int action, int status, int handle, int d
 // By this means, the DriverFeature can be controlled just like the individual
 // device drivers are.
 
-int DeviceFeature::open(int *handle, const char *name, int flags) {
+int DeviceFeature::open(const char *name, int flags) {
 
   int minorHandle;
   for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
@@ -206,8 +208,7 @@ int DeviceFeature::open(int *handle, const char *name, int flags) {
   }
 
   currentDevice->setOpen(true);
-  *handle = minorHandle;
-  return ESUCCESS;
+  return minorHandle;
 }
 
 int DeviceFeature::status(int handle, int reg, int count, byte *buf) {

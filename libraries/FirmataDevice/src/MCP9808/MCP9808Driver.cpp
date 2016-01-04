@@ -41,7 +41,7 @@ MCP9808Driver::MCP9808Driver(const char *dName, int deviceAddresses[], int addrC
 
 //---------------------------------------------------------------------------
 
-int MCP9808Driver::open(int *handle, const char *name, int flags) {
+int MCP9808Driver::open(const char *name, int flags) {
   uint8_t theRegister;
   int lun;
   for (lun = 0; lun < logicalUnitCount; lun++) {
@@ -79,8 +79,7 @@ int MCP9808Driver::open(int *handle, const char *name, int flags) {
   }
 
   currentDevice->setOpen(true);
-  *handle = lun;
-  return ESUCCESS;
+  return lun;
 }
 /**
  * Read a status register on the device. For the MCP9808, there are nine
@@ -107,7 +106,7 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
     buf[0] = (v >> 8) & 0xFF;
     buf[1] = v & 0xFF;
   }
-  return ESUCCESS;
+  return count;
 }
 
 int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
@@ -129,7 +128,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   } else {
     I2CMode.write16(address, reg, (((buf[0] & 0xFF) << 8) | (buf[1] & 0xFF)));
   }
-  return ESUCCESS;
+  return count;
 }
 
 int MCP9808Driver::read(int handle, int count, byte *buf) {
@@ -148,7 +147,7 @@ int MCP9808Driver::read(int handle, int count, byte *buf) {
   buf[0] = (v >> 8) & 0xFF;
   buf[1] = v & 0xFF;
 
-  return ESUCCESS;
+  return count;
 }
 
 int MCP9808Driver::write(int handle, int count, byte *buf) {
@@ -163,122 +162,3 @@ int MCP9808Driver::close(int lun) {
   }
   return ESUCCESS;
 }
-
-//     /**
-//      * @throws IOException
-//      * @see ws.tuxi.lib.firmata.device.DeviceDriver#control(int, int, int, byte[])
-//      */
-//     @Override
-//     public int control(int handle, int reg, int count, byte[] buf) throws IOException {
-//         I2CDeviceInfo currentDevice;
-//         FirmataMessage request;
-
-//         currentDevice = (I2CDeviceInfo) devices.get(handle);
-
-//         if (!currentDevice.isOpen()) {
-//             throw new DeviceException("Device must be open to control it: " + currentDevice.getDeviceName());
-//         }
-//         if (buf.length < count) {
-//             throw new DeviceException(
-//                     "Buffer length '" + buf.length + "' too small for requested count '" + count + "'.");
-//         }
-
-//         if (reg != MCP9808Register.RESOLUTION.ordinal() && count != 2) {
-//             throw new ProtocolException("MCP9808 register " + reg + " control message is 2 bytes long, not " + count
-//                     + " as requested in this call.");
-//         }
-
-//         if (reg == MCP9808Register.RESOLUTION.ordinal() && count != 1) {
-//             throw new ProtocolException(
-//                     "MCP9808 resolution control message is 1 byte long, not " + count + " as requested in this call.");
-//         }
-
-//         // Note that, at least for this device, the internal register address is sent as the first
-//         // byte of the data being written.
-
-//         // Also, according to the data sheet, "This device does not support sequential register
-//         // read/write. Each register needs to be addressed using the register pointer." I think
-//         // that means that each write needs to start with the 8-bit register number, followed by
-//         // two data bytes (or one for the resolution register).
-
-//         // So before sending the user's data, we prepend it with the requested register number.
-
-//         int[] dataToWrite = new int[buf.length + 1];
-//         dataToWrite[0] = reg & 0xFF;
-//         int dataIndex = 1;
-//         for (byte b : buf) {
-//             dataToWrite[dataIndex++] = Byte.toUnsignedInt(b);
-//         }
-
-//         request = new I2CRequestWrite(currentDevice.getDeviceAddress(), dataToWrite.length, dataToWrite);
-//         logger.trace("Control request: {}", request.toString());
-//         qOut.writeMessage(request);
-
-//         return count;
-//     }
-
-//     /**
-//      * The read method on this device always reads the two ambient temperature bytes.
-//      *
-//      * @throws IOException
-//      *
-//      * @see ws.tuxi.lib.firmata.device.DeviceDriver#read(int)
-//      */
-//     @Override
-//     public int read(int handle, int count, byte[] buf) throws IOException {
-//         FirmataMessage query;
-//         FirmataMessage response;
-//         I2CDeviceInfo currentDevice = (I2CDeviceInfo) devices.get(handle);
-
-//         if (!currentDevice.isOpen()) {
-//             throw new DeviceException("Device must be open to control it: " + currentDevice.getDeviceName());
-//         }
-
-//         if (count != 2) {
-//             throw new DeviceException(
-//                     "MCP9808 read result is always 2 bytes long, not " + count + " as requested in this call.");
-//         }
-//         if (buf.length < count) {
-//             throw new DeviceException(
-//                     "Buffer length '" + buf.length + "' too small for requested count '" + count + "'.");
-//         }
-
-//         query = new I2CRequestRead(currentDevice.getDeviceAddress(), MCP9808Register.AMBIENT_TEMP.ordinal(), 2);
-//         qOut.writeMessage(query);
-
-//         do {
-//             response = qIn.readMessage();
-//         } while (!I2CReply.class.isAssignableFrom(response.getClass()));
-
-//         I2CReply msg = (I2CReply) response;
-//         if (msg.getRegister() != MCP9808Register.AMBIENT_TEMP.ordinal()) {
-//             throw new ProtocolException("MCP9808 response register '" + msg.getRegister()
-//                     + "' does not match request register '" + MCP9808Register.AMBIENT_TEMP.ordinal() + "'.");
-//         }
-//         buf[0] = (byte) msg.getData(0);
-//         buf[1] = (byte) msg.getData(1);
-//         logger.debug("Read {} bytes: {}, {}", 2, Integer.toHexString(Byte.toUnsignedInt(buf[0])),
-//                 Integer.toHexString(Byte.toUnsignedInt(buf[1])));
-//         return 2;
-//     }
-
-//     /**
-//      * @see ws.tuxi.lib.firmata.device.DeviceDriver#write(int, int, byte[])
-//      */
-//     @Override
-//     public int write(int handle, int count, byte[] buf) {
-//         throw new UnsupportedOperationException("Device '" + this.toString(handle) + "' does not support write().");
-//     }
-
-//     @Override
-//     public int close(int handle) throws IOException {
-//         String name = devices.get(handle).getDeviceName();
-//         if (devices.get(handle).isOpen()) {
-//             devices.get(handle).setOpen(false);
-//         } else {
-//             throw new DeviceException("Could not close '" + name + "', " + DeviceStatus.DEVICE_ALREADY_CLOSED);
-//         }
-//         logger.info("Device {} closed successfully.  Handle was {}.", name, handle);
-//         return 0;
-//     }
-// }
