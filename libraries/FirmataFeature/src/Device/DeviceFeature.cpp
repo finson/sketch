@@ -82,7 +82,7 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
 
   int dpCount = base64_dec_len((char *)(argv + 6), argc - 6);
   if (dpCount > MAX_DPB_LENGTH) {
-    sendDeviceResponse(action, handle, EMSGSIZE);
+    sendDeviceResponse(handle, action, EMSGSIZE);
     return true;
   }
 
@@ -92,7 +92,7 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
 
   int status = dispatchDeviceAction(action, handle, dpCount, dpBlock);
 
-  sendDeviceResponse(action, handle, status, dpBlock);
+  sendDeviceResponse(handle, action, status, dpBlock);
   return true;
 }
 
@@ -147,11 +147,11 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
 
-void DeviceFeature::sendDeviceResponse(int action, int handle, int status) {
-  sendDeviceResponse(action, handle, status, 0);
+void DeviceFeature::sendDeviceResponse(int handle, int action, int status) {
+  sendDeviceResponse(handle, action, status, 0);
 }
 
-void DeviceFeature::sendDeviceResponse(int action, int handle, int status, const byte *dpB) {
+void DeviceFeature::sendDeviceResponse(int handle, int action, int status, const byte *dpB) {
   byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
 
   Firmata.write(START_SYSEX);

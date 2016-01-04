@@ -38,14 +38,14 @@ public:
     int write(int handle, int count, byte *buf);
     int close(int handle);
 
+    void sendDeviceResponse(int handle, int action, int status);
+    void sendDeviceResponse(int handle, int action, int status, const byte *dpBlock);
+
 private:
 
     int majorDeviceCount;
     DeviceDriver *majorDevices[MAX_MGR_DEVICE_COUNT+1];
     LogicalUnitInfo logicalUnits[MAX_MGR_LU_COUNT];
-
-    void sendDeviceResponse(int action, int handle, int status);
-    void sendDeviceResponse(int action, int handle, int status, const byte *dpBlock);
 
 };
 
