@@ -1,6 +1,13 @@
+
+
+----------
+Jan 2016 V 0.2.0 beta.  Doug Johnson (finson@whidbey.com) 
+
+----------
+
 ##Firmata Feature: DeviceFeature and Device Drivers
 
-Proposed for addition in Firmata 2.6.
+Proposed for addition in Firmata 2.6 or later.
 
 The purpose of this feature is to facilitate arbitrary additions to Firmata capabilities without requiring a central registration or causing frequent command code conflicts.  The feature is implemented with a new FirmataFeature module `DeviceFeature`, a pair of new Sysex commands (`DEVICE_QUERY` and `DEVICE_RESPONSE`), and the concept of a DeviceDriver abstract class with well defined method signatures.  
 
@@ -26,21 +33,13 @@ Some terms with specific meanings for this feature are *device*, *logical unit* 
 
 The Device Driver API includes six methods documented below.  The API is intended to be implemented by a device driver module on the server side (Firmata micro) exactly as written.  On the client side (client host), the same API calls should be implemented, but there will be small changes dictated by the syntax of the language used for the client.  Client-side proxy device drivers and server-side device drivers always use this API and never compose Firmata messages themselves, instead they rely on Firmata to do that.
 
-In the most common architecture, the device driver implements the main device control code on the server and provides access using the specified API.  A client device driver also implements the API, and acts as a proxy for the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the component(s) using local capabilities.  In this scenario, the server side device driver receives the same calls and parameters as were provided to the proxy on the client.
+In the most common architecture, the device driver implements the main device control code on the server and provides access using the specified API.  A proxy on the client also implements the API signatures, and acts as a bridge to the actual device driver and uses the Device Driver Sysex messages DEVICE\_QUERY and DEVICE\_RESPONSE to control the server side device driver, which in turn controls the component(s) using local capabilities.  In this scenario, the server side device driver receives the same calls and parameters as were provided to the proxy on the client.
 
 On the other hand, it is also possible for a device driver to implement the main control code on the client and provide access there using the same API. In this case the client device driver uses existing Firmata Features and commands as necessary to control the remote component(s) directly and according to the data sheet.  In this scenario, the server side Firmata responds to standard Firmata commands as received and there is no specific device driver needed on the server.
 
 ####Device Status and Control Registers
 
-The status and control methods operate based on register numbers.  On an actual device, physical register numbers usually start at 0 and max out at a relatively low value like 16 or 32, depending on the device.  In addition to the positive physical register numbers, this DeviceDriver API also uses negative register numbers to identify virtual quantities and actions associated with the device.  Common virtual status register identifiers include:
-
-    -1  Device default name and a.b.c version number
-    -2  Get LUN configuration 
-
-  Common virtual control register identifiers include:
-
-    -1  Reset the device hardware to power-on defaults if possible.
-    -2  Modify LUN configuration
+The status and control methods operate based on register numbers.  On an actual device, physical register numbers usually start at 0 and max out at a relatively low value like 16 or 32, depending on the device.  This DeviceDriver API uses a 16-bit signed integer to identify the register of interest, so virtual quantities and actions can be implemented in addition to the actual physical device capabilities.
 
 ####Status Return from Methods
 
@@ -207,7 +206,7 @@ or
 
 Each of the device driver methods returns an `int` value to the caller.  The meaning of the returned `int` varies depending on the method called.  Handles, byte counts, and error status returns are all handled by Firmata the same way.  Handle values and byte counts are always positive, to distinguish them from error return values.
 
-For transmission by Firmata, the `int` is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The higher-order 6 bits and the sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing it back to the original caller.  
+For transmission by Firmata, the `int` being returned is considered to be a 14-bit signed integer.  The low-order 7 bits are put in the LSB, and bit 7 is set to 0.  The higher-order 6 bits and the sign bit are put in the MSB, and bit 7 is set to 0.  The resulting two bytes are stored in the header at offsets 6 and 7.  The value is reassembled and sign extended by Firmata on the client side before passing it back to the original caller.  
 
 Note that the byte count returned by the various methods is the number of actual bytes read or written, it is *not* the length of the encoded message body.  Once the message body is decoded back to the raw values on the client, the two lengths will again be equal.  The encode/decode should all happen outside the view of the caller, so this won't be a problem except as something to remember when debugging and looking at the messages as they are transmitted.
 
