@@ -1,49 +1,28 @@
-#ifndef StepperMode_h
-#define StepperMode_h
+#ifndef CommonStepper_h
+#define CommonStepper_h
 
 #include <FirmataMode.h>
-#include <CommonStepper.h>
 
 /**
- * This abstract class defines the methods that are available to a device
- * driver that wishes to control stepper motors.  The concrete subclasses
+ * This abstract class defines the methods that are available to any
+ * caller that wishes to control stepper motors.  The concrete subclasses
  * implement the methods as well as they can, depending on what underlying
  * library they use.  Not all libraries can support all the defined methods
  * fully, but the subclasses provide the best implementation they can, given
  * the constraints of their library.
  */
 
-class StepperModeClass: public FirmataMode {
+class CommonStepper {
 
 public:
-
-  // Firmata access to capabilities
-
-  boolean handleSetPinMode(byte pin, int mode);
-  void handleGetCapability(byte pin);
-
-  // Implementation of capabilities
-
-  void addStepper(CommonStepper motor);
-
-  void step(int n);
   void reset();
-  void update()
-
 
   //-----------------------------------------------
 
-/**
- * Called on a microsecond based interval in order to update stepper positions.
- * @param deltaMicros Length, in microseconds, of the interval since the last call to this
- * method.
- */
+// FirmataExt calls these methods on short, regular intervals
+
   virtual void update(unsigned long deltaMicros) = 0;
-/**
- * Called on a millisecond based interval in order to report stepper completion.
- * @param deltaMillis Length, in milliseconds, of the interval since the last call to this method.
- */
-  virtual void report(unsigned long deltaMillis) {};
+  virtual void report(unsigned long deltaMillis) = 0;
 
 // Basic Firmata Stepper library
 
