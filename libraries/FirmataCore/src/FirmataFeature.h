@@ -11,7 +11,7 @@ class FirmataFeature
     virtual boolean handleFeatureSysex(byte command, byte argc, byte* argv) = 0;
     virtual void reset() = 0;
 
-    virtual void report() {};
+    virtual void report(unsigned long deltaMillis) {};
     virtual void update(unsigned long deltaMicros) {};
 };
 
