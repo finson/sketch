@@ -18,7 +18,6 @@ public:
 
   boolean handleFeatureSysex(byte command, byte argc, byte *argv) final { return false;}
 
-private:
 };
 
 #endif
