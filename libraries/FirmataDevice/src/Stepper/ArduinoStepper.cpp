@@ -6,23 +6,30 @@
  *
  * These are the Stepper library methods available to us while implementing the
  * CommonStepper interface.
-
+ *
+ * Stepper(steps, p1, p2)
+ * Stepper(steps, p1, p2, p3, p4)
  * void setSpeed(long whatSpeed);
  * void step(int number_of_steps);   // blocking
  * int version(void);
- *
  */
 
   //-----Setup------------------------------------------
 
-  ArduinoStepper::ArduinoStepper(int steps, int p1, int p2): Stepper(steps, p1, p2) {}
-  ArduinoStepper::ArduinoStepper(int steps, int p1, int p2, int p3, int p4): Stepper(steps, p1, p2, p3, p4) {}
+  ArduinoStepper::ArduinoStepper(int steps, int p1, int p2):
+   Stepper(steps, p1, p2),
+   stepsPerRevolution(steps) {}
+
+  ArduinoStepper::ArduinoStepper(int steps, int p1, int p2, int p3, int p4):
+  Stepper(steps, p1, p2, p3, p4),
+  stepsPerRevolution(steps) {}
+
   ArduinoStepper::~ArduinoStepper() {}
 
   //-----Move the motor (blocking) -----------------------------------------
 
   void ArduinoStepper::runToPosition() {
-    step(theTargetPosition-step_number);
+    step(theTargetPosition-theCurrentPosition);
   }
 
   void ArduinoStepper::runToNewPosition(long position) {
@@ -33,20 +40,20 @@
   //-----Position (0..number_of_steps-1)-----------------------------------------
 
   void ArduinoStepper::setCurrentPosition(long position) {
-    step_number = position % number_of_steps;
+    theCurrentPosition = position % stepsPerRevolution;
   }
 
   void ArduinoStepper::moveTo(long absolute) {
-    if (step_number != absolute) {
-      theTargetPosition = absolute % number_of_steps;
+    if (theCurrentPosition != absolute) {
+      theTargetPosition = absolute % stepsPerRevolution;
     }
 }
   void ArduinoStepper::moveBy(long relative) {
-    moveTo(step_number + relative);
+    moveTo(theCurrentPosition + relative);
   }
 
   long ArduinoStepper::getCurrentPosition() {
-    return step_number;
+    return theCurrentPosition;
   }
 
   long ArduinoStepper::getTargetPosition() {
@@ -54,7 +61,7 @@
   }
 
   long ArduinoStepper::getDistanceToGo() {
-    return theTargetPosition-step_number;
+    return theTargetPosition-theCurrentPosition;
   }
 
 
@@ -71,7 +78,7 @@
       theStepInterval = 0;
     } else {
       theStepInterval = abs(1000000L / ts);
-      theDirection = (ts > 0) ? Direction.CW : Direction.CCW;
+      theDirection = (ts > 0) ? Direction::CW : Direction::CCW;
     }
     theSpeed = ts;
 }
@@ -103,19 +110,19 @@
    */
 
   void ArduinoStepper::setRPMSpeed(long targetRPM) {
-    setSPSSpeed(targetRPM * number_of_steps / 60);
+    setSPSSpeed(targetRPM * stepsPerRevolution / 60);
   }
 
   long ArduinoStepper::getRPMSpeed() {
-    return theSpeed * 60 / number_of_steps;
+    return theSpeed * 60 / stepsPerRevolution;
   }
 
   void ArduinoStepper::setMaxRPMSpeed(long maxRPM) {
-    setMaxSPSSpeed(maxRPM * number_of_steps / 60);
+    setMaxSPSSpeed(maxRPM * stepsPerRevolution / 60);
   }
 
   long ArduinoStepper::getMaxRPMSpeed() {
-    return theMaxSpeed * 60 / number_of_steps;
+    return theMaxSpeed * 60 / stepsPerRevolution;
   }
 
   //----- to be implemented

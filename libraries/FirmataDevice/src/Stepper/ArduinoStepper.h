@@ -77,6 +77,10 @@ private:
   /// Whether thePin is inverted or not
   uint8_t thePinInverted[4];
 
+  /// Number of steps in one revolution
+
+  long stepsPerRevolution;
+
 //-----
 
   /// The current motor speed in steps per second.  ~1-2000 SPS for 200-step
@@ -88,7 +92,7 @@ private:
   long theMaxSpeed;
 
   /// Current direction motor is spinning in
-  boolean theDirection; // 1 == CW
+  Direction theDirection;
 
 //-----
 
@@ -105,9 +109,12 @@ private:
   /// Min step size in microseconds based on maxSpeed
   float theCmin; // at max speed
 
+  /// The current absolution position in steps.
+  long theCurrentPosition;    // Steps
+
   /// The target position in steps. The AccelStepper library will move the
-  /// motor from theCurrentPos to theTargetPos, taking into account the
-  /// max speed, acceleration and deceleration
+  /// motor from theCurrentPosition to theTargetPosition, taking into account
+  /// the max speed, acceleration and deceleration
   long theTargetPosition;     // Steps
 
 //----- Not used by Arduino Stepper library

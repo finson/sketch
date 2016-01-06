@@ -1,4 +1,4 @@
-#include <CommonStepper.h>
+#include "CommonStepper.h"
 
 /**
  * This abstract class defines the methods that are available to any
@@ -9,19 +9,13 @@
  * the constraints of their library.
  */
 
-class CommonStepper {
-
-public:
-
 // FirmataExt calls these two methods on short, regular intervals.
 // Subclasses should override if they want the chance to update motor state,
 // change motor control parameters, report to the calling method, or other
 // repetitive tasks.
 
-  virtual void update(unsigned long deltaMicros) {}
-  virtual void report(unsigned long deltaMillis) {}
+  void CommonStepper::update(unsigned long deltaMicros) {}
+  void CommonStepper::report(unsigned long deltaMillis) {}
 
-  void stop() {}
-  void reset() {}
-
-};
+  void CommonStepper::stop() {}
+  void CommonStepper::reset() {}
