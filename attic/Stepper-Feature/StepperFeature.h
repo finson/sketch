@@ -18,7 +18,7 @@
 #define StepperFeature_h
 
 #include <FirmataFeature.h>
-#include <StepperMode.h>
+#include "Mode/StepperMode.h"
 
 #define MAX_STEPPERS 6 // arbitrary value... may need to adjust
 #define STEPPER_CONFIG 0
@@ -42,7 +42,7 @@ class StepperFeature: public FirmataFeature
     boolean handleSetPinMode(byte pin, int mode) {return false;}
 
   private:
-    AsyncStepper *stepper[MAX_STEPPERS];
+    CommonStepper *stepper[MAX_STEPPERS];
     byte numSteppers;
 };
 
