@@ -27,11 +27,11 @@ DeviceFeature deviceManager("DeviceFeature",1);
 #include <I2C/I2CFeature.h>
 I2CFeature pI2C;
 
-#include <Stepper/StepperFeature.h>
-StepperFeature ffStepper;
+#include <Stepper/CommonStepper.h>
+//StepperFeature ffStepper;
 
-//FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&deviceManager,0};
-FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&ffStepper,&deviceManager,0};
+FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&deviceManager,0};
+//FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&pI2C,&ffStepper,&deviceManager,0};
 
 // Device Drivers
 
