@@ -85,7 +85,7 @@ void FirmataExtClass::dispatchTimers() {
     if (elapsedTime >= intervalTime[idx]) {
       if (idx==0) {
         for (int n = 0; n < numFeatures; n++) {
-          features[n]->report();
+          features[n]->report(elapsedTime);
         }
       } else {
         for (int n = 0; n < numFeatures; n++) {
