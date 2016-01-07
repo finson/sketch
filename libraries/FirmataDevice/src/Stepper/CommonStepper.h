@@ -95,7 +95,7 @@ public:
   virtual void setAcceleration(long acceleration) = 0;
   virtual void setDeceleration(long deceleration) = 0;
 
-  virtual void setMinPulseWidth(unsigned int minWidth) = 0;
+  virtual void setMinPulseWidth(unsigned int minWidth);
 
 };
 

@@ -19,3 +19,5 @@
 
   void CommonStepper::stop() {}
   void CommonStepper::reset() {}
+
+  void CommonStepper::setMinPulseWidth(unsigned int minWidth) {}
