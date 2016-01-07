@@ -30,6 +30,7 @@
 
   void ArduinoStepper::runToPosition() {
     step(theTargetPosition-theCurrentPosition);
+    theCurrentPosition += theTargetPosition-theCurrentPosition;
   }
 
   void ArduinoStepper::runToNewPosition(long position) {
