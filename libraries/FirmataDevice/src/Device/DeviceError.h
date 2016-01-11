@@ -136,6 +136,6 @@
 #define EKEYREJECTED   (-129)  /* Key was rejected by service */
 #define EOWNERDEAD     (-130)  /* Owner died */
 #define ENOTRECOVERABLE (-131) /* State not recoverable */
-#define ENOTSUP        (-132)  /*Parameter values are valid, but the functionality they request is not available */
+#define ENOTSUP        (-132)  /* Functionality requested is not available */
 
 #endif

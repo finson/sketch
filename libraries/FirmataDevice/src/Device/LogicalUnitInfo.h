@@ -14,11 +14,18 @@ public:
 
   void setOpen(bool stateOfOpen);
   bool isOpen();
+
   void setLogicalUnitName(const char *name);
   const char *getLogicalUnitName();
 
+  void setDeviceObject(void *obj);
+  void  *getDeviceObject();
+
+protected:
+  void *theDeviceObject = 0;
+
 private:
-  char luName[MAX_LU_NAME_LENGTH+1];
+  char luName[MAX_LU_NAME_LENGTH + 1];
   bool luIsOpen = false;
 
 };

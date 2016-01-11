@@ -3,10 +3,9 @@
 * **Done**.  Use raw I2C to control device from client.
 * **Done**.  Write device driver to control device from client (MCP9808).
 * **Done**.  Make provisions for multiple command input streams (Firmata and direct call)
-* **Done** Implement board level libraries as Features of type Mode.  I2C
+* *Revert*. Implement board level libraries as Features of type Mode.  I2C
 * **Done** v0.3.  Write device driver to control device from server (MCP9808).
 * Write server device driver to control virtual device (Hello).
-* Implement board level libraries as Features of type Mode. Stepper
 * Client - handle async message arrival
 * Write Stepper device controllers (raw, client, server)
 * Wire, SPI, OneWire Mode Features

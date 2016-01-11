@@ -4,6 +4,7 @@
 #include <arduino.h>
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
+#include "DeviceRegister.h"
 
 #define MAX_DEVICE_NAME_LENGTH (MAX_LU_NAME_LENGTH-3)
 
@@ -24,7 +25,7 @@ extern DeviceFeature deviceManager;
 
 class DeviceDriver
 {
-  public:
+public:
     DeviceDriver(const char *nameRoot);
 
     virtual int open(const char *name, int flags) = 0;
@@ -34,10 +35,28 @@ class DeviceDriver
     virtual int write(int handle, int count, byte *buf) = 0;
     virtual int close(int handle) = 0;
 
-    virtual int millisecondTimeBase() { return ESUCCESS; }
 
-  protected:
-    char deviceName[MAX_DEVICE_NAME_LENGTH+1];
+    /**
+     * Called repeatedly by the application program at the expiration of a
+     * microsecond based interval to perform real time updates of position and
+     * control.
+     * @param deltaMicros Length, in microseconds, of the interval since the last call to this
+     * method.
+     * @return status code
+     */
+    virtual int microsecondUpdate(unsigned long deltaMicros);
+
+    /**
+     * Called repeatedly by the application program at the expiration of a
+     * millisecond based interval to provide an opportunity for reporting and
+     * other lower frequency tasks.
+     * @param deltaMillis Length, in milliseconds, of the interval since the last call to this method.
+     * @return status code
+     */
+    virtual int millisecondReport(unsigned long deltaMillis);
+
+protected:
+    char deviceName[MAX_DEVICE_NAME_LENGTH + 1];
     int logicalUnitCount;
 };
 
