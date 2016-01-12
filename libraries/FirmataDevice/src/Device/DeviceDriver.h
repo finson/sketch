@@ -19,12 +19,15 @@
 
 #define DDC_INIT 0
 
-class DeviceFeature;
+#define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
+#define getLSBInt16(val) ((val) & 0xFF)
+#define getMSBInt16(val) (((val) >> 8)& 0xFF)
 
+class DeviceFeature;
 extern DeviceFeature deviceManager;
 
-class DeviceDriver
-{
+class DeviceDriver {
+
 public:
     DeviceDriver(const char *nameRoot);
 

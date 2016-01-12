@@ -52,12 +52,11 @@ public:
 
   void getSPSSpeeds(Speeds *spd);
   void setSPSTargetSpeed(long targetSPS);
-
   void getSPSAccelerations(Accelerations *acc);
   void setSPSAccelerations(long acceleration, long deceleration);
+
   void getRPMSpeeds(Speeds *spd);
   void setRPMSpeed(long targetRPM);
-
   void getRPMAccelerations(Accelerations *acc);
   void setRPMAccelerations(long acceleration, long deceleration);
 

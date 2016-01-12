@@ -4,6 +4,7 @@
 #include "StepperDriver.h"
 #include <Stepper.h>
 
+
 /**
  * This class defines a stepper motor device driver, using
  * the basic blocking Stepper library that is standard with Arduino.
@@ -23,8 +24,9 @@ public:
 
 
 private:
-  int executeCCR_Configure(int handle, int reg, int count, byte *buf);
-
+  int controlCCR_Configure(int handle, int reg, int count, byte *buf);
+  int controlSTP_MoveR(int handle, int reg, int count, byte *buf);
+  int controlSTP_RPMSpeed(int handle, int reg, int count, byte *buf);
 };
 
 #endif

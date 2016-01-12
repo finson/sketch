@@ -13,43 +13,92 @@
  * int version(void);
  */
 
-  StepperDriverBasic::StepperDriverBasic(const char *dName, int addrCount) :
-   StepperDriver(dName,addrCount)
-   {
+StepperDriverBasic::StepperDriverBasic(const char *dName, int addrCount) :
+  StepperDriver(dName, addrCount) {
 
-   }
+}
 
 int StepperDriverBasic::control(int handle, int reg, int count, byte *buf) {
-  LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
-  if (!currentDevice->isOpen()) {
+  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  if (!currentUnit->isOpen()) {
     return ENOTCONN;
   }
 
   switch (reg) {
-    case CCR_Configure:
-    return executeCCR_Configure(handle, reg, count, buf);
-
-    default:
-    return ENOTSUP;
+  case CCR_Configure: return controlCCR_Configure(handle, reg, count, buf);
+  case STP_MoveR:     return controlSTP_MoveR(handle, reg, count, buf);
+  case STP_RPMSpeed:  return controlSTP_RPMSpeed(handle, reg, count, buf);
+  default:            return ENOTSUP;
   }
 }
 
-int StepperDriverBasic::executeCCR_Configure(int handle, int reg, int count, byte *buf) {
-  LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
+int StepperDriverBasic::controlCCR_Configure(int handle, int reg, int count, byte *buf) {
+  int stepCount, pin1, pin2, pin3, pin4;
+  Stepper *motor;
 
-  void *deviceObject = currentDevice->getDeviceObject();
+  if ((count != 6) && (count != 10)) {
+    return EMSGSIZE;
+  }
+
+  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+
+  void *deviceObject = currentUnit->getDeviceObject();
   if (deviceObject != 0) {
     return EBUSY;
   }
 
-  deviceObject = new Stepper(200,4,5);
+  stepCount = getInt16(buf[0], buf[1]);
+  pin1 = getInt16(buf[2], buf[3]);
+  pin2 = getInt16(buf[4], buf[5]);
+  if (count == 6) {
+    motor = new Stepper(stepCount, pin1, pin2);
+  } else if (count == 10) {
+    pin3 = getInt16(buf[6], buf[7]);
+    pin4 = getInt16(buf[8], buf[9]);
+    motor = new Stepper(stepCount, pin1, pin2, pin3, pin4);
+  }
+  currentUnit->setDeviceObject(motor);
+  return count;
+}
+
+int StepperDriverBasic::controlSTP_MoveR(int handle, int reg, int count, byte *buf) {
+  Stepper *motor;
+  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+
+  Stepper *deviceObject = static_cast<Stepper *>(currentUnit->getDeviceObject());
+  if (deviceObject == 0) {
+    return EBADSLT;
+  }
+
+  if (count != 3) {
+    return EMSGSIZE;
+  }
+
+  deviceObject->step(getInt16(buf[0],buf[1]));
+  return count;
+}
+
+int StepperDriverBasic::controlSTP_RPMSpeed(int handle, int reg, int count, byte *buf) {
+  Stepper *motor;
+  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+
+  Stepper *deviceObject = static_cast<Stepper *>(currentUnit->getDeviceObject());
+  if (deviceObject == 0) {
+    return EBADSLT;
+  }
+
+  if (count != 2) {
+    return EMSGSIZE;
+  }
+
+  deviceObject->setSpeed(getInt16(buf[0],buf[1]));
   return count;
 }
 
 
-  int StepperDriverBasic::status(int handle, int reg, int count, byte *buf) {return ENOSYS;}
-//   StepperLUI *currentDevice = &logicalUnits[handle & 0x7F];
-//   if (!currentDevice->isOpen()) {
+int StepperDriverBasic::status(int handle, int reg, int count, byte *buf) {return ENOSYS;}
+//   StepperLUI *currentUnit = &logicalUnits[handle & 0x7F];
+//   if (!currentUnit->isOpen()) {
 //     return ENOTCONN;
 //   }
 //   if (static_cast<StepperRegister>(reg) == StepperRegister::RESOLUTION) {
@@ -60,7 +109,7 @@ int StepperDriverBasic::executeCCR_Configure(int handle, int reg, int count, byt
 //     return EMSGSIZE;
 //   }
 
-//   int address = currentDevice->getDeviceAddress();
+//   int address = currentUnit->getDeviceAddress();
 //   if (count == 1) {
 //     buf[0] = I2CMode.read8(address, reg);
 //   } else {
@@ -72,8 +121,8 @@ int StepperDriverBasic::executeCCR_Configure(int handle, int reg, int count, byt
 // }
 
 int StepperDriverBasic::read(int handle, int count, byte *buf) {return ENOSYS;}
-//   StepperLUI *currentDevice = &logicalUnits[handle & 0x7F];
-//   if (!currentDevice->isOpen()) {
+//   StepperLUI *currentUnit = &logicalUnits[handle & 0x7F];
+//   if (!currentUnit->isOpen()) {
 //     return ENOTCONN;
 //   }
 
@@ -81,7 +130,7 @@ int StepperDriverBasic::read(int handle, int count, byte *buf) {return ENOSYS;}
 //     return EMSGSIZE;
 //   }
 
-//   int address = currentDevice->getDeviceAddress();
+//   int address = currentUnit->getDeviceAddress();
 //   int reg = static_cast<uint8_t>(StepperRegister::AMBIENT_TEMP);
 //   int v = I2CMode.read16(address, reg);
 //   buf[0] = (v >> 8) & 0xFF;
@@ -90,14 +139,14 @@ int StepperDriverBasic::read(int handle, int count, byte *buf) {return ENOSYS;}
 //   return count;
 // }
 
-int StepperDriverBasic::write(int handle, int count, byte *buf){return ENOSYS;}
+int StepperDriverBasic::write(int handle, int count, byte *buf) {return ENOSYS;}
 //   return ENOSYS;
 // }
 
 int StepperDriverBasic::close(int lun) {return ENOSYS;}
-//   StepperLUI *currentDevice = &logicalUnits[lun & 0x7F];
-//   if (currentDevice->isOpen()) {
-//     currentDevice->setOpen(false);
+//   StepperLUI *currentUnit = &logicalUnits[lun & 0x7F];
+//   if (currentUnit->isOpen()) {
+//     currentUnit->setOpen(false);
 //     I2CMode.disableI2CPins();
 //   }
 //   return ESUCCESS;

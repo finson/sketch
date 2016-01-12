@@ -5,7 +5,10 @@
 
 #define MAX_Stepper_LU_COUNT 8
 
-enum class StepperRegister;
+// Stepper register definitions
+
+#define STP_MoveR 0
+#define STP_RPMSpeed 1
 
 class StepperDriver: public DeviceDriver {
 
