@@ -25,9 +25,9 @@
 #define getInt16LE(addr) ((((*((addr)+1))&0xFF)<<8)  |  ((*((addr)+0))&0xFF))
 #define getInt32LE(addr) ((((*((addr)+3))&0xFF)<<24) | (((*((addr)+2))&0xFF)<<16) | (((*((addr)+1))&0xFF)<<8) | ((*((addr)+0))&0xFF))
 
-#define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
-#define getLSBInt16(val) ((val) & 0xFF)
-#define getMSBInt16(val) (((val) >> 8)& 0xFF)
+// #define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
+// #define getLSBInt16(val) ((val) & 0xFF)
+// #define getMSBInt16(val) (((val) >> 8)& 0xFF)
 
 // class DeviceFeature;
 // extern DeviceFeature deviceManager;

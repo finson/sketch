@@ -11,6 +11,10 @@
 #define StepsPerRevolution 686
 #define RevolutionsPerMinute 10
 
+#define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
+#define getLSBInt16(val) ((val) & 0xFF)
+#define getMSBInt16(val) (((val) >> 8)& 0xFF)
+
 StepperDriverBasic dd("STP", 8);
 int pin[] = {4, 5, 8, 9};
 #define BUF_SIZE 128

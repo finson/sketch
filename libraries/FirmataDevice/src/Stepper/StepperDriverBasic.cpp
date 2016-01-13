@@ -90,7 +90,7 @@ int StepperDriverBasic::controlSTP_RPMSpeed(int handle, int reg, int count, byte
   if (deviceObject == 0) return EBADSLT;
   if (count != 4) return EMSGSIZE;
 
-  deviceObject->setSpeed(getInt16LE(buf));
+  deviceObject->setSpeed(getInt32LE(buf));
   return count;
 }
 
