@@ -17,9 +17,11 @@
 
 StepperDriverBasic dd("STP", 8);
 int pin[] = {4, 5, 8, 9};
-#define BUF_SIZE 128
+#define BUF_SIZE 256
 byte buf[BUF_SIZE];
+char names[BUF_SIZE];
 int handle;
+int vReg[] = {CDR_DriverVersion, CDR_LibraryVersion};
 
 void setup() {
   Serial.begin(115200);
@@ -55,16 +57,37 @@ void setup() {
   status = dd.control(handle, STP_RPMSpeed, bufIndex, buf);
   Serial.println(status);
 
-  Serial.print("Versions: ");
-  status = dd.status(handle, CDR_DriverVersion,BUF_SIZE,buf);
-  Serial.print(status);
-  if (status >= 0) {
-    for (int idx=0; idx<status; idx++) {
-      Serial.print(" ");
-      Serial.print(buf[idx]);
+  for (int regIndex = 0; regIndex < 2; regIndex++) {
+    Serial.print("Version: ");
+    status = dd.status(handle, vReg[regIndex], BUF_SIZE, buf);
+    Serial.print(status);
+    Serial.print(' ');
+    if (status >= 0) {
+      bufIndex = 0;
+      int packetSize = buf[bufIndex++];
+      for (int idx = 0; idx < packetSize; idx++) {
+        Serial.print(buf[bufIndex++]);
+        switch (idx) {
+          case 0:
+          case 1:
+            Serial.print('.');
+            break;
+          case 2:
+            Serial.print('-');
+            break;
+          case 3:
+          case 4:
+            Serial.print('.');
+            break;
+          case 5:
+            Serial.print(' ');
+            break;
+        }
+      }
+      Serial.write(reinterpret_cast<char *>(&buf[bufIndex]));
     }
+    Serial.println();
   }
-  Serial.println();
 }
 
 void loop() {

@@ -11,13 +11,15 @@
 
 struct SemanticVersion {
 
-  SemanticVersion() : major(0), minor(0),patch(0),rc(0) {}
-  SemanticVersion(int ma,int mi, int pa, int n) : major(ma), minor(mi),patch(pa), rc(n) {}
+  SemanticVersion(int ma,int mi, int pa=0,int pMa=0,int pMi=0, int pPa=0) :
+    major(ma), minor(mi),patch(pa),pMajor(pMa),pMinor(pMi),pPatch(pPa) {}
 
   int major;
   int minor;
   int patch;
-  int rc;
+  int pMajor;
+  int pMinor;
+  int pPatch;
 
 };
 

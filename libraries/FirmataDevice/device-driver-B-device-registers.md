@@ -1,6 +1,6 @@
 
 ----------
-*tbd* 2016 V 0.2.0 beta.  Doug Johnson (finson@whidbey.com) 
+*tbd* 2016 V 0.4.0 beta.  Doug Johnson (finson@whidbey.com) 
 
 ----------
 
@@ -90,36 +90,31 @@ Register names starting with CDR_ refer to **C**ommon **D**evice **R**egisters. 
 
 ---
 ###`CDR_DriverVersion`
-####Get version numbers for the DeviceDriver and its underlying library (libraries).
+###`CDR_LibraryVersion`
+####Get version number and name of the DeviceDriver or supporting library
 
-Version numbers are in the Semantic Versioning format x.y.z-a.b.c  See [semver.org](http://semver.org) for more info.
+Version numbers are in the Semantic Versioning format x.y.z-a.b.c  See [semver.org](http://semver.org) for more info.  
 
-The first byte of the return data buffer is a count of the version identifiers that follow.  The second byte is the size of the version identifier packets.
+The first byte of the return data buffer is the size in bytes of the version identifier packet that follows.  Name strings use UTF-8 encoding and are null-terminated.
 
-In the initial implementation, the size of the version identifier packets is 6 bytes.  The size of the receiving buffer should be large enough to take the 2-byte header and several version identifiers.  The version numbers in order refer to:
- 
-1. The DeviceDriver itself
-2. A supporting library, if any
-3. Another supporting library, if any
-4. etc
+In the initial implementation, the size of the version identifier packet is 6 bytes.  The name string immediately follows the version identifier packet and is limited to 128 bytes maximum, including the null terminator.
 
-The returned byte count will always be (2+count*size). If the buffer size is not large enough, an error will be returned (`EMSGSIZE`).
+The size of the receiving buffer should be large enough to hold the 1-byte packet size, a version identifier packet, and a name string (including the null terminator). If the buffer size is not large enough, an error will be returned (`EMSGSIZE`).
 
 *Method signature*
 
 `int status(int handle, CDR_DriverVersion, int bufSize, byte *buf)`
+`int status(int handle, CDR_LibraryVersion, int bufSize, byte *buf)`
 
 *Return data buffer*
 
-     0  version descriptor count
-     1  6 (version descriptor packet size)
-     2  pre-release (c)
-     3  pre-release (b)
+     0  6 (version descriptor packet size)
+     1  major version (x)
+     2  minor version (y)
+     3  patch version (z)
      4  pre-release (a)
-     5  patch version (z)
-     6  minor version (y)
-     7  major version (x)
-     8..13   First supporting library version
-     14..19  Second supporting library version
+     5  pre-release (b)
+     6  pre-release (c)
+     7..n  name string (UTF-8, null terminated)
 
 ---

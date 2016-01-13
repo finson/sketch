@@ -102,7 +102,8 @@ int StepperDriverBasic::status(int handle, int reg, int count, byte *buf) {
 
   switch (reg) {
   case CDR_DriverVersion: return statusCDR_DriverVersion(handle, reg, count, buf);
-  default:                return ENOTSUP;
+  case CDR_LibraryVersion: return statusCDR_LibraryVersion(handle, reg, count, buf);
+  default: return ENOTSUP;
   }
 }
 
@@ -111,23 +112,40 @@ int StepperDriverBasic::statusCDR_DriverVersion(int handle, int reg, int count, 
   LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
   Stepper *deviceObject = static_cast<Stepper *>(currentUnit->getDeviceObject());
   if (deviceObject == 0) return EBADSLT;
-  if (count < (2 + (VERSION_PACKET_COUNT*VERSION_PACKET_SIZE))) return EMSGSIZE;
+  return buildVersionResponse(stepperDriverSemVer,stepperDriverName,count,buf);
+}
+
+int StepperDriverBasic::statusCDR_LibraryVersion(int handle, int reg, int count, byte *buf) {
+  Stepper *motor;
+  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  Stepper *deviceObject = static_cast<Stepper *>(currentUnit->getDeviceObject());
+  if (deviceObject == 0) return EBADSLT;
+  int status = buildVersionResponse(stepperLibrarySemVer,stepperLibraryName,count,buf);
+  if (status > 2) {
+    buf[1] = motor->version();
+  }
+  return status;
+}
+
+
+int StepperDriverBasic::buildVersionResponse(const byte *semver,const char *name,int count, byte *buf) {
+
+  int nameLength = strlen_P(name);
+  if (count < (1 + VERSION_PACKET_SIZE + nameLength + 1)) return EMSGSIZE;
 
   int byteIndex = 0;
-  buf[byteIndex++] = VERSION_PACKET_COUNT;
   buf[byteIndex++] = VERSION_PACKET_SIZE;
 
-  // Device Driver version (packet 1)
+  // version
 
   for (int idx=0; idx<VERSION_PACKET_SIZE; idx++) {
-    buf[byteIndex++] = pgm_read_byte_near(&stepperDriverBasicSemVer[idx]);
+    buf[byteIndex++] = pgm_read_byte_near(&semver[idx]);
   }
 
-  // Stepper library version (packet 2)
+  // name (including terminating null)
 
-  buf[byteIndex++] = (uint8_t)(deviceObject->version());
-  for (int idx=1;idx<VERSION_PACKET_SIZE;idx++) {
-    buf[byteIndex++] = 0;
+  for (int idx=0;idx<=nameLength;idx++) {
+    buf[byteIndex++] = pgm_read_byte_near(&name[idx]);
   }
 
   return byteIndex;
