@@ -2,6 +2,8 @@
 #define DeviceDriver_h
 
 #include <arduino.h>
+#include <avr/pgmspace.h>
+
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
 #include "DeviceRegister.h"
@@ -19,12 +21,16 @@
 
 #define DDC_INIT 0
 
+#define getInt8LE(addr) ((*(addr))&0xFF)
+#define getInt16LE(addr) ((((*((addr)+1))&0xFF)<<8)  |  ((*((addr)+0))&0xFF))
+#define getInt32LE(addr) ((((*((addr)+3))&0xFF)<<24) | (((*((addr)+2))&0xFF)<<16) | (((*((addr)+1))&0xFF)<<8) | ((*((addr)+0))&0xFF))
+
 #define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
 #define getLSBInt16(val) ((val) & 0xFF)
 #define getMSBInt16(val) (((val) >> 8)& 0xFF)
 
-class DeviceFeature;
-extern DeviceFeature deviceManager;
+// class DeviceFeature;
+// extern DeviceFeature deviceManager;
 
 class DeviceDriver {
 

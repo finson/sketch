@@ -1,19 +1,15 @@
 #ifndef DeviceRegister_h
 #define DeviceRegister_h
 
-// These are the common register codes used by the DeviceDrivers.  Registers
-// specific to each device are defined by the individual DeviceDrivers.
+// These are the Common Device Register codes used by the DeviceDrivers in
+// their status() and control() methods.  Register names specific to a
+// particular device type are defined by the individual DeviceDrivers.
 
-// Common Status Registers
-
-#define CSR_Version     (-1)
-#define CSR_DeviceName  (-2)
-#define CSR_UnitName    (-3)
-#define CSR_UnitCount   (-4)
-#define CSR_Debug       (-5)
-
-// Common Control Registers
-
-#define CCR_Reset       (-256)  /* Reset all state in the device driver */
-#define CCR_Configure   (-257)  /* Configure a logical unit number instance */
+#define CDR_DriverVersion (-1)
+#define CDR_DriverName    (-2)
+#define CDR_UnitName      (-3)
+#define CDR_UnitCount     (-4)
+#define CDR_Reset         (-5)  /* Reset all state in the device driver */
+#define CDR_Configure     (-6)  /* Configure a logical unit number instance */
+#define CDR_Debug         (-256)
 #endif

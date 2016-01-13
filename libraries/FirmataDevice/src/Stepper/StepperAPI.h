@@ -63,8 +63,5 @@ public:
   void stop();
   void reset();
 
-  void setMinPulseWidth(long minWidth);
-
-
 };
 #endif

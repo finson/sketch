@@ -4,6 +4,9 @@
 #include "StepperDriver.h"
 #include <Stepper.h>
 
+#define VERSION_PACKET_COUNT 2
+#define VERSION_PACKET_SIZE 6
+const PROGMEM  uint8_t  stepperDriverBasicSemVer[] = {0,1,0,0,0,0};
 
 /**
  * This class defines a stepper motor device driver, using
@@ -24,9 +27,11 @@ public:
 
 
 private:
-  int controlCCR_Configure(int handle, int reg, int count, byte *buf);
+  int controlCDR_Configure(int handle, int reg, int count, byte *buf);
   int controlSTP_MoveR(int handle, int reg, int count, byte *buf);
   int controlSTP_RPMSpeed(int handle, int reg, int count, byte *buf);
+  int statusCDR_DriverVersion(int handle, int reg, int count, byte *buf);
+
 };
 
 #endif

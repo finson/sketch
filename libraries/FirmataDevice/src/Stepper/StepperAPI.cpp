@@ -60,16 +60,13 @@ void StepperAPI::moveToRelativeTarget(long deltaSteps, bool block) {}
 
 void StepperAPI::getSPSSpeeds(Speeds *spd) {}
 void StepperAPI::setSPSTargetSpeed(long targetSPS) {}
-
 void StepperAPI::getSPSAccelerations(Accelerations *acc) {}
 void StepperAPI::setSPSAccelerations(long acceleration, long deceleration) {}
+
 void StepperAPI::getRPMSpeeds(Speeds *spd) {}
 void StepperAPI::setRPMSpeed(long targetRPM) {}
-
 void StepperAPI::getRPMAccelerations(Accelerations *acc) {}
 void StepperAPI::setRPMAccelerations(long acceleration, long deceleration) {}
 
 void StepperAPI::stop() {}
 void StepperAPI::reset() {}
-
-void StepperAPI::setMinPulseWidth(long minWidth) {}
