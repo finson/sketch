@@ -108,7 +108,7 @@ The size of the receiving buffer should be large enough to hold the 1-byte packe
 
 *Return data buffer*
 
-     0  6 (version descriptor packet size)
+     0  version descriptor packet size (6, in this example)
      1  major version (x)
      2  minor version (y)
      3  patch version (z)

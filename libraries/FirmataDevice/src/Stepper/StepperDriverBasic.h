@@ -4,14 +4,11 @@
 #include "StepperDriver.h"
 #include <Stepper.h>
 
-#define VERSION_PACKET_COUNT 1
-#define VERSION_PACKET_SIZE 6
+const PROGMEM uint8_t driverSemVer[] = {6,0,1,0,0,0,0};
+const PROGMEM char driverName[] = {"StepperDriverBasic"};
 
-const PROGMEM uint8_t  stepperDriverSemVer[] = {0,1,0,0,0,0};
-const PROGMEM char stepperDriverName[] = {"StepperDriverBasic"};
-
-const PROGMEM uint8_t  stepperLibrarySemVer[] = {0,0,0,0,0,0};
-const PROGMEM char stepperLibraryName[] = {"Stepper"};
+const PROGMEM uint8_t librarySemVer[] = {6,0,0,0,0,0,0};
+const PROGMEM char libraryName[] = {"Stepper"};
 
 /**
  * This class defines a stepper motor device driver, using
@@ -38,8 +35,6 @@ private:
 
   int statusCDR_DriverVersion(int handle, int reg, int count, byte *buf);
   int statusCDR_LibraryVersion(int handle, int reg, int count, byte *buf);
-
-  int buildVersionResponse(const byte *semver,const char *name, int count, byte *buf);
 
 };
 

@@ -5,12 +5,18 @@
 
 #define MAX_Stepper_LU_COUNT 8
 
-
-
 // Stepper register definitions
 
 #define STP_MoveR 0
 #define STP_RPMSpeed 1
+
+// Stepper interface definitions
+
+enum class StepperInterface : int {
+  EZStepper = 0,
+  TWO_WIRE = 1,
+  FOUR_WIRE = 2
+};
 
 class StepperDriver: public DeviceDriver {
 

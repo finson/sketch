@@ -61,6 +61,9 @@ public:
     virtual int millisecondReport(unsigned long deltaMillis);
 
 protected:
+
+    int buildVersionResponse(const byte *semver,const char *name, int count, byte *buf);
+
     char deviceName[MAX_DEVICE_NAME_LENGTH + 1];
     int logicalUnitCount;
 };
