@@ -1,20 +1,31 @@
 #ifndef HelloDriver_h
 #define HelloDriver_h
 
-#include <FirmataCore.h>
 #include <Device/DeviceDriver.h>
 
-#define MAX_HELLO_LU_COUNT 2
 #define MAX_HELLO_TEXT_LENGTH 31
 #define SAMPLE_COUNT 16
 
-enum class HelloRegister;
+enum class HelloRegister {
+  INTERJECTION = 0,
+  OBJECT = 1,
+  AVG_REPORT_INTERVAL = 10
+};
 
-class HelloDriver: public DeviceDriver
-{
+const PROGMEM uint8_t driverSemVer[] = {6,0,1,0,0,0,0};
+const PROGMEM char driverName[] = {"HelloDriver"};
+
+/**
+ * This class defines a simple device driver as an example
+ * HelloWorld component for device drivers and their usage.
+ * It also has some general code analysis capabilities and
+ * provides a place to perform timing tests and the like.
+ */
+class HelloDriver: public DeviceDriver {
+
 public:
 
-    HelloDriver(const char *dName = "Hello", int count = 1);
+    HelloDriver(const char *unitName = "HLO", int count = 1);
 
     int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
@@ -23,32 +34,12 @@ public:
     int write(int handle, int count, byte *buf);
     int close(int handle);
 
-    int millisecondTimeBase();
-
-    class HelloLUI: public LogicalUnitInfo {
-
-    public:
-        HelloLUI(const char *interjection) : LogicalUnitInfo(interjection) {
-            strlcpy(who,"World",MAX_HELLO_TEXT_LENGTH+1);
-        }
-
-        HelloLUI() : LogicalUnitInfo() {
-            strlcpy(who,"World",MAX_HELLO_TEXT_LENGTH+1);
-        }
-
-        void setWho(const char *newWho) {
-            strlcpy(who,newWho,MAX_HELLO_TEXT_LENGTH+1);
-        }
-
-        const char *getWho() {
-            return who;
-        }
-
-    private:
-        char who[MAX_HELLO_TEXT_LENGTH];
-    };
+    int millisecondTimeBase(unsigned long milliDelta);
+    int microsecondTimeBase(unsigned long microDelta);
 
 private:
+
+    int statusCDR_DriverVersion(int handle, int reg, int count, byte *buf);
 
     unsigned long previousTime[2];   // the time the last interval expired
     unsigned long currentTime[2];    // the current values from millis() and micros()
@@ -57,7 +48,28 @@ private:
     boolean isSampleBufferFull;
     unsigned long calculateAverageInterval();
 
-    HelloLUI logicalUnits[MAX_HELLO_LU_COUNT];
+    class HelloLUI: public LogicalUnitInfo {
+
+    public:
+
+        HelloLUI() : LogicalUnitInfo() {
+            who = "World";
+        }
+
+        ~HelloLUI() {}
+
+        void setWho(const char *newWho) {
+            free(who);
+            who = strdup(newWho);
+        }
+
+        const char *getWho() {
+            return who;
+        }
+
+    private:
+        char *who;
+    };
 };
 
 #endif

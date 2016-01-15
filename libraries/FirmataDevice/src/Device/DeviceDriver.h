@@ -3,12 +3,13 @@
 
 #include <arduino.h>
 #include <avr/pgmspace.h>
+#include <stdlib.h>
 
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
 #include "DeviceRegister.h"
 
-#define MAX_DEVICE_NAME_LENGTH (MAX_LU_NAME_LENGTH-3)
+#define MAX_ROOT_NAME_LENGTH 32
 
 #define  DD_OPEN    0x00
 #define  DD_STATUS  0x01
@@ -25,13 +26,11 @@
 #define getInt16LE(addr) ((((*((addr)+1))&0xFF)<<8)  |  ((*((addr)+0))&0xFF))
 #define getInt32LE(addr) ((((*((addr)+3))&0xFF)<<24) | (((*((addr)+2))&0xFF)<<16) | (((*((addr)+1))&0xFF)<<8) | ((*((addr)+0))&0xFF))
 
-// class DeviceFeature;
-// extern DeviceFeature deviceManager;
-
 class DeviceDriver {
 
 public:
-    DeviceDriver(const char *nameRoot);
+
+    DeviceDriver(const char *nameRoot, const int count);
 
     virtual int open(const char *name, int flags) = 0;
     virtual int status(int handle, int reg, int count, byte *buf) = 0;
@@ -62,10 +61,11 @@ public:
 
 protected:
 
-    int buildVersionResponse(const byte *semver,const char *name, int count, byte *buf);
+    int buildVersionResponse(const byte *semver, const char *name, int count, byte *buf);
 
-    char deviceName[MAX_DEVICE_NAME_LENGTH + 1];
+    const char *rootName;
     int logicalUnitCount;
+    LogicalUnitInfo **logicalUnits;
 };
 
 #endif

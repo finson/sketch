@@ -2,24 +2,17 @@
 
 #include <limits.h>
 
-enum class HelloRegister {
-  INTERJECTION = 0,
-  OBJECT = 1,
-  AVG_REPORT_INTERVAL = 10
-};
+/**
+ * This class defines a simple device driver as a sort of
+ * HelloWorld component for device drivers and their usage.
+ * It also has some general code analysis capabilities and
+ * provides a place to perform timing tests and the like.
+ */
 
 //---------------------------------------------------------------------------
 
 HelloDriver::HelloDriver(const char *dName, int count) :
-  DeviceDriver(dName) {
-  char buf[MAX_LU_NAME_LENGTH + 1];
-  logicalUnitCount = min(MAX_HELLO_LU_COUNT, count);
-  for (int idx = 0; idx < logicalUnitCount; idx++) {
-    snprintf(buf, MAX_LU_NAME_LENGTH + 1, "%s:%1d", dName, idx);
-    logicalUnits[idx].setLogicalUnitName(buf);
-    logicalUnits[idx].setWho("World.");
-    logicalUnits[idx].setOpen(false);
-  }
+  DeviceDriver(dName,count) {
 
 // Set up to calculate loop time average
 
@@ -32,49 +25,30 @@ HelloDriver::HelloDriver(const char *dName, int count) :
 //---------------------------------------------------------------------------
 
 int HelloDriver::open(const char *name, int flags) {
+  int lun = DeviceDriver::open(name,flags);
+  if (lun < 0) return lun;
 
-  int minorHandle;
-  for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
-    // Firmata.sendString(logicalUnits[minorHandle].getLogicalUnitName());
-    if (strcmp(logicalUnits[minorHandle].getLogicalUnitName(), name) == 0) {
-      break;
-    }
-  }
-
-  if (minorHandle == logicalUnitCount) {
-    return ENXIO;
-  }
-
-  LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
-
-  if ((flags & DDO_FORCE_OPEN) != 0) {
-    currentDevice->setOpen(false);
-  }
-  if (currentDevice->isOpen()) {
-    return EADDRINUSE;
-  }
-
-  currentDevice->setOpen(true);
-  return minorHandle;
+  logicalUnits[lun] = new HelloLUI();
+  return lun;
 }
 
-int HelloDriver::status(int handle, int reg, int count, byte *buf) {
-  if (static_cast<int>(HelloRegister::AVG_REPORT_INTERVAL) == reg) {
-    if (count != 4) {
-      return EMSGSIZE;
-    } else if (isSampleBufferFull) {
-      unsigned long avg = calculateAverageInterval();
-      buf[0] = avg & 0xFF;
-      buf[1] = (avg >> 8) & 0xFF;
-      buf[2] = (avg >> 16) & 0xFF;
-      buf[3] = (avg >> 24) & 0xFF;
-      return 4;
-    } else {
-      return ENODATA;
-    }
-  }
-  return ENOTSUP;
-}
+// int HelloDriver::status(int handle, int reg, int count, byte *buf) {
+//   if (static_cast<int>(HelloRegister::AVG_REPORT_INTERVAL) == reg) {
+//     if (count != 4) {
+//       return EMSGSIZE;
+//     } else if (isSampleBufferFull) {
+//       unsigned long avg = calculateAverageInterval();
+//       buf[0] = avg & 0xFF;
+//       buf[1] = (avg >> 8) & 0xFF;
+//       buf[2] = (avg >> 16) & 0xFF;
+//       buf[3] = (avg >> 24) & 0xFF;
+//       return 4;
+//     } else {
+//       return ENODATA;
+//     }
+//   }
+//   return ENOTSUP;
+// }
 
 int HelloDriver::control(int handle, int reg, int count, byte *buf) {
   return ENOSYS;
@@ -88,11 +62,13 @@ int HelloDriver::write(int handle, int count, byte *buf) {
 }
 
 int HelloDriver::close(int handle) {
-  LogicalUnitInfo *currentDevice = &logicalUnits[(handle & 0x7F)];
-  if (currentDevice->isOpen()) {
-    currentDevice->setOpen(false);
-  }
-  return ESUCCESS;
+  return DeviceDriver::close(handle);
+}
+
+//---------------------------------------------------------------------------
+
+int HelloDriver::microsecondTimeBase(unsigned long deltaMicros) {
+
 }
 
 //---------------------------------------------------------------------------
@@ -100,7 +76,7 @@ int HelloDriver::close(int handle) {
 // Collect a millisecond interval (report()) duration sample.  The sample array
 // is actually 0..SAMPLE_COUNT, and the useful samples are in 1..SAMPLE_COUNT.
 
-int HelloDriver::millisecondTimeBase() {
+int HelloDriver::millisecondTimeBase(unsigned long deltaMillis) {
   currentTime[0] = millis();
 
   unsigned long elapsedTime;
@@ -127,4 +103,20 @@ unsigned long HelloDriver::calculateAverageInterval() {
     sum += samples[idx];
   }
   return sum / SAMPLE_COUNT;
+}
+
+//---------------------------------------------------------------------------
+
+int HelloDriver::status(int handle, int reg, int count, byte *buf) {
+  HelloLUI *currentUnit = static_cast<HelloLUI *>(logicalUnits[handle & 0x7F]);
+  if (currentUnit == 0) return ENOTCONN;
+
+  switch (reg) {
+  case CDR_DriverVersion: return statusCDR_DriverVersion(handle, reg, count, buf);
+  default: return ENOTSUP;
+  }
+}
+
+int HelloDriver::statusCDR_DriverVersion(int handle, int reg, int count, byte *buf) {
+  return DeviceDriver::buildVersionResponse(driverSemVer,driverName,count,buf);
 }

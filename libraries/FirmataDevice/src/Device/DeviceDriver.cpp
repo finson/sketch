@@ -1,9 +1,10 @@
-#include "DeviceDriver.h"
+#include <Device/DeviceDriver.h>
 
-DeviceDriver::DeviceDriver(const char *nameRoot) {
-  strlcpy(deviceName,nameRoot,(MAX_DEVICE_NAME_LENGTH+1));
-  logicalUnitCount = 0;
-};
+DeviceDriver::DeviceDriver(const char *r, const int count) :
+rootName(r),
+logicalUnitCount(count),
+logicalUnits(new LogicalUnitInfo*[count]())
+{};
 
 int DeviceDriver::microsecondUpdate(unsigned long deltaMicros) {
   return ESUCCESS;
@@ -12,6 +13,42 @@ int DeviceDriver::microsecondUpdate(unsigned long deltaMicros) {
 int DeviceDriver::millisecondReport(unsigned long deltaMillis) {
   return ESUCCESS;
 }
+
+//---------------------------------------------------------------------------
+
+int DeviceDriver::open(const char *name, int flags) {
+  int lun;
+
+  int unitNameLength = strcspn(name,":");
+  if (!(strlen(rootName) == unitNameLength) && strncmp(rootName,name,unitNameLength)) {
+    return ENODEV;
+  }
+
+  lun = atoi(&name[unitNameLength+1]);
+  if (lun >= logicalUnitCount) {
+    return ENXIO;
+  }
+
+  if (logicalUnits[lun] == 0) {
+    return lun;
+  }
+
+  if ((flags & DDO_FORCE_OPEN) == 0) {
+    return EADDRINUSE;
+  } else {
+    free(logicalUnits[lun]);
+    return lun;
+  }
+  return ENXIO;
+}
+
+int DeviceDriver::close(int handle) {
+  LogicalUnitInfo *currentDevice = logicalUnits[(handle & 0x7F)];
+  if (currentDevice != 0) delete currentDevice;
+  return ESUCCESS;
+}
+
+//---------------------------------------------------------------------------
 
 int DeviceDriver::buildVersionResponse(const byte *semver,const char *name,int count, byte *buf) {
 
