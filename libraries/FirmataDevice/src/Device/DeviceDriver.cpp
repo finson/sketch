@@ -1,10 +1,14 @@
 #include <Device/DeviceDriver.h>
 
+//---------------------------------------------------------------------------
+
 DeviceDriver::DeviceDriver(const char *r, const int count) :
 rootName(r),
 logicalUnitCount(count),
 logicalUnits(new LogicalUnitInfo*[count]())
 {};
+
+//---------------------------------------------------------------------------
 
 int DeviceDriver::microsecondUpdate(unsigned long deltaMicros) {
   return ESUCCESS;
@@ -25,7 +29,7 @@ int DeviceDriver::open(const char *name, int flags) {
   }
 
   lun = atoi(&name[unitNameLength+1]);
-  if (lun >= logicalUnitCount) {
+  if (lun < 0 || lun >= logicalUnitCount) {
     return ENXIO;
   }
 
@@ -36,7 +40,7 @@ int DeviceDriver::open(const char *name, int flags) {
   if ((flags & DDO_FORCE_OPEN) == 0) {
     return EADDRINUSE;
   } else {
-    free(logicalUnits[lun]);
+    delete logicalUnits[lun];
     return lun;
   }
   return ENXIO;
