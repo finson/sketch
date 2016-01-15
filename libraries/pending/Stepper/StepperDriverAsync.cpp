@@ -20,13 +20,22 @@
 //---------------------------------------------------------------------------
 
 StepperDriverAsync::StepperDriverAsync(const char *dName, int addrCount) :
-  StepperDriver(dName, addrCount) {
+  DeviceDriver(dName, addrCount) {
 }
 
 //---------------------------------------------------------------------------
 
+int StepperDriverAsync::open(const char *name, int flags) {
+  int lun = DeviceDriver::open(name,flags);
+  if (lun < 0) return lun;
+
+  logicalUnits[lun] = new StepperDriverAsyncLUI();
+  return lun;
+}
+
+
 int StepperDriverAsync::control(int handle, int reg, int count, byte *buf) {
-  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  StepperDriverAsyncLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
   if (!currentUnit->isOpen()) return ENOTCONN;
 
   switch (reg) {
@@ -43,7 +52,7 @@ int StepperDriverAsync::controlCDR_Configure(int handle, int reg, int count, byt
 
   if (count < 7) return EMSGSIZE;
 
-  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  StepperDriverAsyncLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
   void *deviceObject = currentUnit->getDeviceObject();
   if (deviceObject != 0) return EBUSY;
 
@@ -72,35 +81,38 @@ int StepperDriverAsync::controlCDR_Configure(int handle, int reg, int count, byt
     return ENOTSUP;
   }
   currentUnit->setDeviceObject(motor);
+  currentUnit->setRPMSpeed(0);
+  currentUnit->setRPMAccelerations(0,0);
   return count;
 }
 
 int StepperDriverAsync::controlSTP_RPMSpeed(int handle, int reg, int count, byte *buf) {
   AsyncStepper *motor;
-  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  StepperDriverAsyncLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
   AsyncStepper *deviceObject = static_cast<AsyncStepper *>(currentUnit->getDeviceObject());
   if (deviceObject == 0) return EBADSLT;
   if (count != 4) return EMSGSIZE;
 
-  deviceObject->setSpeed(getInt32LE(buf));
+  currentUnit->setRPMSpeed(getInt32LE(buf));
   return count;
 }
 
 int StepperDriverAsync::controlSTP_MoveR(int handle, int reg, int count, byte *buf) {
   AsyncStepper *motor;
-  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  StepperDriverAsyncLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
   AsyncStepper *deviceObject = static_cast<AsyncStepper *>(currentUnit->getDeviceObject());
   if (deviceObject == 0) return EBADSLT;
   if (count != 5) return EMSGSIZE;
 
-  deviceObject->step((int)getInt32LE(buf));
+  deviceObject->setStepsToMove((int)getInt32LE(buf),currentUnit->getRPMSpeed(),
+    currentUnit->getRPMAcceleration(),currentUnit->getRPMDeceleration());
   return count;
 }
 
 //---------------------------------------------------------------------------
 
 int StepperDriverAsync::status(int handle, int reg, int count, byte *buf) {
-  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  StepperDriverAsyncLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
   if (!currentUnit->isOpen()) return ENOTCONN;
 
   switch (reg) {
@@ -116,7 +128,7 @@ int StepperDriverAsync::statusCDR_DriverVersion(int handle, int reg, int count, 
 
 int StepperDriverAsync::statusCDR_LibraryVersion(int handle, int reg, int count, byte *buf) {
   AsyncStepper *motor;
-  LogicalUnitInfo *currentUnit = &logicalUnits[handle & 0x7F];
+  StepperDriverAsyncLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
   AsyncStepper *deviceObject = static_cast<AsyncStepper *>(currentUnit->getDeviceObject());
   if (deviceObject == 0) return EBADSLT;
   int status = buildVersionResponse(librarySemVer,libraryName,count,buf);
@@ -129,7 +141,7 @@ int StepperDriverAsync::statusCDR_LibraryVersion(int handle, int reg, int count,
 //---------------------------------------------------------------------------
 
 int StepperDriverAsync::read(int handle, int count, byte *buf) {return ENOSYS;}
-//   StepperLUI *currentUnit = &logicalUnits[handle & 0x7F];
+//   StepperLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[handle & 0x7F]);
 //   if (!currentUnit->isOpen()) {
 //     return ENOTCONN;
 //   }
@@ -152,7 +164,7 @@ int StepperDriverAsync::write(int handle, int count, byte *buf) {return ENOSYS;}
 // }
 
 int StepperDriverAsync::close(int lun) {return ENOSYS;}
-//   StepperLUI *currentUnit = &logicalUnits[lun & 0x7F];
+//   StepperLUI *currentUnit = static_cast<StepperDriverAsyncLUI *>(&logicalUnits[lun & 0x7F]);
 //   if (currentUnit->isOpen()) {
 //     currentUnit->setOpen(false);
 //     I2CMode.disableI2CPins();
