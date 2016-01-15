@@ -2,7 +2,7 @@
 #include <Hello/HelloDriver.h>
 
 /**
-   Test the operation of a simple device driver.
+   Test the operation of simple device driver HelloDriver.
 */
 
 #define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
