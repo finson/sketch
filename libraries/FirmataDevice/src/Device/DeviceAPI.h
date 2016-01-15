@@ -16,7 +16,7 @@
 class DeviceAPI {
 
 public:
-  virtual int getDriverVersion(int handle, SemanticVersion *ver) = 0;
+  virtual int getDriverVersion(int handle, SemanticVersion * ver) = 0;
   virtual int getAPIVersion(SemanticVersion *ver) = 0;
 
 private:
