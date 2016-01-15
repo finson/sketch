@@ -28,7 +28,7 @@ int HelloDriver::open(const char *name, int flags) {
   int lun = DeviceDriver::open(name,flags);
   if (lun < 0) return lun;
 
-  logicalUnits[lun] = new HelloLUI();
+  logicalUnits[lun] = new HelloLUI("World");
   return lun;
 }
 
