@@ -2,6 +2,7 @@
 #define HelloDriver_h
 
 #include <Device/DeviceDriver.h>
+#include "HelloLUI.h"
 
 #define MAX_HELLO_TEXT_LENGTH 31
 #define SAMPLE_COUNT 16
@@ -48,28 +49,6 @@ private:
     boolean isSampleBufferFull;
     unsigned long calculateAverageInterval();
 
-    class HelloLUI: public LogicalUnitInfo {
-
-    public:
-
-        HelloLUI() : LogicalUnitInfo() {
-            who = "World";
-        }
-
-        ~HelloLUI() {}
-
-        void setWho(const char *newWho) {
-            free(who);
-            who = strdup(newWho);
-        }
-
-        const char *getWho() {
-            return who;
-        }
-
-    private:
-        char *who;
-    };
 };
 
 #endif

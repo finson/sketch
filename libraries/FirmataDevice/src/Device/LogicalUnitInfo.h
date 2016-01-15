@@ -4,14 +4,9 @@
 class LogicalUnitInfo {
 
 public:
-  LogicalUnitInfo();
-  virtual ~LogicalUnitInfo();
+  LogicalUnitInfo() {}
+  virtual ~LogicalUnitInfo() {}
 
-  void *getDeviceObject();
-  void setDeviceObject(void *obj);
-
-private:
-  void *theDeviceObject;
 };
 
 #endif
