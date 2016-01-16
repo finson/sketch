@@ -24,7 +24,7 @@ int DeviceDriver::open(const char *name, int flags) {
   int lun;
 
   int unitNameLength = strcspn(name,":");
-  if (!(strlen(rootName) == unitNameLength) && strncmp(rootName,name,unitNameLength)) {
+  if ((strlen(rootName) != unitNameLength) || (strncmp(rootName,name,unitNameLength) != 0)) {
     return ENODEV;
   }
 
@@ -48,7 +48,10 @@ int DeviceDriver::open(const char *name, int flags) {
 
 int DeviceDriver::close(int handle) {
   LogicalUnitInfo *currentDevice = logicalUnits[(handle & 0x7F)];
-  if (currentDevice != 0) delete currentDevice;
+  if (currentDevice != 0) {
+    delete currentDevice;
+    logicalUnits[(handle & 0x7F)] = 0;
+  }
   return ESUCCESS;
 }
 

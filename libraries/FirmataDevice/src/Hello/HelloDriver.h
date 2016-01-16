@@ -30,8 +30,6 @@ public:
 
 private:
 
-    int statusCDR_DriverVersion(int handle, int reg, int count, byte *buf);
-
     static const PROGMEM uint8_t driverSemVer[];
     static const PROGMEM char driverName[];
 

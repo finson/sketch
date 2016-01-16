@@ -14,8 +14,8 @@
 * spec - add discussion of the interface between Features, DeviceDrivers, and Modes.
 * Add status register code "get device driver version"
 * Add status register code "get installed device driver count"
-
-
+* Debug info defined by LUN, retrieved with read
+* Put tools ram method in Peek and assign it a LUN
 
 
 ##Deferred Features and changes.

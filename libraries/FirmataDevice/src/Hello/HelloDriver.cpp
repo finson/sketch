@@ -28,8 +28,10 @@ int HelloDriver::status(int handle, int reg, int count, byte *buf) {
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case static_cast<int>(CDR::DriverVersion): return statusCDR_DriverVersion(handle, reg, count, buf);
-  default: return ENOTSUP;
+  case static_cast<int>(CDR::DriverVersion):
+    return DeviceDriver::buildVersionResponse(HelloDriver::driverSemVer,HelloDriver::driverName,count,buf);
+  default:
+    return ENOTSUP;
   }
 }
 
@@ -46,10 +48,4 @@ int HelloDriver::write(int handle, int count, byte *buf) {
 
 int HelloDriver::close(int handle) {
   return DeviceDriver::close(handle);
-}
-
-//---------------------------------------------------------------------------
-
-int HelloDriver::statusCDR_DriverVersion(int handle, int reg, int count, byte *buf) {
-  return DeviceDriver::buildVersionResponse(driverSemVer,driverName,count,buf);
 }

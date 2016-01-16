@@ -1,5 +1,4 @@
 #include "PeekDriver.h"
-
 #include <limits.h>
 
 const PROGMEM uint8_t PeekDriver::driverSemVer[] = {6,0,1,0,0,0,0};
@@ -36,9 +35,12 @@ int PeekDriver::status(int handle, int reg, int count, byte *buf) {
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case static_cast<int>(CDR::DriverVersion): return statusCDR_DriverVersion(handle, reg, count, buf);
-  case static_cast<int>(CDR::Debug): return statusCDR_Debug(handle, reg, count, buf);
-  default: return ENOTSUP;
+  case static_cast<int>(CDR::DriverVersion):
+    return DeviceDriver::buildVersionResponse(PeekDriver::driverSemVer, PeekDriver::driverName, count, buf);
+  case static_cast<int>(CDR::Debug):
+    return statusCDR_Debug(handle, reg, count, buf);
+  default:
+    return ENOTSUP;
   }
 }
 
@@ -55,12 +57,6 @@ int PeekDriver::write(int handle, int count, byte *buf) {
 
 int PeekDriver::close(int handle) {
   return DeviceDriver::close(handle);
-}
-
-//---------------------------------------------------------------------------
-
-int PeekDriver::statusCDR_DriverVersion(int handle, int reg, int count, byte *buf) {
-  return DeviceDriver::buildVersionResponse(PeekDriver::driverSemVer, PeekDriver::driverName, count, buf);
 }
 
 //---------------------------------------------------------------------------
