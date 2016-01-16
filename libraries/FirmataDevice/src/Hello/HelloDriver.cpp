@@ -28,7 +28,7 @@ int HelloDriver::status(int handle, int reg, int count, byte *buf) {
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case CDR_DriverVersion: return statusCDR_DriverVersion(handle, reg, count, buf);
+  case static_cast<int>(CDR::DriverVersion): return statusCDR_DriverVersion(handle, reg, count, buf);
   default: return ENOTSUP;
   }
 }

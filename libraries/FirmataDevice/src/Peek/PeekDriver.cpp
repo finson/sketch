@@ -36,8 +36,8 @@ int PeekDriver::status(int handle, int reg, int count, byte *buf) {
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case CDR_DriverVersion: return statusCDR_DriverVersion(handle, reg, count, buf);
-  case static_cast<int>(PeekRegister::AVG_REPORT_INTERVAL): return statusAVG_ReportInterval(handle, reg, count, buf);
+  case static_cast<int>(CDR::DriverVersion): return statusCDR_DriverVersion(handle, reg, count, buf);
+  case static_cast<int>(CDR::Debug): return statusCDR_Debug(handle, reg, count, buf);
   default: return ENOTSUP;
   }
 }
@@ -95,7 +95,7 @@ int PeekDriver::millisecondTimeBase(unsigned long deltaMillis) {
 
 //---------------------------------------------------------------------------
 
-int PeekDriver::statusAVG_ReportInterval(int handle, int reg, int count, byte *buf) {
+int PeekDriver::statusCDR_Debug(int handle, int reg, int count, byte *buf) {
   if (count != 4) {
     return EMSGSIZE;
   } else if (isSampleBufferFull) {

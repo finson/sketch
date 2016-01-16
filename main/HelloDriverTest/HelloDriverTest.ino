@@ -19,7 +19,7 @@ DeviceDriver *ddArray[] {&ddHello, &ddPeek};
 byte buf[BUF_SIZE];
 char names[BUF_SIZE];
 int handle;
-int vReg[] = {CDR_DriverVersion, CDR_LibraryVersion};
+int vReg[] = {static_cast<int>(CDR::DriverVersion), static_cast<int>(CDR::LibraryVersion)};
 
 void setup() {
   int bufIndex = 0;

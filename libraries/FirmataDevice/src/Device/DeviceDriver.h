@@ -7,7 +7,18 @@
 
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
-#include "DeviceRegister.h"
+
+// These are the Common Device Register codes used by the DeviceDrivers in
+// their status() and control() methods.  Register names specific to a
+// particular device type are defined by the individual DeviceDrivers.
+
+enum class CDR : int {
+    DriverVersion   = -1,   /* Get driver name and version */
+    LibraryVersion  = -2,   /* Get library name and version */
+    Reset           = -3,   /* Reset all state in the device driver */
+    Configure       = -4,   /* Configure a logical unit number instance */
+    Debug           = -256  /* Do something helpful for debugging ... */
+};
 
 #define MAX_ROOT_NAME_LENGTH 32
 
