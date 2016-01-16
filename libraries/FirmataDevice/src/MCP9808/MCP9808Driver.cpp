@@ -1,8 +1,7 @@
 #include "MCP9808Driver.h"
 #include <Wire.h>
 
-const PROGMEM uint8_t MCP9808Driver::driverSemVer[] = {6, 0, 1, 0, 0, 0, 0};
-const PROGMEM char MCP9808Driver::driverName[] = {"MCP9808Driver"};
+DEFINE_SEMVER(MCP9808Driver, "MCP9808Driver", 0, 1, 0)
 
 //---------------------------------------------------------------------------
 

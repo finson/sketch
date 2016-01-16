@@ -8,6 +8,26 @@
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
 
+// Put call to DECLARE_SEMVER in the declaration file xx.h in the private
+// section of the device driver class declaration.  For example:
+//
+// class TrialDriver {
+// public:
+//   int yada();
+// private:
+//   DECLARE_SEMVER
+// };
+
+#define DECLARE_SEMVER static const PROGMEM char driverName[]; static const PROGMEM byte driverSemVer[];
+
+// Put call to DEFINE_SEMVER in the definition file xx.cpp. For example:
+//
+// DEFINE_SEMVER(TrialDriver,"TrialDriver",1,0,3)
+
+#define DEFINE_SEMVER(theScope, theName, major, minor, patch) \
+const PROGMEM char theScope::driverName[] = {theName}; \
+const PROGMEM byte theScope::driverSemVer[] = {3, major, minor, patch};
+
 // These are the Common Device Register codes used by the DeviceDrivers in
 // their status() and control() methods.  Register names specific to a
 // particular device type are defined by the individual DeviceDrivers.

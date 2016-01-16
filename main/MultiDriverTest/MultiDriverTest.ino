@@ -60,29 +60,35 @@ void setup() {
       Serial.print("Version: ");
       status = dd->status(handle, vReg[regIndex], BUF_SIZE, buf);
       Serial.print(status);
-      Serial.print(' ');
       if (status >= 0) {
         bufIndex = 0;
         int packetSize = buf[bufIndex++];
         for (int idx = 0; idx < packetSize; idx++) {
-          Serial.print(buf[bufIndex++]);
           switch (idx) {
             case 0:
+              Serial.print(' ');
+              break;
             case 1:
               Serial.print('.');
               break;
             case 2:
-              Serial.print('-');
+              Serial.print('.');
               break;
             case 3:
+              Serial.print('-');
+              break;
             case 4:
               Serial.print('.');
               break;
             case 5:
-              Serial.print(' ');
+              Serial.print('.');
               break;
+            default:
+              Serial.print('?');
           }
+          Serial.print(buf[bufIndex++]);
         }
+        Serial.print(' ');
         Serial.write(reinterpret_cast<char *>(&buf[bufIndex]));
       }
       Serial.println();
