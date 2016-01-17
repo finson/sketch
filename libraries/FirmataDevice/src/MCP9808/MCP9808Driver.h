@@ -1,19 +1,20 @@
 #ifndef MCP9808Driver_h
 #define MCP9808Driver_h
 
+#include <I2C.h>
 #include <Device/DeviceDriver.h>
 #include "MCP9808LUI.h"
 
-enum class MCP9808Register {
-  RESERVED,
-  CONFIG,
-  UPPER_TEMP,
-  LOWER_TEMP,
-  CRIT_TEMP,
-  AMBIENT_TEMP,
-  MANUF_ID,
-  DEVICE_ID,
-  RESOLUTION
+enum class MCP9808Register : int {
+  RESERVED = 0,
+  CONFIG = 1,
+  UPPER_TEMP = 2,
+  LOWER_TEMP = 3,
+  CRIT_TEMP = 4,
+  AMBIENT_TEMP = 5,
+  MANUF_ID = 6,
+  DEVICE_ID = 7,
+  RESOLUTION = 8
 };
 
 class MCP9808Driver: public DeviceDriver {
@@ -33,6 +34,7 @@ private:
 
     int controlCDR_Configure(int handle, int reg, int count, byte *buf);
     int statusCDR_DriverVersion(int handle, int reg, int count, byte *buf);
+    int statusCDR_Debug(int handle, int reg, int count, byte *buf);
 
 };
 

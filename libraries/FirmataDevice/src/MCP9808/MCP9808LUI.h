@@ -5,9 +5,7 @@ class MCP9808LUI: public LogicalUnitInfo {
 
 public:
 
-  MCP9808LUI() : LogicalUnitInfo(), i2cAddress(0x18) {}
-
-  MCP9808LUI(const int addr) : LogicalUnitInfo(), i2cAddress(addr) {}
+  MCP9808LUI() : LogicalUnitInfo(), i2cAddress(-1) {}
 
   ~MCP9808LUI() {}
 
