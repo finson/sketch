@@ -30,14 +30,12 @@
 // Device Drivers
 
 #include <Hello/HelloDriver.h>
-HelloDriver ddHello("HW");
-
 #include <Peek/PeekDriver.h>
-PeekDriver ddPeek("PK");
+#include <MCP9808/MCP9808Driver.h>
 
- #include <MCP9808/MCP9808Driver.h>
- MCP9808Driver ddMCP9808("TC",1);
+DeviceDriver *selectedDevices[] = {
+  new HelloDriver("HW"),
+  new PeekDriver("PK"),
+  new MCP9808Driver("TC",2),
+  0};
 
-DeviceDriver *selectedDevices[] = {&ddHello,&ddPeek,&ddMCP9808,0};
-// DeviceDriver *selectedDevices[] = {&ddMCP9808,0};
-//DeviceDriver *selectedDevices[] = {&ddHello,&ddPeek,&ddMCP9808,0};

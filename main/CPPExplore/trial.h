@@ -15,3 +15,9 @@ private:
   DECLARE_SEMVER
 };
 
+DriverExample *drivers[] = {
+  new DriverExample(),
+  new DriverExample()
+};
+
+
