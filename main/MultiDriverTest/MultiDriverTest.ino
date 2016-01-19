@@ -1,4 +1,5 @@
-#include "SelectedFeatures.h"
+#include "SelectedDeviceDrivers.h"
+#include <Device/DeviceTable.h>
 
 /**
    Test the operation of several device drivers loaded together.
@@ -13,9 +14,13 @@ byte buf[BUF_SIZE];
 char names[BUF_SIZE];
 int handle;
 int vReg[] = {static_cast<int>(CDR::DriverVersion), static_cast<int>(CDR::LibraryVersion)};
-char *unitNames[] = {"HW:0", "PK:0", "TC:0" };
+
+DeviceTable dt(selectedDevices);
 
 void setup() {
+
+  char *unitNames[] = {"HW:0", "PK:0", "TC:0" };
+  int unitNameCount = 3;
   int bufIndex = 0;
 
   Serial.begin(115200);
@@ -25,13 +30,11 @@ void setup() {
     delay(1000);
   }
 
-  int ddIndex = 0;
-  DeviceDriver *dd;
-  while ((dd = selectedDevices[ddIndex]) != 0) {
+  for (int idx=0; idx<unitNameCount; idx++) {
     Serial.print("Open: ");
-    Serial.print(unitNames[ddIndex]);
+    Serial.print(unitNames[idx]);
     Serial.print(" ");
-    int status = dd->open(unitNames[ddIndex], 0);
+    int status = dt.open(unitNames[idx], 0);
     Serial.println(status);
 
     //  Serial.print("Config: ");
@@ -58,7 +61,7 @@ void setup() {
 
     for (int regIndex = 0; regIndex < 2; regIndex++) {
       Serial.print("Version: ");
-      status = dd->status(handle, vReg[regIndex], BUF_SIZE, buf);
+      status = dt.status(handle, vReg[regIndex], BUF_SIZE, buf);
       Serial.print(status);
       if (status >= 0) {
         bufIndex = 0;
@@ -93,7 +96,7 @@ void setup() {
       }
       Serial.println();
     }
-    ddIndex += 1;
+    idx += 1;
   }
 }
 
