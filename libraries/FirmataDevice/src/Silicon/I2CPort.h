@@ -14,15 +14,11 @@ public:
   I2CPort();
   ~I2CPort();
 
-  void enable();
-  void disable();
-  bool isEnabled();
-
-  void writeUInt8(int addr, uint8_t reg, uint8_t *valueAddress);
-  void writeUInt16LE(int addr, uint8_t reg, uint8_t *valueAddress);
-  void writeUInt16BE(int addr, uint8_t reg, uint8_t *valueAddress);
-  void writeUInt32LE(int addr, uint8_t reg, uint8_t *valueAddress);
-  void writeUInt32BE(int addr, uint8_t reg, uint8_t *valueAddress);
+  void writeUInt8(int addr, uint8_t reg, uint8_t value);
+  void writeUInt16LE(int addr, uint8_t reg, uint16_t value);
+  void writeUInt16BE(int addr, uint8_t reg, uint16_t value);
+  void writeUInt32LE(int addr, uint8_t reg, uint32_t value);
+  void writeUInt32BE(int addr, uint8_t reg, uint32_t value);
 
   uint8_t readUInt8(int addr, uint8_t reg);
   uint16_t readUInt16LE(int addr, uint8_t reg);
@@ -30,6 +26,9 @@ public:
   uint32_t readUInt32LE(int addr, uint8_t reg);
   uint32_t readUInt32BE(int addr, uint8_t reg);
 
+private:
+  void read2(int addr, uint8_t reg, uint8_t *bytesRead);
+  void read4(int addr, uint8_t reg, uint8_t *bytesRead);
 };
 
 #endif

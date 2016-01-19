@@ -1,8 +1,8 @@
-#include <Port.h>
-#include <ByteSwap.h>
+#include "Port.h"
+#include "ByteOrder.h"
 
 Port::Port() {}
-~Port() {}
+Port::~Port() {}
 
 void Port::enable() {}
 void Port::disable() {}
