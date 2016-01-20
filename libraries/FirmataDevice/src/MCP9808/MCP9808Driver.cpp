@@ -13,7 +13,9 @@ DEFINE_SEMVER(MCP9808Driver, "MCP9808Driver", 0, 1, 0)
  * first, the least significant byte last.
  */
 MCP9808Driver::MCP9808Driver(const char *dName, int lunCount, int baseI2CAddress) :
-  DeviceDriver(dName, lunCount) : i2c(), baseAddress(baseI2CAddress) {}
+  DeviceDriver(dName, lunCount),
+  i2c(),
+  baseAddress(baseI2CAddress) {}
 
 //---------------------------------------------------------------------------
 
@@ -27,14 +29,14 @@ int MCP9808Driver::open(const char *name, int flags) {
   lun = status;
   MCP9808LUI *currentUnit = new MCP9808LUI(baseAddress+lun);
 
-  int address = currentDevice->getDeviceAddress();
+  int address = currentUnit->getI2CAddress();
   int theRegister = static_cast<int>(MCP9808Register::MANUF_ID);
   if (i2c.readUInt16BE(address, theRegister) != 0x0054) {
     return ECONNREFUSED;
   }
 
   theRegister = static_cast<int>(MCP9808Register::DEVICE_ID);
-  if (i2c.read16(address, theRegister) != 0x0400) {
+  if (i2c.readUInt16BE(address, theRegister) != 0x0400) {
     return ECONNREFUSED;
   }
 
@@ -62,7 +64,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   case static_cast<int>(MCP9808Register::LOWER_TEMP):
   case static_cast<int>(MCP9808Register::CRIT_TEMP):
     if (count == 2) {
-      i2c.writeUInt16BE(address, reg, buf);
+      i2c.writeUInt16BE(theI2CAddress, reg, getInt16LE(buf));
       return count;
     } else {
       return EMSGSIZE;
@@ -71,7 +73,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
 
   case static_cast<int>(MCP9808Register::RESOLUTION):
     if (count == 1) {
-      i2c.writeUInt8(address, reg, buf);
+      i2c.writeUInt8(theI2CAddress, reg, getInt8LE(buf));
       return count;
     } else {
       return EMSGSIZE;
@@ -128,7 +130,7 @@ int MCP9808Driver::read(int handle, int count, byte * buf) {
 
   int address = currentUnit->getI2CAddress();
   int reg = static_cast<int>(MCP9808Register::AMBIENT_TEMP);
-  int v = i2c.read16(address, reg);
+  int v = i2c.readUInt16BE(address, reg);
   buf[0] = (v >> 8) & 0xFF;
   buf[1] = v & 0xFF;
 

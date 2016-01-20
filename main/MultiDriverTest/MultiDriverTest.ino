@@ -4,10 +4,10 @@
 /**
    Test the operation of several device drivers loaded together.
 */
-
-#define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
-#define getLSBInt16(val) ((val) & 0xFF)
-#define getMSBInt16(val) (((val) >> 8)& 0xFF)
+//
+//#define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
+//#define getLSBInt16(val) ((val) & 0xFF)
+//#define getMSBInt16(val) (((val) >> 8)& 0xFF)
 
 #define BUF_SIZE 256
 byte buf[BUF_SIZE];
@@ -30,7 +30,7 @@ void setup() {
     delay(1000);
   }
 
-  for (int idx=0; idx<unitNameCount; idx++) {
+  for (int idx = 0; idx < unitNameCount; idx++) {
     Serial.print("Open: ");
     Serial.print(unitNames[idx]);
     Serial.print(" ");
@@ -59,6 +59,11 @@ void setup() {
     //  status = dd->control(handle, STP_RPMSpeed, bufIndex, buf);
     //  Serial.println(status);
 
+    if (status < 0) {
+      continue;
+    } else {
+      handle = status;
+    }
     for (int regIndex = 0; regIndex < 2; regIndex++) {
       Serial.print("Version: ");
       status = dt.status(handle, vReg[regIndex], BUF_SIZE, buf);
@@ -96,11 +101,11 @@ void setup() {
       }
       Serial.println();
     }
-    idx += 1;
   }
 }
 
 void loop() {
+  dt.dispatchTimers();
   //
   //  Serial.print("Move+: ");
   //  int msgIndex = 0;
