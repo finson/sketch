@@ -28,6 +28,12 @@ DeviceTable::DeviceTable(DeviceDriver *deviceArray[]) :
   while (devices[deviceCount] != 0) {
     deviceCount += 1;
   }
+
+  previousTime[0] = 0;
+  previousTime[1] = 0;
+  intervalTime[0] = DEFAULT_REPORT_INTERVAL;
+  intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
+
 }
 
 DeviceTable::~DeviceTable() {}
@@ -69,6 +75,36 @@ int DeviceTable::close(int handle) {
 }
 
 //----------------------------------------------------------------------------
+
+void DeviceTable::dispatchTimers() {
+  int deviceIndex;
+  int status;
+  currentTime[0] = millis();
+  currentTime[1] = micros();
+
+  unsigned long elapsedTime;
+
+  for (int idx = 0; idx < 2; idx++) {
+    if (currentTime[idx] >= previousTime[idx]) {
+      elapsedTime = currentTime[idx] - previousTime[idx];
+    } else {
+      elapsedTime = (ULONG_MAX - previousTime[idx]) + (currentTime[idx] + 1);
+    }
+
+    if (elapsedTime >= intervalTime[idx]) {
+      if (idx == 0) {
+        for (deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
+          status = devices[deviceIndex]->millisecondTimeBase(elapsedTime);
+        }
+      } else {
+        for (deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
+          status = devices[deviceIndex]->microsecondTimeBase(elapsedTime);
+        }
+      }
+      previousTime[idx] = currentTime[idx];
+    }
+  }
+}
 
 int DeviceTable::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
   int deviceIndex = 0;

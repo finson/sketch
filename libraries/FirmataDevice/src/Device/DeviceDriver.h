@@ -86,7 +86,7 @@ public:
      * method.
      * @return status code
      */
-    virtual int microsecondUpdate(unsigned long deltaMicros);
+    virtual int microsecondTimeBase(unsigned long deltaMicros);
 
     /**
      * Called repeatedly by the application program at the expiration of a
@@ -95,7 +95,7 @@ public:
      * @param deltaMillis Length, in milliseconds, of the interval since the last call to this method.
      * @return status code
      */
-    virtual int millisecondReport(unsigned long deltaMillis);
+    virtual int millisecondTimeBase(unsigned long deltaMillis);
 
 protected:
 

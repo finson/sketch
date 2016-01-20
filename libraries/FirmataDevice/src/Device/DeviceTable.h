@@ -3,8 +3,15 @@
 #define DeviceTable_h
 
 #include <Device/DeviceDriver.h>
+#include <limits.h>
 
 #define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
+
+#define MINIMUM_REPORT_INTERVAL 10     // milliseconds
+#define DEFAULT_REPORT_INTERVAL 19
+
+#define MINIMUM_UPDATE_INTERVAL 100    // microseconds
+#define DEFAULT_UPDATE_INTERVAL 200
 
 class DeviceTable : public DeviceDriver {
 public:
@@ -12,6 +19,7 @@ public:
     ~DeviceTable();
 
     int dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock);
+    void dispatchTimers();
 
     int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
@@ -25,6 +33,10 @@ private:
 
     int deviceCount;
     DeviceDriver **devices;
+
+    unsigned long previousTime[2];   // the time the last interval expired
+    unsigned long currentTime[2];    // the current values from millis() and micros()
+    unsigned long intervalTime[2];   // length of time between calls to features
 
 };
 
