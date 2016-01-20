@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+#ifndef lowByte
+#define lowByte(w) ((uint8_t) ((w) & 0xff))
+#endif
+#ifndef highByte
+#define highByte(w) ((uint8_t) ((w) >> 8))
+#endif
+
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 
 #error "ByteOrder is not implemented for BigEndian hosts yet."
@@ -32,15 +39,14 @@
 // These methods perform the extract, swap, and pack operations
 
 class ByteOrder {
-
 public:
-  static void x2LE(uint16_t value, uint8_t *dst);
+  static void x2LE(uint16_t src, uint8_t *dst);
   static void x4LE(uint32_t src, uint8_t *dst);
 
   static uint16_t p2LE(uint8_t *src);
   static uint32_t p4LE(uint8_t *src);
 
-  static void x2BE(uint16_t value, uint8_t *dst);
+  static void x2BE(uint16_t src, uint8_t *dst);
   static void x4BE(uint32_t src, uint8_t *dst);
 
   static uint16_t p2BE(uint8_t *src);
