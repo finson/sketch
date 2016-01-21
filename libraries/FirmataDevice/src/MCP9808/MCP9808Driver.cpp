@@ -31,12 +31,12 @@ int MCP9808Driver::open(const char *name, int flags) {
 
   int address = currentUnit->getI2CAddress();
   int theRegister = static_cast<int>(MCP9808Register::MANUF_ID);
-  if (i2c.readUInt16BE(address, theRegister) != 0x0054) {
+  if (i2c.read16BE(address, theRegister) != 0x0054) {
     return ECONNREFUSED;
   }
 
   theRegister = static_cast<int>(MCP9808Register::DEVICE_ID);
-  if (i2c.readUInt16BE(address, theRegister) != 0x0400) {
+  if (i2c.read16BE(address, theRegister) != 0x0400) {
     return ECONNREFUSED;
   }
 
@@ -64,7 +64,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   case static_cast<int>(MCP9808Register::LOWER_TEMP):
   case static_cast<int>(MCP9808Register::CRIT_TEMP):
     if (count == 2) {
-      i2c.writeUInt16BE(theI2CAddress, reg, getInt16LE(buf));
+      i2c.write16BE(theI2CAddress, reg, from16LEToHost(buf));
       return count;
     } else {
       return EMSGSIZE;
@@ -73,7 +73,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
 
   case static_cast<int>(MCP9808Register::RESOLUTION):
     if (count == 1) {
-      i2c.writeUInt8(theI2CAddress, reg, getInt8LE(buf));
+      i2c.write8BE(theI2CAddress, reg, from8LEToHost(buf));
       return count;
     } else {
       return EMSGSIZE;
@@ -130,7 +130,7 @@ int MCP9808Driver::read(int handle, int count, byte * buf) {
 
   int address = currentUnit->getI2CAddress();
   int reg = static_cast<int>(MCP9808Register::AMBIENT_TEMP);
-  int v = i2c.readUInt16BE(address, reg);
+  int v = i2c.read16BE(address, reg);
   buf[0] = (v >> 8) & 0xFF;
   buf[1] = v & 0xFF;
 

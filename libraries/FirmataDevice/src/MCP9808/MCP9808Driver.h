@@ -21,6 +21,7 @@ class MCP9808Driver: public DeviceDriver {
 
 public:
     MCP9808Driver(const char *unitName = "TC", int count = 8, int base = 0x18);
+
     int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
     int control(int handle, int reg, int count, byte *buf);
