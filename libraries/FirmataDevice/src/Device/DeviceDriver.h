@@ -5,6 +5,7 @@
 #include <avr/pgmspace.h>
 #include <stdlib.h>
 
+#include <Silicon/ByteOrder.h>
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
 
@@ -57,12 +58,6 @@ enum class CDR : int {
 
 #define getUnitHandle(handle) ((handle) & 0x7F)
 #define getDeviceHandle(handle) (((handle) >> 7) & 0x7F)
-
-// Create ints using consecutive source address pointers
-
-#define getInt8LE(addr) ((*(addr))&0xFF)
-#define getInt16LE(addr) ((((*((addr)+1))&0xFF)<<8)  |  ((*((addr)+0))&0xFF))
-#define getInt32LE(addr) ((((*((addr)+3))&0xFF)<<24) | (((*((addr)+2))&0xFF)<<16) | (((*((addr)+1))&0xFF)<<8) | ((*((addr)+0))&0xFF))
 
 class DeviceDriver {
 

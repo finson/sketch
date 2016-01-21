@@ -12,117 +12,101 @@ I2CPort::~I2CPort() {
 
 //----------------------------------------------------------------------------
 
-void I2CPort::writeUInt8(int addr, uint8_t reg, uint8_t value) {
+void I2CPort::readBytes(int addr, uint8_t reg, uint8_t *buf, int count) {
   Wire.beginTransmission((uint8_t)addr);
   Wire.write((uint8_t)reg);
-  Wire.write((uint8_t)(value));
   Wire.endTransmission();
-}
 
-void I2CPort::writeUInt16LE(int addr, uint8_t reg, uint16_t value) {
-  uint8_t bytesToWrite[2];
-  fromHostTo16LE(value, bytesToWrite);
+  Wire.requestFrom((uint8_t)addr, (uint8_t)count);
 
-  Wire.beginTransmission((uint8_t)addr);
-  Wire.write((uint8_t)reg);
-  Wire.write(bytesToWrite[0]);
-  Wire.write(bytesToWrite[1]);
-  Wire.endTransmission();
-}
-
-void I2CPort::writeUInt16BE(int addr, uint8_t reg, uint16_t value) {
-  uint8_t bytesToWrite[2];
-  fromHostTo16BE(value, bytesToWrite);
-
-  Wire.beginTransmission((uint8_t)addr);
-  Wire.write((uint8_t)reg);
-  Wire.write(bytesToWrite[0]);
-  Wire.write(bytesToWrite[1]);
-  Wire.endTransmission();
-}
-
-void I2CPort::writeUInt32LE(int addr, uint8_t reg, uint32_t value) {
-  uint8_t bytesToWrite[4];
-  fromHostTo32LE(value, bytesToWrite);
-
-  Wire.beginTransmission((uint8_t)addr);
-  Wire.write((uint8_t)reg);
-  Wire.write(bytesToWrite[0]);
-  Wire.write(bytesToWrite[1]);
-  Wire.endTransmission();
-}
-
-void I2CPort::writeUInt32BE(int addr, uint8_t reg, uint32_t value) {
-  uint8_t bytesToWrite[4];
-  fromHostTo32BE(value, bytesToWrite);
-
-  Wire.beginTransmission((uint8_t)addr);
-  Wire.write((uint8_t)reg);
-  Wire.write(bytesToWrite[0]);
-  Wire.write(bytesToWrite[1]);
-  Wire.endTransmission();
+  for (int idx = 0; idx < count; idx++) {
+    buf[idx] = Wire.read();
+  }
 }
 
 //----------------------------------------------------------------------------
 
-uint8_t I2CPort::readUInt8(int addr, uint8_t reg) {
-
-  Wire.beginTransmission(addr);
-  Wire.write((uint8_t)reg);
-  Wire.endTransmission();
-
-  Wire.requestFrom((uint8_t)addr, (uint8_t)1);
-  return (uint8_t)Wire.read();
+uint8_t I2CPort::read8LE(int addr, uint8_t reg) {
+  uint8_t bytesRead[1];
+  readBytes(addr, reg, bytesRead,1);
+  return from8LEToHost(bytesRead);
 }
 
-uint16_t I2CPort::readUInt16LE(int addr, uint8_t reg) {
+uint8_t I2CPort::read8BE(int addr, uint8_t reg) {
+  uint8_t bytesRead[1];
+  readBytes(addr, reg, bytesRead,1);
+  return from8BEToHost(bytesRead);
+}
+
+uint16_t I2CPort::read16LE(int addr, uint8_t reg) {
   uint8_t bytesRead[2];
-  read2(addr, reg, bytesRead);
+  readBytes(addr, reg, bytesRead,2);
   return from16LEToHost(bytesRead);
 }
 
-uint16_t I2CPort::readUInt16BE(int addr, uint8_t reg) {
+uint16_t I2CPort::read16BE(int addr, uint8_t reg) {
   uint8_t bytesRead[2];
-  read2(addr, reg, bytesRead);
+  readBytes(addr, reg, bytesRead,2);
   return from16BEToHost(bytesRead);
 }
 
-uint32_t I2CPort::readUInt32LE(int addr, uint8_t reg) {
+uint32_t I2CPort::read32LE(int addr, uint8_t reg) {
   uint8_t bytesRead[4];
-  read4(addr, reg, bytesRead);
+  readBytes(addr, reg, bytesRead,4);
   return from32LEToHost(bytesRead);
 }
 
-uint32_t I2CPort::readUInt32BE(int addr, uint8_t reg) {
+uint32_t I2CPort::read32BE(int addr, uint8_t reg) {
   uint8_t bytesRead[4];
-  read4(addr, reg, bytesRead);
+  readBytes(addr,reg,bytesRead,4);
   return from32BEToHost(bytesRead);
 }
 
 //----------------------------------------------------------------------------
 
-void I2CPort::read2(int addr, uint8_t reg, uint8_t *bytesRead) {
-
-  Wire.beginTransmission(addr);
+void I2CPort::writeBytes(int addr, uint8_t reg, uint8_t *buf, int count) {
+  Wire.beginTransmission((uint8_t)addr);
   Wire.write((uint8_t)reg);
+  for (int idx = 0; idx < count; idx++) {
+    Wire.write(buf[idx]);
+  }
   Wire.endTransmission();
-
-  Wire.requestFrom((uint8_t)addr, (uint8_t)2);
-
-  bytesRead[0] = Wire.read();
-  bytesRead[1] = Wire.read();
 }
 
-void I2CPort::read4(int addr, uint8_t reg, uint8_t *bytesRead) {
+//----------------------------------------------------------------------------
 
-  Wire.beginTransmission(addr);
-  Wire.write((uint8_t)reg);
-  Wire.endTransmission();
+void I2CPort::write8LE(int addr, uint8_t reg, uint8_t value) {
+  uint8_t bytesToWrite[1];
+  fromHostTo8LE(value, bytesToWrite);
+  writeBytes(addr, reg, bytesToWrite, 1);
+}
 
-  Wire.requestFrom((uint8_t)addr, (uint8_t)4);
+void I2CPort::write8BE(int addr, uint8_t reg, uint8_t value) {
+  uint8_t bytesToWrite[1];
+  fromHostTo8BE(value, bytesToWrite);
+  writeBytes(addr, reg, bytesToWrite, 1);
+}
 
-  bytesRead[0] = Wire.read();
-  bytesRead[1] = Wire.read();
-  bytesRead[2] = Wire.read();
-  bytesRead[3] = Wire.read();
+void I2CPort::write16LE(int addr, uint8_t reg, uint16_t value) {
+  uint8_t bytesToWrite[2];
+  fromHostTo16LE(value, bytesToWrite);
+  writeBytes(addr, reg, bytesToWrite, 2);
+}
+
+void I2CPort::write16BE(int addr, uint8_t reg, uint16_t value) {
+  uint8_t bytesToWrite[2];
+  fromHostTo16BE(value, bytesToWrite);
+  writeBytes(addr, reg, bytesToWrite, 4);
+}
+
+void I2CPort::write32LE(int addr, uint8_t reg, uint32_t value) {
+  uint8_t bytesToWrite[4];
+  fromHostTo32LE(value, bytesToWrite);
+  writeBytes(addr, reg, bytesToWrite, 4);
+}
+
+void I2CPort::write32BE(int addr, uint8_t reg, uint32_t value) {
+  uint8_t bytesToWrite[4];
+  fromHostTo32BE(value, bytesToWrite);
+  writeBytes(addr, reg, bytesToWrite, 4);
 }

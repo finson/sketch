@@ -129,21 +129,21 @@ int DeviceTable::dispatchDeviceAction(int action, int handle, int dpCount, byte 
     return (status < 0) ? status : ((deviceIndex & 0x7F) << 7) | (status & 0x7F);
 
   case DD_STATUS:
-    count = getInt16LE(dpBlock);
-    reg   = getInt16LE(dpBlock + 2);
+    count = from16LEToHost(dpBlock);
+    reg   = from16LEToHost(dpBlock + 2);
     return devices[deviceHandle]->status(unitHandle, reg, count, dpBlock + 4);
 
   case DD_CONTROL:
-    count = getInt16LE(dpBlock);
-    reg   = getInt16LE(dpBlock + 2);
+    count = from16LEToHost(dpBlock);
+    reg   = from16LEToHost(dpBlock + 2);
     return devices[deviceHandle]->control(unitHandle, reg, count, dpBlock + 4);
 
   case DD_READ:
-    count = getInt16LE(dpBlock);
+    count = from16LEToHost(dpBlock);
     return devices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
 
   case DD_WRITE:
-    count = getInt16LE(dpBlock);
+    count = from16LEToHost(dpBlock);
     return devices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
 
   case DD_CLOSE:

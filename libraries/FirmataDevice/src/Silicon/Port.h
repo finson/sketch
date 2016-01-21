@@ -29,21 +29,23 @@ public:
   Port();
   ~Port();
 
+  virtual void write8LE(int addr, uint8_t reg, uint8_t value) = 0;
+  virtual void write8BE(int addr, uint8_t reg, uint8_t value) = 0;
+  virtual void write16LE(int addr, uint8_t reg, uint16_t value) = 0;
+  virtual void write16BE(int addr, uint8_t reg, uint16_t value) = 0;
+  virtual void write32LE(int addr, uint8_t reg, uint32_t value) = 0;
+  virtual void write32BE(int addr, uint8_t reg, uint32_t value) = 0;
+
+  virtual uint8_t read8LE(int addr, uint8_t reg) = 0;
+  virtual uint8_t read8BE(int addr, uint8_t reg) = 0;
+  virtual uint16_t read16LE(int addr, uint8_t reg) = 0;
+  virtual uint16_t read16BE(int addr, uint8_t reg) = 0;
+  virtual uint32_t read32LE(int addr, uint8_t reg) = 0;
+  virtual uint32_t read32BE(int addr, uint8_t reg) = 0;
+
   virtual void enable();
   virtual void disable();
   virtual bool isEnabled();
-
-  virtual void writeUInt8(int addr, uint8_t reg, uint8_t value) = 0;
-  virtual void writeUInt16LE(int addr, uint8_t reg, uint16_t value) = 0;
-  virtual void writeUInt16BE(int addr, uint8_t reg, uint16_t value) = 0;
-  virtual void writeUInt32LE(int addr, uint8_t reg, uint32_t value) = 0;
-  virtual void writeUInt32BE(int addr, uint8_t reg, uint32_t value) = 0;
-
-  virtual uint8_t readUInt8(int addr, uint8_t reg) = 0;
-  virtual uint16_t readUInt16LE(int addr, uint8_t reg) = 0;
-  virtual uint16_t readUInt16BE(int addr, uint8_t reg) = 0;
-  virtual uint32_t readUInt32LE(int addr, uint8_t reg) = 0;
-  virtual uint32_t readUInt32BE(int addr, uint8_t reg) = 0;
 };
 
 #endif
