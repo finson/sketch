@@ -4,10 +4,6 @@
 /**
    Test the operation of several device drivers loaded together.
 */
-//
-//#define getInt16(lsb, msb) ((((msb) & 0xFF)<<8) | ((lsb) & 0xFF))
-//#define getLSBInt16(val) ((val) & 0xFF)
-//#define getMSBInt16(val) (((val) >> 8)& 0xFF)
 
 #define BUF_SIZE 256
 byte buf[BUF_SIZE];
