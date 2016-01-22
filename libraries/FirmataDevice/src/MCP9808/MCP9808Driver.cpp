@@ -44,6 +44,30 @@ int MCP9808Driver::open(const char *name, int flags) {
   return lun;
 }
 
+/**
+ * Read a status register on the device. For the MCP9808, there are nine
+ * registers accessible.
+ */
+int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
+  MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
+  if (currentUnit == 0) return ENOTCONN;
+
+  switch (reg) {
+  case static_cast<int>(CDR::DriverVersion):
+    return DeviceDriver::buildVersionResponse(MCP9808Driver::driverSemVer, MCP9808Driver::driverName, count, buf);
+  case static_cast<int>(CDR::Debug):
+    return statusCDR_Debug(handle, reg, count, buf);
+  case static_cast<int>(MCP9808Register::MANUF_ID):
+    break;
+  case static_cast<int>(MCP9808Register::DEVICE_ID):
+    break;
+  case static_cast<int>(MCP9808Register::AMBIENT_TEMP):
+    break;
+  default:
+    return ENOTSUP;
+  }
+}
+
 int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
   if (currentUnit == 0) {
@@ -85,41 +109,6 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   }
 }
 
-/**
- * Read a status register on the device. For the MCP9808, there are nine
- * registers accessible.
- */
-int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
-  MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
-  if (currentUnit == 0) return ENOTCONN;
-
-  switch (reg) {
-  case static_cast<int>(CDR::DriverVersion):
-    return DeviceDriver::buildVersionResponse(MCP9808Driver::driverSemVer, MCP9808Driver::driverName, count, buf);
-  case static_cast<int>(CDR::Debug):
-    return statusCDR_Debug(handle, reg, count, buf);
-  case static_cast<int>(MCP9808Register::MANUF_ID):
-    break;
-  case static_cast<int>(MCP9808Register::DEVICE_ID):
-    break;
-  case static_cast<int>(MCP9808Register::AMBIENT_TEMP):
-    break;
-  default:
-    return ENOTSUP;
-  }
-}
-
-//   int address = currentDevice->getDeviceAddress();
-//   if (count == 1) {
-//     buf[0] = i2c.read8(address, reg);
-//   } else {
-//     int v = i2c.read16(address, reg);
-//     buf[0] = (v >> 8) & 0xFF;
-//     buf[1] = v & 0xFF;
-//   }
-//   return count;
-// }
-
 int MCP9808Driver::read(int handle, int count, byte * buf) {
   MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
   if (currentUnit == 0) return ENOTCONN;
@@ -131,9 +120,7 @@ int MCP9808Driver::read(int handle, int count, byte * buf) {
   int address = currentUnit->getI2CAddress();
   int reg = static_cast<int>(MCP9808Register::AMBIENT_TEMP);
   int v = i2c.read16BE(address, reg);
-  buf[0] = (v >> 8) & 0xFF;
-  buf[1] = v & 0xFF;
-
+  fromHostTo16LE(v,buf);
   return count;
 }
 
@@ -153,6 +140,5 @@ int MCP9808Driver::statusCDR_Debug(int handle, int reg, int count, byte *buf) {
 
 
 int MCP9808Driver::controlCDR_Configure(int handle, int reg, int count, byte *buf) {
-
-
+  return ENOTSUP;
 }
