@@ -1,39 +1,55 @@
 #include "Tester.h"
 
-Tester::Tester(char *suiteName) {
-  theSuiteName = strdup(suiteName);
+Tester::Tester() {
   theTestName = "Unnamed";
-  suiteFailureCount = 0;
   testFailureCount = 0;
-  Serial.print("Begin suite ");
-  Serial.println(theSuiteName);
+  groupFailureCount = 0;
 }
 
 Tester::~Tester() {
-  if (theSuiteName != 0) {
-    free(theSuiteName);
+  if (theGroupName != 0) {
+    free(theGroupName);
   }
   if (theTestName !=0) {
     free(theTestName);
   }
 }
 
-void Tester::before(char *testName) {
+void Tester::beforeGroup(char *groupName) {
+  theGroupName = strdup(groupName);
+  Serial.print("Begin group ");
+  Serial.println(theGroupName);
+  groupFailureCount = 0;
+  testFailureCount = 0;
+
+};
+
+void Tester::beforeTest(char *testName) {
   theTestName = strdup(testName);
   testFailureCount = 0;
-  Serial.print("Begin test ");
+  Serial.print(" Begin test ");
   Serial.println(theTestName);
 }
 
-void Tester::after() {
-  Serial.print("After test ");
+void Tester::afterTest() {
+  Serial.print(" After test ");
   Serial.print(theTestName);
-  Serial.print(". Found ");
+  Serial.print(". ");
   Serial.print(testFailureCount);
   Serial.println(" assertion failures.");
-  suiteFailureCount += testFailureCount;
+  groupFailureCount += testFailureCount;
   testFailureCount = 0;
 }
+
+void Tester::afterGroup() {
+  Serial.print("After group ");
+  Serial.print(theGroupName);
+  Serial.print(". ");
+  Serial.print(groupFailureCount);
+  Serial.println(" cumulative assertion failures.\n");
+  groupFailureCount = 0;
+  testFailureCount = 0;
+};
 
 bool Tester::assertTrue(char *msg, bool condition) {
   return assertConditionIsTrue(msg, condition);
@@ -64,8 +80,8 @@ uint32_t Tester::getTestFailureCount() {
   return testFailureCount;
 }
 
-uint32_t Tester::getSuiteFailureCount() {
-  return suiteFailureCount;
+uint32_t Tester::getGroupFailureCount() {
+  return groupFailureCount;
 }
 
 bool Tester::assertConditionIsTrue(char *msg, bool condition) {

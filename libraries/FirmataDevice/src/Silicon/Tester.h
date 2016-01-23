@@ -9,11 +9,13 @@
 class Tester {
 public:
 
-  Tester(char *suiteName);
+  Tester();
   ~Tester();
 
-  void before(char *testName);
-  void after();
+  void beforeGroup(char *groupName);
+  void beforeTest(char *testName);
+  void afterTest();
+  void afterGroup();
 
   bool assertTrue(char *msg, bool condition);
   bool assertFalse(char *msg, bool condition);
@@ -23,15 +25,15 @@ public:
   bool assertEquals(char *msg, uint32_t expected, uint32_t actual);
 
   uint32_t getTestFailureCount();
-  uint32_t getSuiteFailureCount();
+  uint32_t getGroupFailureCount();
 
 private:
 
   char *theTestName;
-  char *theSuiteName;
+  char *theGroupName;
 
   uint32_t testFailureCount;
-  uint32_t suiteFailureCount;
+  uint32_t groupFailureCount;
 
   void handleFailure(char *msg);
   bool assertConditionIsTrue(char *msg, bool condition);
