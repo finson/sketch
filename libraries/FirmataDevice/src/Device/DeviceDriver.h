@@ -5,7 +5,7 @@
 #include <avr/pgmspace.h>
 #include <stdlib.h>
 
-#include <Silicon/ByteOrder.h>
+#include <Framework/ByteOrder.h>
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
 
