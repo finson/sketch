@@ -12,23 +12,23 @@ public:
   Logger(char *name);
   ~Logger();
 
-  template <typename Msg, typename... Items>
-  void fatal(Msg msg,Items ...valPack);
+  template <typename... ItemType>
+  void fatal(char *msg, ItemType ...valPack);
 
-  template <typename Msg, typename... Items>
-  void error(Msg msg,Items ...valPack);
+  template <typename... ItemType>
+  void error(char *msg, ItemType ...valPack);
 
-  template <typename Msg, typename... Items>
-  void warn(Msg msg,Items ...valPack);
+  template <typename... ItemType>
+  void warn(char *msg, ItemType ...valPack);
 
-  template <typename Msg, typename... Items>
-  void info(Msg msg,Items ...valPack);
+  template <typename... ItemType>
+  void info(char *msg, ItemType ...valPack);
 
-  template <typename Msg, typename... Items>
-  void debug(Msg msg,Items ...valPack);
+  template <typename... ItemType>
+  void debug(char *msg, ItemType ...valPack);
 
-  template <typename Msg, typename... Items>
-  void trace(Msg msg,Items ...valPack);
+  template <typename... ItemType>
+  void trace(char *msg, ItemType ...valPack);
 
   char *getLoggerName();
   int getCurrentLogLevel();
@@ -40,8 +40,8 @@ private:
   int currentLogLevel;
 
 
-template <typename MsgLevel, typename Msg, typename... Items>
-void recordLogEvent(MsgLevel theLvl, Msg theMsg, Items ...valPack);
+template <typename... ItemType>
+void recordLogEvent(int theLvl, char *theMsg, ItemType ...valPack);
 
 template <typename First, typename... Rest>
 void valuePrinter(First valFirst, Rest ...valPack);
@@ -53,5 +53,7 @@ void valuePrinter();
 
 
 };
+
+#include "LoggerTemplates.h"
 
 #endif

@@ -58,13 +58,13 @@ void loop() {
 
       tst->beforeTest("LevelCheck");
 
-//      logger->trace("trace level");
-//      logger->debug("debug level");
-//      logger->info("info level");
-//      logger->warn("warn level");
-//      logger->error("error level");
-//      logger->fatal("fatal level");
-//
+      logger->trace("trace level");
+      logger->debug("debug level");
+      logger->info("info level");
+      logger->warn("warn level");
+      logger->error("error level");
+      logger->fatal("fatal level");
+
       tst->afterTest();
 
       // --------------------------------------------------------
