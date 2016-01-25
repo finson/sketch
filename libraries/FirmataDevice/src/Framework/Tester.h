@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "Logger.h"
 
 class Tester {
 public:
@@ -17,26 +18,26 @@ public:
   void afterTest();
   void afterGroup();
 
-  bool assertTrue(char *msg, bool condition);
-  bool assertFalse(char *msg, bool condition);
+  void assertTrue(char *msg, bool condition);
+  void assertFalse(char *msg, bool condition);
 
-  bool assertEquals(char *msg, uint8_t expected, uint8_t actual);
-  bool assertEquals(char *msg, uint16_t expected, uint16_t actual);
-  bool assertEquals(char *msg, uint32_t expected, uint32_t actual);
+  template <typename T0, typename T1>
+  void assertEquals(char *msg, T0 expected, T1 actual);
 
-  uint32_t getTestFailureCount();
-  uint32_t getGroupFailureCount();
+  int getTestFailureCount();
+  int getGroupFailureCount();
 
 private:
+
+  Logger *logger;
 
   char *theTestName;
   char *theGroupName;
 
-  uint32_t testFailureCount;
-  uint32_t groupFailureCount;
-
-  void handleFailure(char *msg);
-  bool assertConditionIsTrue(char *msg, bool condition);
+  int testFailureCount;
+  int groupFailureCount;
 };
+
+#include "TesterTemplates.h"
 
 #endif

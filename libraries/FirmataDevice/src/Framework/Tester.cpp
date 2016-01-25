@@ -4,6 +4,7 @@ Tester::Tester() {
   theTestName = "Unnamed";
   testFailureCount = 0;
   groupFailureCount = 0;
+  logger = new Logger("Tester log");
 }
 
 Tester::~Tester() {
@@ -13,11 +14,14 @@ Tester::~Tester() {
   if (theTestName !=0) {
     free(theTestName);
   }
+  if (logger != 0) {
+    free(logger);
+  }
 }
 
 void Tester::beforeGroup(char *groupName) {
   theGroupName = strdup(groupName);
-  Serial.print("Begin group ");
+  Serial.print("\n*Begin group ");
   Serial.println(theGroupName);
   groupFailureCount = 0;
   testFailureCount = 0;
@@ -27,12 +31,12 @@ void Tester::beforeGroup(char *groupName) {
 void Tester::beforeTest(char *testName) {
   theTestName = strdup(testName);
   testFailureCount = 0;
-  Serial.print(" Begin test ");
+  Serial.print("\n#Begin test ");
   Serial.println(theTestName);
 }
 
 void Tester::afterTest() {
-  Serial.print(" After test ");
+  Serial.print("#After test ");
   Serial.print(theTestName);
   Serial.print(". ");
   Serial.print(testFailureCount);
@@ -42,7 +46,7 @@ void Tester::afterTest() {
 }
 
 void Tester::afterGroup() {
-  Serial.print("After group ");
+  Serial.print("\n*After group ");
   Serial.print(theGroupName);
   Serial.print(". ");
   Serial.print(groupFailureCount);
@@ -51,45 +55,20 @@ void Tester::afterGroup() {
   testFailureCount = 0;
 };
 
-bool Tester::assertTrue(char *msg, bool condition) {
-  return assertConditionIsTrue(msg, condition);
-}
-
-bool Tester::assertFalse(char *msg, bool condition) {
-  return assertConditionIsTrue(msg, !condition);
-}
-
-bool Tester::assertEquals(char *msg, uint8_t expected, uint8_t actual) {
-  return assertConditionIsTrue(msg, (expected == actual));
-}
-
-bool Tester::assertEquals(char *msg, uint16_t expected, uint16_t actual) {
-  return assertConditionIsTrue(msg, (expected == actual));
-}
-
-bool Tester::assertEquals(char *msg, uint32_t expected, uint32_t actual) {
-  return assertConditionIsTrue(msg, (expected == actual));
-}
-
-
-void Tester::handleFailure(char *msg) {
-  testFailureCount += 1;
-}
-
-uint32_t Tester::getTestFailureCount() {
+int Tester::getTestFailureCount() {
   return testFailureCount;
 }
 
-uint32_t Tester::getGroupFailureCount() {
+int Tester::getGroupFailureCount() {
   return groupFailureCount;
 }
 
-bool Tester::assertConditionIsTrue(char *msg, bool condition) {
-  if (condition) {
-    return true;
-  } else {
-    handleFailure(msg);
-  }
-  return false;
+void Tester::assertTrue(char *msg, bool condition) {
+  if (condition) return;
+  logger->fatal(msg);
+  testFailureCount += 1;
 }
 
+void Tester::assertFalse(char *msg, bool condition) {
+  assertTrue(msg, !condition);
+}

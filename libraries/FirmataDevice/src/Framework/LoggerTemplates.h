@@ -35,6 +35,7 @@ template <typename... ItemType>
 void Logger::recordLogEvent(int theLvl, char *theMsg, ItemType ...valPack) {
   if (isEnabled(theLvl)) {
     int levelIndex = constrain(theLvl / 100, 0, LogLevel::COUNT);
+    Serial.print('~');
     Serial.print(LogLevel::levelName[levelIndex]);
     Serial.print(" : ");
     Serial.print(theMsg);
