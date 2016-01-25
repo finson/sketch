@@ -58,11 +58,11 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
   case static_cast<int>(CDR::Debug):
     return statusCDR_Debug(handle, reg, count, buf);
   case static_cast<int>(MCP9808Register::MANUF_ID):
-    break;
+    return ENOTSUP;
   case static_cast<int>(MCP9808Register::DEVICE_ID):
-    break;
+    return ENOTSUP;
   case static_cast<int>(MCP9808Register::AMBIENT_TEMP):
-    break;
+    return ENOTSUP;
   default:
     return ENOTSUP;
   }
