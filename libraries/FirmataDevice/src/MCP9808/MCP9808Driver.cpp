@@ -22,12 +22,12 @@ MCP9808Driver::MCP9808Driver(const char *dName, int lunCount, int baseI2CAddress
 int MCP9808Driver::open(const char *name, int flags) {
   int lun;
   int status = DeviceDriver::open(name, flags);
-  if (status<0) {
+  if (status < 0) {
     return status;
   }
 
   lun = status;
-  MCP9808LUI *currentUnit = new MCP9808LUI(baseAddress+lun);
+  MCP9808LUI *currentUnit = new MCP9808LUI(baseAddress + lun);
 
   int address = currentUnit->getI2CAddress();
   int theRegister = static_cast<int>(MCP9808Register::MANUF_ID);
@@ -49,20 +49,36 @@ int MCP9808Driver::open(const char *name, int flags) {
  * registers accessible.
  */
 int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
+  int v;
   MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
   if (currentUnit == 0) return ENOTCONN;
+    int address = currentUnit->getI2CAddress();
 
   switch (reg) {
   case static_cast<int>(CDR::DriverVersion):
     return DeviceDriver::buildVersionResponse(MCP9808Driver::driverSemVer, MCP9808Driver::driverName, count, buf);
+
   case static_cast<int>(CDR::Debug):
     return statusCDR_Debug(handle, reg, count, buf);
-  case static_cast<int>(MCP9808Register::MANUF_ID):
-    return ENOTSUP;
-  case static_cast<int>(MCP9808Register::DEVICE_ID):
-    return ENOTSUP;
+
+  case static_cast<int>(MCP9808Register::CONFIG):
+  case static_cast<int>(MCP9808Register::UPPER_TEMP):
+  case static_cast<int>(MCP9808Register::LOWER_TEMP):
+  case static_cast<int>(MCP9808Register::CRIT_TEMP):
   case static_cast<int>(MCP9808Register::AMBIENT_TEMP):
-    return ENOTSUP;
+  case static_cast<int>(MCP9808Register::MANUF_ID):
+  case static_cast<int>(MCP9808Register::DEVICE_ID):
+    if (count < 2) return EMSGSIZE;
+    v = i2c.read16BE(address, reg);
+    fromHostTo16BE(v, buf);
+    return 2;
+
+  case static_cast<int>(MCP9808Register::RESOLUTION):
+    if (count < 1) return EMSGSIZE;
+    v = i2c.read8LE(address, reg);
+    fromHostTo8LE(v, buf);
+    return 1;
+
   default:
     return ENOTSUP;
   }
@@ -82,7 +98,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   switch (reg) {
 
   case static_cast<int>(MCP9808Register::CONFIG):
-    break;
+    return ENOTSUP;
 
   case static_cast<int>(MCP9808Register::UPPER_TEMP):
   case static_cast<int>(MCP9808Register::LOWER_TEMP):
@@ -93,7 +109,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
     } else {
       return EMSGSIZE;
     }
-    break;
+   return ESUCCESS;
 
   case static_cast<int>(MCP9808Register::RESOLUTION):
     if (count == 1) {
@@ -102,7 +118,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
     } else {
       return EMSGSIZE;
     }
-    break;
+   return ESUCCESS;
 
   default:
     return ENOTSUP;
@@ -120,7 +136,7 @@ int MCP9808Driver::read(int handle, int count, byte * buf) {
   int address = currentUnit->getI2CAddress();
   int reg = static_cast<int>(MCP9808Register::AMBIENT_TEMP);
   int v = i2c.read16BE(address, reg);
-  fromHostTo16LE(v,buf);
+  fromHostTo16LE(v, buf);
   return count;
 }
 
