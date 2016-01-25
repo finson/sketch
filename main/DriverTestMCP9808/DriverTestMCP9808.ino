@@ -54,7 +54,7 @@ void setup() {
   // --------------------------------------------------------
 
   tst->beforeTest("MCP9808OpenClose");
-  int status = dt->open("TempSensor:0", 0);
+  int status = dt->open("TempSensor:0", DDO_FORCE_OPEN);
   tst->assertTrue("Open error.", (status >= 0));
   if (status >= 0) {
     int handle = status;
@@ -76,6 +76,27 @@ void setup() {
     logger->debug("Read 2 bytes:", buf[0], buf[1]);
     status = dt->close(handle);
     tst->assertTrue("Close error.", (status >= 0));
+  }
+  tst->afterTest();
+
+  // --------------------------------------------------------
+
+  tst->beforeTest("MCP9808StatusMethodCDR");
+  status = dt->open("TempSensor:0");
+  tst->assertTrue("Open error.", (status >= 0));
+
+  int reg = static_cast<int>(CDR::DriverVersion);
+
+  if (status >= 0) {
+    int handle = status;
+    status = dt->status(handle, reg, BUF_SIZE, buf);
+    tst->assertTrue("Device status() status assertTrue:", (status >= 0));
+    if (status >= 0) {
+      logger->debug("  Read n version bytes ", status);
+    }
+    status = dt->close(handle);
+    tst->assertTrue("Close error.", (status >= 0));
+
   }
   tst->afterTest();
 
