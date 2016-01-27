@@ -1,6 +1,6 @@
 #include "DeviceTable.h"
 
-DEFINE_SEMVER(DeviceTable, "DeviceTable", 0, 1, 0)
+DEFINE_SEMVER(DeviceTable, 0, 1, 0)
 
 /**
  * This DeviceTable class provides single point access to all the loaded
