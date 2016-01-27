@@ -94,7 +94,7 @@
 #define EUSERS      (-87)  /* Too many users */
 #define ENOTSOCK    (-88)  /* Socket operation on non-socket */
 #define EDESTADDRREQ    (-89)  /* Destination address required */
-#define EMSGSIZE        (-90)  /* Message too long */
+#define EMSGSIZE        (-90)  /* Message too long or too short */
 #define EPROTOTYPE      (-91)  /* Protocol wrong type for socket */
 #define ENOPROTOOPT     (-92)  /* Protocol not available */
 #define EPROTONOSUPPORT (-93)  /* Protocol not supported */
@@ -136,6 +136,10 @@
 #define EKEYREJECTED   (-129)  /* Key was rejected by service */
 #define EOWNERDEAD     (-130)  /* Owner died */
 #define ENOTRECOVERABLE (-131) /* State not recoverable */
-#define ENOTSUP        (-132)  /* Functionality requested is not available */
+
+// DeviceDriver status code additions
+
+#define ENOTSUP        (-150)  /* Functionality requested is not available */
+#define EPANIC         (-151)  /* Executing code that was supposed to be unreachable */
 
 #endif

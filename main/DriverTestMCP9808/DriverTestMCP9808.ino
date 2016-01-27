@@ -3,7 +3,6 @@
 #include <Framework/Logger.h>
 #include <Framework/Tester.h>
 #include <Framework/ByteOrder.h>
-#include <elapsedMillis.h>
 #include "SelectedDeviceDrivers.h"
 
 /**
@@ -12,11 +11,6 @@
 
 #define BUF_SIZE 256
 byte buf[BUF_SIZE];
-int vReg[] = {static_cast<int>(CDR::DriverVersion), static_cast<int>(CDR::LibraryVersion)};
-
-bool waitingForInput = false;
-elapsedMillis millisecondsSinceLastInputCheck;
-unsigned int checkInterval = 500;
 
 DeviceTable *dt;
 Tester *tst;
@@ -29,7 +23,6 @@ void setup() {
   // Countdown before running to give time to open the monitor window.
 
   Serial.begin(115200);
-  Serial.println("I'm starting ... ");
 
   delay(3000);
   for (int idx = 0; idx < 5; idx++) {
@@ -39,15 +32,19 @@ void setup() {
   }
   Serial.println();
 
+  // Load the device driver table
+
+  dt = new DeviceTable(selectedDevices);
+
   //  Create the objects needed for the testing framework.
 
+  tst = new Tester();
   logger = new Logger("DriverTestMCP9808");
   logger->setCurrentLogLevel(LogLevel::DEBUG);
 
-  dt = new DeviceTable(selectedDevices);
-  tst = new Tester();
+  // --------------------------------------------------------
 
-  // Run the test group
+  // Begin testing
 
   tst->beforeGroup("MCP9808");
 
@@ -81,7 +78,7 @@ void setup() {
 
   // --------------------------------------------------------
 
-  tst->beforeTest("MCP9808StatusMethodCDR");
+  tst->beforeTest("MCP9808CDRDriverVersion");
   status = dt->open("TempSensor:0");
   tst->assertTrue("Open error.", (status >= 0));
 
@@ -90,9 +87,12 @@ void setup() {
   if (status >= 0) {
     int handle = status;
     status = dt->status(handle, reg, BUF_SIZE, buf);
-    tst->assertTrue("Device status() status assertTrue:", (status >= 0));
+    tst->assertTrue("Device status() Driver Version assertTrue:", (status >= 0));
     if (status >= 0) {
-      logger->debug("  Read n version bytes ", status);
+      logger->debug("Version data is n bytes. ",status);
+//      char *svString = SemVer::toString(buf);
+//      logger->debug("  Read n version bytes ", status,svString);
+//      free(svString);
     }
     status = dt->close(handle);
     tst->assertTrue("Close error.", (status >= 0));

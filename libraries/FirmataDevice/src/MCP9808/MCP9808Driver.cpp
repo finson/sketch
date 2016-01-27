@@ -1,9 +1,10 @@
 #include "MCP9808Driver.h"
 #include <Wire.h>
 
-DEFINE_SEMVER(MCP9808Driver, "MCP9808Driver", 0, 1, 0)
-
 //---------------------------------------------------------------------------
+
+DEFINE_SEMVER(MCP9808Driver, 0, 1, 0)
+
 /**
  * This device driver is for the Microchip Technology MCP9808 Digital
  * Temperature Sensor.
@@ -45,18 +46,19 @@ int MCP9808Driver::open(const char *name, int flags) {
 }
 
 /**
- * Read a status register on the device. For the MCP9808, there are nine
- * registers accessible.
+ * Read a status register on the device.
  */
 int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
-  int v;
+  uint8_t v8;
+  uint16_t v16;
+
   MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
   if (currentUnit == 0) return ENOTCONN;
     int address = currentUnit->getI2CAddress();
 
   switch (reg) {
   case static_cast<int>(CDR::DriverVersion):
-    return DeviceDriver::buildVersionResponse(MCP9808Driver::driverSemVer, MCP9808Driver::driverName, count, buf);
+    return DeviceDriver::buildVersionResponse(releaseVersion, scopeName, count, buf);
 
   case static_cast<int>(CDR::Debug):
     return statusCDR_Debug(handle, reg, count, buf);
@@ -69,14 +71,14 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
   case static_cast<int>(MCP9808Register::MANUF_ID):
   case static_cast<int>(MCP9808Register::DEVICE_ID):
     if (count < 2) return EMSGSIZE;
-    v = i2c.read16BE(address, reg);
-    fromHostTo16BE(v, buf);
+    v16 = i2c.read16BE(address, reg);
+    fromHostTo16BE(v16, buf);
     return 2;
 
   case static_cast<int>(MCP9808Register::RESOLUTION):
     if (count < 1) return EMSGSIZE;
-    v = i2c.read8LE(address, reg);
-    fromHostTo8LE(v, buf);
+    v8 = i2c.read8(address, reg);
+    buf[0] = v8;
     return 1;
 
   default:
@@ -98,8 +100,6 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   switch (reg) {
 
   case static_cast<int>(MCP9808Register::CONFIG):
-    return ENOTSUP;
-
   case static_cast<int>(MCP9808Register::UPPER_TEMP):
   case static_cast<int>(MCP9808Register::LOWER_TEMP):
   case static_cast<int>(MCP9808Register::CRIT_TEMP):
@@ -109,7 +109,6 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
     } else {
       return EMSGSIZE;
     }
-   return ESUCCESS;
 
   case static_cast<int>(MCP9808Register::RESOLUTION):
     if (count == 1) {
@@ -118,11 +117,11 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
     } else {
       return EMSGSIZE;
     }
-   return ESUCCESS;
 
   default:
     return ENOTSUP;
   }
+  return EPANIC;
 }
 
 int MCP9808Driver::read(int handle, int count, byte * buf) {
@@ -151,10 +150,5 @@ int MCP9808Driver::close(int handle) {
 //---------------------------------------------------------------------------
 
 int MCP9808Driver::statusCDR_Debug(int handle, int reg, int count, byte *buf) {
-  return ENOTSUP;
-}
-
-
-int MCP9808Driver::controlCDR_Configure(int handle, int reg, int count, byte *buf) {
   return ENOTSUP;
 }

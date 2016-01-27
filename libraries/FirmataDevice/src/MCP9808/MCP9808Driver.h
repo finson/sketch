@@ -32,8 +32,6 @@ public:
 private:
     DECLARE_SEMVER
 
-    int controlCDR_Configure(int handle, int reg, int count, byte *buf);
-    int statusCDR_DriverVersion(int handle, int reg, int count, byte *buf);
     int statusCDR_Debug(int handle, int reg, int count, byte *buf);
 
     int baseAddress;
