@@ -10,15 +10,57 @@ The document device-driver.md describes the overall device feature proposal and 
 
 This Appendix B defines the registers that are actually implemented by several known device drivers and the detailed format of the parameter block bodies they expect.
 
-Register names starting with CDR_ refer to **C**ommon **D**evice **R**egisters.  Names starting with STP_ refer to **ST**e**P**per registers.
+##Common Device Registers (CDR_)
+
+###`CDR_DriverVersion`
+###`CDR_LibraryVersion`
+
+####Get version number and name of the DeviceDriver or supporting library.
+
+Version numbers are in the Semantic Versioning format x.y.z-a.b.c  See [semver.org](http://semver.org) for more info.  
+
+The first byte of the return data buffer is the size in bytes of the version identifier packet that follows.  Name strings use UTF-8 encoding and are null-terminated.
+
+In the initial implementation, the size of the version identifier packet is 6 bytes.  The name string immediately follows the version identifier packet and is limited to 128 bytes maximum, including the null terminator.
+
+The size of the receiving buffer should be large enough to hold the 1-byte packet size, a version identifier packet, and a name string (including the null terminator). If the buffer size is not large enough, an error will be returned (`EMSGSIZE`).
+
+*Method signature*
+
+`int status(int handle, CDR_DriverVersion, int bufSize, byte *buf)`
+`int status(int handle, CDR_LibraryVersion, int bufSize, byte *buf)`
+
+*Return data buffer*
+
+     0  version descriptor packet size (6, in this example)
+     1  major version (x)
+     2  minor version (y)
+     3  patch version (z)
+     4  pre-release (a)
+     5  pre-release (b)
+     6  pre-release (c)
+     7..n  name string (UTF-8, null terminated)
+
+
+
+     0  version descriptor packet size (3, in this example)
+     1  major version (x)
+     2  minor version (y)
+     3  patch version (z)
+     4..n  name string (UTF-8, null terminated)
+
+---
 
 ##StepperDriverBasic
 
 ###`CDR_Configure`
-####Configure a specific stepper motor
+####Get/set stepper motor interface configuration
+
+Configure the stepper motor attached to the given handle and its associated software object.
 
 *Method signature*
 
+`int status(int handle, CDR_Configure, int count, byte *buf)`
 `int control(int handle, CDR_Configure, int count, byte *buf)`
 
 *Parameter block buffer*
@@ -88,33 +130,91 @@ Register names starting with CDR_ refer to **C**ommon **D**evice **R**egisters. 
      2  RPM
      3  RPM (MSB)
 
+
+##MCP9808 Temperature Sensor
+
+Note that most of the registers on this device are 16-bit (2-byte) and the device expects them to be written in Big Endian order and provides them to a reader in Big Endian order.  So, for reasons of consistency with the Microchip Technology datasheet for the device, the values in the parameter blocks for this device are arranged as Big Endian sequences.
+
+The bytes can be easily put into whichever order is needed by the host using the macros and methods of the ByteOrder class.
+
+###`CDR_Configure`
+####Get/set MCP9808 interface configuration
+
+Get/set the configuration of the temperature sensor attached to the given handle and its associated software object.
+
+*Method signatures*
+
+`int status(int handle, CDR_Configure, int count, byte *buf)`
+`int control(int handle, CDR_Configure, int count, byte *buf)`
+
+*Parameter block buffer*
+
+     0  sensor config (MSB)
+     1  sensor config (LSB)
+
 ---
-###`CDR_DriverVersion`
-###`CDR_LibraryVersion`
-####Get version number and name of the DeviceDriver or supporting library
+###`UPPER_TEMP`
+####Get/set upper temperature limit register.
+###`LOWER_TEMP`
+####Get/set lower temperature limit register.
+###`CRIT_TEMP`
+####Get/set critical temperature limit register.
 
-Version numbers are in the Semantic Versioning format x.y.z-a.b.c  See [semver.org](http://semver.org) for more info.  
+*Method signatures*
 
-The first byte of the return data buffer is the size in bytes of the version identifier packet that follows.  Name strings use UTF-8 encoding and are null-terminated.
+`int status(int handle, int reg, 2, byte *buf);`
+`int control(int handle, int reg, 2, byte *buf);`
 
-In the initial implementation, the size of the version identifier packet is 6 bytes.  The name string immediately follows the version identifier packet and is limited to 128 bytes maximum, including the null terminator.
+*Parameter block buffer*
 
-The size of the receiving buffer should be large enough to hold the 1-byte packet size, a version identifier packet, and a name string (including the null terminator). If the buffer size is not large enough, an error will be returned (`EMSGSIZE`).
+     0  temperature °C (MSB)
+     1  temperature °C (LSB)
+
+---
+###`AMBIENT_TEMP`
+####Get ambient temperature in degrees C.
 
 *Method signature*
 
-`int status(int handle, CDR_DriverVersion, int bufSize, byte *buf)`
-`int status(int handle, CDR_LibraryVersion, int bufSize, byte *buf)`
+`int status(int handle, AMBIENT_TEMP, 2, byte *buf);`
 
-*Return data buffer*
+*Parameter block buffer*
 
-     0  version descriptor packet size (6, in this example)
-     1  major version (x)
-     2  minor version (y)
-     3  patch version (z)
-     4  pre-release (a)
-     5  pre-release (b)
-     6  pre-release (c)
-     7..n  name string (UTF-8, null terminated)
+     0  temperature °C (MSB)
+     1  temperature °C (LSB)
 
 ---
+###`MANUF_ID`
+####Get Manufacturer ID
+###`DEVICE_ID`
+####Get Device ID
+
+*Method signature*
+
+`int status(int handle, MANUF_ID, 2, byte *buf);`
+`int status(int handle, DEVICE_ID, 2, byte *buf);`
+
+*Parameter block buffer*
+
+     0  0x00 (manufacturer ID - MSB)
+     1  0x54 (manufacturer ID - LSB)
+
+or 
+
+     0  0x04 (device ID - MSB)
+     1  0x00 (device ID - LSB)
+
+---
+###`RESOLUTION`
+
+####Get/set sensor resolution
+
+*Method signature*
+
+`int status(int handle, RESOLUTION, 1, byte *buf);`
+`int control(int handle, RESOLUTION, 1, byte *buf);`
+
+*Parameter block buffer*
+
+     0  0,1,2, or 3 (resolution control bits)
+
