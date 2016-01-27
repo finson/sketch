@@ -26,16 +26,18 @@ void I2CPort::readBytes(int addr, uint8_t reg, uint8_t *buf, int count) {
 
 //----------------------------------------------------------------------------
 
-uint8_t I2CPort::read8LE(int addr, uint8_t reg) {
+uint8_t I2CPort::read8(int addr, uint8_t reg) {
   uint8_t bytesRead[1];
   readBytes(addr, reg, bytesRead,1);
-  return from8LEToHost(bytesRead);
+  return bytesRead[0];
+}
+
+uint8_t I2CPort::read8LE(int addr, uint8_t reg) {
+  return read8(addr,reg);
 }
 
 uint8_t I2CPort::read8BE(int addr, uint8_t reg) {
-  uint8_t bytesRead[1];
-  readBytes(addr, reg, bytesRead,1);
-  return from8BEToHost(bytesRead);
+  return read8(addr,reg);
 }
 
 uint16_t I2CPort::read16LE(int addr, uint8_t reg) {
@@ -75,16 +77,18 @@ void I2CPort::writeBytes(int addr, uint8_t reg, uint8_t *buf, int count) {
 
 //----------------------------------------------------------------------------
 
-void I2CPort::write8LE(int addr, uint8_t reg, uint8_t value) {
+void I2CPort::write8(int addr, uint8_t reg, uint8_t value) {
   uint8_t bytesToWrite[1];
-  fromHostTo8LE(value, bytesToWrite);
+  bytesToWrite[0] = value;
   writeBytes(addr, reg, bytesToWrite, 1);
 }
 
+void I2CPort::write8LE(int addr, uint8_t reg, uint8_t value) {
+  write8(addr,reg,value);
+}
+
 void I2CPort::write8BE(int addr, uint8_t reg, uint8_t value) {
-  uint8_t bytesToWrite[1];
-  fromHostTo8BE(value, bytesToWrite);
-  writeBytes(addr, reg, bytesToWrite, 1);
+  write8(addr,reg,value);
 }
 
 void I2CPort::write16LE(int addr, uint8_t reg, uint16_t value) {
