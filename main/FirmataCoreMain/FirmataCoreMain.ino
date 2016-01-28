@@ -1,6 +1,5 @@
 #include <FirmataFeatureLibrary.h>
 #include <FirmataDeviceLibrary.h>
-#include <base64.h>
 
 #include <FirmataCore.h>
 #include <FirmataExt.h>

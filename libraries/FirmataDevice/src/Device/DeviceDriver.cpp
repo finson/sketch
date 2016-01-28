@@ -10,12 +10,12 @@ logicalUnits(new LogicalUnitInfo*[count]())
 
 //---------------------------------------------------------------------------
 
-int DeviceDriver::microsecondTimeBase(unsigned long deltaMicros) {
-  return ESUCCESS;
+void DeviceDriver::update(unsigned long deltaMicros) {
+  return;
 }
 
-int DeviceDriver::millisecondTimeBase(unsigned long deltaMillis) {
-  return ESUCCESS;
+void DeviceDriver::report(unsigned long deltaMillis) {
+  return;
 }
 
 //---------------------------------------------------------------------------

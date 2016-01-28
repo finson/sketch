@@ -30,39 +30,30 @@ FirmataExtClass::FirmataExtClass()
   numFeatures = 0;
   previousTime[0] = 0;
   previousTime[1] = 0;
-  intervalTime[0] = DEFAULT_REPORT_INTERVAL;
-  intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
+  intervalTime[0] = DEFAULT_UPDATE_INTERVAL;
+  intervalTime[1] = DEFAULT_REPORT_INTERVAL;
 }
 
 void FirmataExtClass::addSelectedFeatures()
 {
 
-// Install the user-selected FirmataModes and FirmataFeatures.
+// Install the user-selected FirmataFeatures.
 
   int selectionIndex = 0;
-  while (selectedModes[selectionIndex] != 0) {
-    if (numFeatures < MAX_FEATURES) {
-      features[numFeatures++] = selectedModes[selectionIndex];
-    }
-    selectionIndex += 1;
-  }
-
-  selectionIndex = 0;
   while (selectedFeatures[selectionIndex] != 0) {
     if (numFeatures < MAX_FEATURES) {
-      features[numFeatures++] = selectedFeatures[selectionIndex];
+      features[numFeatures++] = selectedFeatures[selectionIndex++];
     }
-    selectionIndex += 1;
   }
 }
 
 void FirmataExtClass::dispatchReset()
 {
 
-  previousTime[0] = millis();
-  previousTime[1] = micros();
-  intervalTime[0] = DEFAULT_REPORT_INTERVAL;
-  intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
+  previousTime[0] = micros();
+  previousTime[1] = millis();
+  intervalTime[0] = DEFAULT_UPDATE_INTERVAL;
+  intervalTime[1] = DEFAULT_REPORT_INTERVAL;
 
   for (byte i = 0; i < numFeatures; i++) {
     features[i]->reset();
@@ -70,10 +61,10 @@ void FirmataExtClass::dispatchReset()
 }
 
 void FirmataExtClass::dispatchTimers() {
-  currentTime[0] = millis();
-  currentTime[1] = micros();
-
   unsigned long elapsedTime;
+
+  currentTime[0] = micros();
+  currentTime[1] = millis();
 
   for (int idx=0; idx<2; idx++) {
     if (currentTime[idx] >= previousTime[idx]) {
@@ -85,11 +76,11 @@ void FirmataExtClass::dispatchTimers() {
     if (elapsedTime >= intervalTime[idx]) {
       if (idx==0) {
         for (int n = 0; n < numFeatures; n++) {
-          features[n]->report(elapsedTime);
+          features[n]->update(elapsedTime);
         }
       } else {
         for (int n = 0; n < numFeatures; n++) {
-          features[n]->update(elapsedTime);
+          features[n]->report(elapsedTime);
         }
       }
       previousTime[idx] = currentTime[idx];
@@ -165,7 +156,7 @@ boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)
 
   case SAMPLING_INTERVAL:
     if (argc >= 2) {
-      intervalTime[0] = max(argv[0] + (argv[1] << 7), MINIMUM_REPORT_INTERVAL);
+      intervalTime[1] = max(argv[0] + (argv[1] << 7), MINIMUM_REPORT_INTERVAL);
     }
     break;
 

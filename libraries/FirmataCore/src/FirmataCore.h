@@ -83,6 +83,13 @@
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 
+// these are DEPRECATED to make the naming more consistent
+
+#define FIRMATA_STRING          0x71 // same as STRING_DATA
+#define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
+#define SYSEX_I2C_REPLY         0x77 // same as I2C_REPLY
+#define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
+
 #define TOTAL_SYSEX_COMMANDS    22   // MAX_FEATURES in FirmataExt is based on this (inflated) number
 
 // pin modes

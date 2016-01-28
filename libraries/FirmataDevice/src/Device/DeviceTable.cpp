@@ -13,7 +13,7 @@ DEFINE_SEMVER(DeviceTable, 0, 1, 0)
  * or direct calls to DeviceDriver objects, but not both.  This is because the
  * 14-bit handles returned by DeviceTable contain both a device index value and
  * a logical unit index value, whereas the 7-bit handles returned by the
- * DeviceDrivers contain only a logical unit value.
+ * DeviceDrivers themselves contain only a logical unit value.
  */
 //----------------------------------------------------------------------------
 
@@ -76,13 +76,23 @@ int DeviceTable::close(int handle) {
 
 //----------------------------------------------------------------------------
 
-void DeviceTable::dispatchTimers() {
-  int deviceIndex;
-  int status;
-  currentTime[0] = millis();
-  currentTime[1] = micros();
+void DeviceTable::update(unsigned long deltaMicros) {
+  for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
+    devices[deviceIndex]->update(deltaMicros);
+  }
+}
 
+void DeviceTable::report(unsigned long deltaMillis) {
+  for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
+    devices[deviceIndex]->report(deltaMillis);
+  }
+}
+
+void DeviceTable::dispatchTimers() {
   unsigned long elapsedTime;
+
+  currentTime[0] = micros();
+  currentTime[1] = millis();
 
   for (int idx = 0; idx < 2; idx++) {
     if (currentTime[idx] >= previousTime[idx]) {
@@ -93,13 +103,9 @@ void DeviceTable::dispatchTimers() {
 
     if (elapsedTime >= intervalTime[idx]) {
       if (idx == 0) {
-        for (deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
-          status = devices[deviceIndex]->millisecondTimeBase(elapsedTime);
-        }
+        update(elapsedTime);
       } else {
-        for (deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
-          status = devices[deviceIndex]->microsecondTimeBase(elapsedTime);
-        }
+        report(elapsedTime);
       }
       previousTime[idx] = currentTime[idx];
     }

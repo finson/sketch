@@ -60,18 +60,16 @@ public:
      * control.
      * @param deltaMicros Length, in microseconds, of the interval since the last call to this
      * method.
-     * @return status code
      */
-    virtual int microsecondTimeBase(unsigned long deltaMicros);
+    virtual void update(unsigned long deltaMicros);
 
     /**
      * Called repeatedly by the application program at the expiration of a
      * millisecond based interval to provide an opportunity for reporting and
      * other lower frequency tasks.
      * @param deltaMillis Length, in milliseconds, of the interval since the last call to this method.
-     * @return status code
      */
-    virtual int millisecondTimeBase(unsigned long deltaMillis);
+    virtual void report(unsigned long deltaMillis);
 
 protected:
     const char *rootName;

@@ -3,62 +3,33 @@
 */
 
 #include "DeviceFeature.h"
+#include <Base64.h>
 
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFeature::DeviceFeature(const char *dName, int count) : DeviceDriver(dName), majorDeviceCount(0)
-{
-  char buf[MAX_DEVICE_NAME_LENGTH + 1];
-
-// Copy the list of addresses of installed DeviceDrivers from SelectedFeatures.h
-
-  majorDeviceCount = 0;
-  majorDevices[majorDeviceCount++] = this;
-
-  int selectionIndex = 0;
-  while (selectedDevices[selectionIndex] != 0) {
-    if (majorDeviceCount < MAX_MGR_DEVICE_COUNT) {
-      majorDevices[majorDeviceCount++] = selectedDevices[selectionIndex];
-    }
-    selectionIndex += 1;
-  }
-
-// Initialize the available DeviceFeature logical units
-
-  logicalUnitCount = min(MAX_MGR_LU_COUNT, count);
-  for (int idx = 0; idx < logicalUnitCount; idx++) {
-    snprintf(buf, MAX_DEVICE_NAME_LENGTH + 1, "%s:%1d", dName, idx);
-    logicalUnits[idx].setLogicalUnitName(buf);
-    logicalUnits[idx].setOpen(false);
-  }
+DeviceFeature::DeviceFeature(const char *dName) {
+  dt = new DeviceTable(selectedDevices);
 }
 
 //---------------------------------------------------------------------------
 
-// The following methods implement the FirmataFeature aspects of this class.
+void DeviceFeature::reset(){}
 
-void DeviceFeature::reset()
-{
-}
+void DeviceFeature::handleGetCapability(byte pin){}
 
-void DeviceFeature::handleGetCapability(byte pin)
-{
-}
-
-boolean DeviceFeature::handleSetPinMode(byte pin, int mode)
-{
+boolean DeviceFeature::handleSetPinMode(byte pin, int mode) {
   return false;
 }
 
-void DeviceFeature::report() {
-  for (int idx = 0; idx < majorDeviceCount; idx++) {
-    majorDevices[idx]->millisecondTimeBase();
-  }
+void DeviceFeature::update(unsigned long deltaMicros) {
+  dt->update(deltaMicros);
 }
 
-//---------------------------------------------------------------------------
+void DeviceFeature::report(unsigned long deltaMillis) {
+  dt->update(deltaMillis);
+}
 
 // The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
 // handle-low, handle-high, reserved, reserved. They are all constrained to
@@ -96,48 +67,57 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
   return true;
 }
 
+//---------------------------------------------------------------------------
+
 int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
-  int deviceIndex = 0;
+  // int deviceIndex = 0;
   int status = ENODEV;
   int count = 0;
   int reg = 0;
-  int unitHandle = (handle & 0x7F);
-  int deviceHandle = ((handle >> 7) & 0x7F);
+  // int unitHandle = (handle & 0x7F);
+  // int deviceHandle = ((handle >> 7) & 0x7F);
   int flags = 0;
 
   switch (action) {
   case DD_OPEN:
     flags = handle;
-    for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-      status = majorDevices[deviceIndex]->open((char *)dpBlock, flags);
-      if (status == ENXIO || status == ENODEV) {
-        continue;
-      } else {
-        break;
-      }
-    }
-    return (status < 0) ? status : ((deviceIndex & 0x7F) << 7) | (status & 0x7F);
+    return dt->open((char *)dpBlock, flags);
+    // for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
+    //   status = majorDevices[deviceIndex]->open((char *)dpBlock, flags);
+    //   if (status == ENXIO || status == ENODEV) {
+    //     continue;
+    //   } else {
+    //     break;
+    //   }
+    // }
+    // return (status < 0) ? status : ((deviceIndex & 0x7F) << 7) | (status & 0x7F);
 
   case DD_STATUS:
     count = ((dpBlock[1] & 0xFF) << 8) | (dpBlock[0] & 0xFF);
     reg   = ((dpBlock[3] & 0xFF) << 8) | (dpBlock[2] & 0xFF);
-    return majorDevices[deviceHandle]->status(unitHandle, reg, count, dpBlock);
+    return dt->status(handle,reg, count, dpBlock);
+    // return majorDevices[deviceHandle]->status(unitHandle, reg, count, dpBlock);
 
   case DD_CONTROL:
     count = ((dpBlock[1] & 0xFF) << 8)  | (dpBlock[0] & 0xFF);
     reg   = ((dpBlock[3] & 0xFF) << 8)  | (dpBlock[2] & 0xFF);
-    return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock + 4);
+    return dt->control(handle, reg, count, dpBlock + 4);
+
+    // return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock + 4);
 
   case DD_READ:
     count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
-    return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock);
+    return dt->read(handle, count, dpBlock);
+    // return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock);
 
   case DD_WRITE:
     count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
-    return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
+    return dt->read(handle, count, dpBlock + 2);
+    // return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
 
   case DD_CLOSE:
-    return majorDevices[deviceHandle]->close(unitHandle);
+    return dt->close(handle);
+    // return majorDevices[deviceHandle]->close(unitHandle);
 
   default:
     return ENOSYS;
@@ -177,69 +157,4 @@ void DeviceFeature::sendDeviceResponse(int handle, int action, int status, const
     }
   }
   Firmata.write(END_SYSEX);
-}
-
-//---------------------------------------------------------------------------
-
-// The following methods implement the DeviceDriver aspects of this class.
-// By this means, the DriverFeature can be controlled just like the individual
-// device drivers are.
-
-int DeviceFeature::open(const char *name, int flags) {
-
-  int minorHandle;
-  for (minorHandle = 0; minorHandle < logicalUnitCount; minorHandle++) {
-    if (strcmp(logicalUnits[minorHandle].getLogicalUnitName(), name) == 0) {
-      break;
-    }
-  }
-  if (minorHandle == logicalUnitCount) {
-    return ENXIO;
-  }
-
-  LogicalUnitInfo *currentDevice = &logicalUnits[minorHandle];
-
-  if ((flags & DDO_FORCE_OPEN) != 0) {
-    currentDevice->setOpen(false);
-  }
-
-  if (currentDevice->isOpen()) {
-    return EADDRINUSE;
-  }
-
-  currentDevice->setOpen(true);
-  return minorHandle;
-}
-
-int DeviceFeature::status(int handle, int reg, int count, byte *buf) {
-  return ESUCCESS;
-}
-
-int DeviceFeature::control(int handle, int reg, int count, byte *buf) {
-  LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
-  if (!currentDevice->isOpen()) {
-    return ENOTCONN;
-  }
-  switch (reg) {
-  case DDC_INIT:
-    return ESUCCESS;
-  default:
-    return ESUCCESS;
-  }
-}
-
-int DeviceFeature::read(int handle, int count, byte *buf) {
-  return ESUCCESS;
-}
-
-int DeviceFeature::write(int handle, int count, byte *buf) {
-  return ESUCCESS;
-}
-
-int DeviceFeature::close(int handle) {
-  LogicalUnitInfo *currentDevice = &logicalUnits[handle & 0x7F];
-  if (currentDevice->isOpen()) {
-    currentDevice->setOpen(false);
-  }
-  return ESUCCESS;
 }

@@ -19,7 +19,10 @@ public:
     ~DeviceTable();
 
     int dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock);
+
     void dispatchTimers();
+    void update(unsigned long deltaMicros);
+    void report(unsigned long deltaMillis);
 
     int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
@@ -36,7 +39,7 @@ private:
 
     unsigned long previousTime[2];   // the time the last interval expired
     unsigned long currentTime[2];    // the current values from millis() and micros()
-    unsigned long intervalTime[2];   // length of time between calls to features
+    unsigned long intervalTime[2];   // length of time between calls to update() and report()
 
 };
 
