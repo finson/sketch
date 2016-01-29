@@ -9,7 +9,7 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFeature::DeviceFeature(const char *dName) {
+DeviceFeature::DeviceFeature() {
   dt = new DeviceTable(selectedDevices);
 }
 
@@ -70,54 +70,35 @@ boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
 //---------------------------------------------------------------------------
 
 int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
-  // int deviceIndex = 0;
-  int status = ENODEV;
   int count = 0;
   int reg = 0;
-  // int unitHandle = (handle & 0x7F);
-  // int deviceHandle = ((handle >> 7) & 0x7F);
   int flags = 0;
 
   switch (action) {
   case DD_OPEN:
     flags = handle;
     return dt->open((char *)dpBlock, flags);
-    // for (deviceIndex = 0; deviceIndex < majorDeviceCount; deviceIndex++) {
-    //   status = majorDevices[deviceIndex]->open((char *)dpBlock, flags);
-    //   if (status == ENXIO || status == ENODEV) {
-    //     continue;
-    //   } else {
-    //     break;
-    //   }
-    // }
-    // return (status < 0) ? status : ((deviceIndex & 0x7F) << 7) | (status & 0x7F);
 
   case DD_STATUS:
-    count = ((dpBlock[1] & 0xFF) << 8) | (dpBlock[0] & 0xFF);
-    reg   = ((dpBlock[3] & 0xFF) << 8) | (dpBlock[2] & 0xFF);
+    count = from16LEToHost(dpBlock);
+    reg   = from16LEToHost(dpBlock + 2);
     return dt->status(handle,reg, count, dpBlock);
-    // return majorDevices[deviceHandle]->status(unitHandle, reg, count, dpBlock);
 
   case DD_CONTROL:
-    count = ((dpBlock[1] & 0xFF) << 8)  | (dpBlock[0] & 0xFF);
-    reg   = ((dpBlock[3] & 0xFF) << 8)  | (dpBlock[2] & 0xFF);
+    count = from16LEToHost(dpBlock);
+    reg   = from16LEToHost(dpBlock + 2);
     return dt->control(handle, reg, count, dpBlock + 4);
 
-    // return majorDevices[deviceHandle]->control(unitHandle, reg, count, dpBlock + 4);
-
   case DD_READ:
-    count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
+    count = from16LEToHost(dpBlock);
     return dt->read(handle, count, dpBlock);
-    // return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock);
 
   case DD_WRITE:
-    count = ((dpBlock[1] & 0xFF) << 8) | ((dpBlock[0] & 0xFF));
+    count = from16LEToHost(dpBlock);
     return dt->read(handle, count, dpBlock + 2);
-    // return majorDevices[deviceHandle]->read(unitHandle, count, dpBlock + 2);
 
   case DD_CLOSE:
     return dt->close(handle);
-    // return majorDevices[deviceHandle]->close(unitHandle);
 
   default:
     return ENOSYS;

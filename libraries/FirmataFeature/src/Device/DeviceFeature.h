@@ -13,7 +13,7 @@
 
 class DeviceFeature : public FirmataFeature {
 public:
-    DeviceFeature(const char *dName);
+    DeviceFeature();
 
     void reset();
     void handleGetCapability(byte pin);
@@ -29,7 +29,6 @@ public:
 
 private:
     DeviceTable *dt;
-
 };
 
 #endif
