@@ -54,7 +54,7 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
 
   MCP9808LUI *currentUnit = static_cast<MCP9808LUI *>(logicalUnits[handle & 0x7F]);
   if (currentUnit == 0) return ENOTCONN;
-    int address = currentUnit->getI2CAddress();
+  int address = currentUnit->getI2CAddress();
 
   switch (reg) {
   case static_cast<int>(CDR::DriverVersion):

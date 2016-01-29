@@ -49,42 +49,16 @@ FirmataExt.addSelectedFeatures();
 
 Firmata.reset();
 
-Firmata.sendString("Setup function complete.");
-
 }
 
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void loop()
-{
-//Firmata.sendString("Loop start.");
-
-///* DIGITALREAD - as fast as possible, check for changes and output them to the
-// * stream buffer using Firmata.write()  */
-//
-//#ifdef DigitalInputFeature_h
-//  digitalInput.report();
-//#endif
-//
-///* STREAMREAD - processing incoming messagse as soon as possible, while still
-// * checking digital inputs.  */
+void loop() {
 
 while (Firmata.available()) {
   Firmata.processInputStream();
 }
-
-///* SEND STREAM WRITE BUFFER - TO DO: make sure that the stream buffer doesn't go over
-// * 60 bytes. use a timer to sending an event character every 4 ms to
-// * trigger the buffer to dump. */
-//
-///* ANALOGREAD - do all analogReads() at the configured sampling interval */
-
-//  if (Firmata.elapsed()) {
-//#ifdef AnalogInputFeature_h
-//    analogInput.report();
-//#endif
-//  }
 
 FirmataExt.dispatchTimers();
 }

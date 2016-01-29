@@ -29,9 +29,9 @@ public:
     int close(int handle);
 
 private:
-
-    static const PROGMEM uint8_t driverSemVer[];
-    static const PROGMEM char driverName[];
+    DECLARE_SEMVER
+    int statusCDR_Debug(int handle, int reg, int count, byte *buf);
+    int controlCDR_Debug(int handle, int reg, int count, byte *buf);
 
 };
 
