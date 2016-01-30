@@ -6,10 +6,16 @@
 #include <Device/DeviceDriver.h>
 #include <Device/DeviceTable.h>
 
-#define MAX_MGR_DEVICE_COUNT 10
-#define MAX_MGR_LU_COUNT 1
-
 #define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
+
+// Firmata coding of DeviceDriver methods
+
+#define  DD_OPEN    0x00
+#define  DD_STATUS  0x01
+#define  DD_CONTROL 0x02
+#define  DD_READ    0x03
+#define  DD_WRITE   0x04
+#define  DD_CLOSE   0x05
 
 class DeviceFeature : public FirmataFeature {
 public:

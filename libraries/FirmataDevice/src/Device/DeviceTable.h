@@ -14,11 +14,10 @@
 #define DEFAULT_UPDATE_INTERVAL 200
 
 class DeviceTable : public DeviceDriver {
+
 public:
     DeviceTable(DeviceDriver *deviceArray[]);
     ~DeviceTable();
-
-    int dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock);
 
     void dispatchTimers();
     void update(unsigned long deltaMicros);
