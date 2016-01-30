@@ -42,16 +42,13 @@ int HelloDriver::status(int handle, int reg, int count, byte *buf) {
   case static_cast<int>(CDR::DriverVersion):
     return DeviceDriver::buildVersionResponse(releaseVersion, scopeName, count, buf);
 
-  case static_cast<int>(CDR::Debug):
-    return statusCDR_Debug(handle, reg, count, buf);
-
   case static_cast<int>(HelloRegister::INTERJECTION):
-    strlcpy(buf,currentUnit->getWhat(),count);
-    return strlen(buf);
+    strlcpy((char *)buf,currentUnit->getWhat(),count);
+    return strlen(currentUnit->getWhat());
 
   case static_cast<int>(HelloRegister::OBJECT):
-    strlcpy(buf,currentUnit->getWho(),count);
-    return strlen(buf);
+    strlcpy((char *)buf,currentUnit->getWho(),count);
+    return strlen(currentUnit->getWho());
 
   default:
     return ENOTSUP;
@@ -64,16 +61,14 @@ int HelloDriver::control(int handle, int reg, int count, byte *buf) {
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case static_cast<int>(CDR::Debug):
-    return controlCDR_Debug(handle, reg, count, buf);
 
   case static_cast<int>(HelloRegister::INTERJECTION):
-    currentUnit->setWhat(buf);
-    return strlen(buf);
+    currentUnit->setWhat((char *)buf);
+    return strlen(currentUnit->getWhat());
 
   case static_cast<int>(HelloRegister::OBJECT):
-    currentUnit->setWho(buf);
-    return strlen(buf);
+    currentUnit->setWho((char *)buf);
+    return strlen(currentUnit->getWho());
 
   default:
     return ENOTSUP;
@@ -85,14 +80,17 @@ int HelloDriver::read(int handle, int count, byte *buf) {
   HelloLUI *currentUnit = static_cast<HelloLUI *>(logicalUnits[handle & 0x7F]);
   if (currentUnit == 0) return ENOTCONN;
 
-  if (count < (strlen(currentUnit->getWho())+strlen(currentUnit->getWhat())+5)) {
-    buf[0] = '\0';
-    strcat(buf,currentUnit->getWhat());
-    strcat(buf,", ");
-    strcat(buf,currentUnit->getWho());
-    strcat(buf,"!");
-    return strlen(buf);
+  if (count >= (strlen(currentUnit->getWho())+strlen(currentUnit->getWhat())+4)) {
+    buf[0] = (uint8_t)'\0';
+    strcat((char *)buf,currentUnit->getWhat());
+    strcat((char *)buf,", ");
+    strcat((char *)buf,currentUnit->getWho());
+    strcat((char *)buf,"!");
+    return strlen((char *)buf);
+  } else {
+    return EMSGSIZE;
   }
+  return EPANIC;
 }
 
 int HelloDriver::write(int handle, int count, byte *buf) {
@@ -101,14 +99,4 @@ int HelloDriver::write(int handle, int count, byte *buf) {
 
 int HelloDriver::close(int handle) {
   return DeviceDriver::close(handle);
-}
-
-//---------------------------------------------------------------------------
-
-int HelloDriver::statusCDR_Debug(int handle, int reg, int count, byte *buf) {
-  return ENOTSUP;
-}
-
-int HelloDriver::controlCDR_Debug(int handle, int reg, int count, byte *buf) {
-  return ENOTSUP;
 }

@@ -19,7 +19,7 @@ class HelloDriver: public DeviceDriver {
 
 public:
 
-    HelloDriver(const char *unitName = "HLO", int count = 1);
+    HelloDriver(const char *unitName = "HELLO", int count = 1);
 
     int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
