@@ -1,30 +1,40 @@
 #include "PeekDriver.h"
 #include <limits.h>
 
-const PROGMEM uint8_t PeekDriver::driverSemVer[] = {6,0,1,0,0,0,0};
-const PROGMEM char PeekDriver::driverName[] = {"PeekDriver"};
-
 /**
- * This PeekDriver class is a development tool to provide code analysis
- * capabilities and a place to perform timing tests and the like.
+ * This PeekDriver class is an administrative and development tool to
+ * provide code analysis capabilities and a place to perform timing
+ * tests and the like.
  */
+DEFINE_SEMVER(PeekDriver, 0, 1, 0)
 
 //---------------------------------------------------------------------------
 
 PeekDriver::PeekDriver(const char *dName, int count) :
-  DeviceDriver(dName, count),
-  previousTime{0, 0},
-  currentTime{0, 0},
-  sampleIndex(0),
-  isSampleBufferFull(false) {}
+  DeviceDriver(dName, count) {
+  previousTime[0] = 0;
+  previousTime[1] = 0;
+  currentTime[0] = 0;
+  currentTime[1] = 0;
+  sampleIndex = 0;
+  isSampleBufferFull = false;
+}
 
 //---------------------------------------------------------------------------
 
 int PeekDriver::open(const char *name, int flags) {
-  int lun = DeviceDriver::open(name, flags);
-  if (lun < 0) return lun;
+  int lun;
+  int status = DeviceDriver::open(name,flags);
+  if (status < 0) {
+    return status;
+  }
 
-  logicalUnits[lun] = new PeekLUI();
+  lun = status;
+  PeekLUI *currentUnit = new PeekLUI();
+
+  // Any further validation of the current unit's appropriateness goes here ...
+
+  logicalUnits[lun] = currentUnit;
   return lun;
 }
 
@@ -61,7 +71,7 @@ int PeekDriver::close(int handle) {
 
 //---------------------------------------------------------------------------
 
-int PeekDriver::microsecondTimeBase(unsigned long deltaMicros) {
+void PeekDriver::update(unsigned long deltaMicros) {
 
 }
 
@@ -70,7 +80,7 @@ int PeekDriver::microsecondTimeBase(unsigned long deltaMicros) {
 // Collect a millisecond interval (report()) duration sample.  The sample array
 // is actually 0..SAMPLE_COUNT, and the useful samples are in 1..SAMPLE_COUNT.
 
-int PeekDriver::millisecondTimeBase(unsigned long deltaMillis) {
+void PeekDriver::report(unsigned long deltaMillis) {
   currentTime[0] = millis();
 
   unsigned long elapsedTime;
@@ -85,8 +95,6 @@ int PeekDriver::millisecondTimeBase(unsigned long deltaMillis) {
   isSampleBufferFull |= (sampleIndex == SAMPLE_COUNT);
   sampleIndex = 1 + ((sampleIndex) % SAMPLE_COUNT);
   previousTime[0] = currentTime[0];
-
-  return ESUCCESS;
 }
 
 //---------------------------------------------------------------------------

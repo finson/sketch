@@ -27,10 +27,11 @@ public:
     int write(int handle, int count, byte *buf);
     int close(int handle);
 
-    int millisecondTimeBase(unsigned long milliDelta);
-    int microsecondTimeBase(unsigned long microDelta);
+    void report(unsigned long milliDelta);
+    void update(unsigned long microDelta);
 
 private:
+    DECLARE_SEMVER
 
     int statusCDR_Debug(int handle, int reg, int count, byte *buf);
 
