@@ -3,16 +3,14 @@
 
 #include <Device/DeviceDriver.h>
 #include "PeekLUI.h"
+#include "Peek.h"
 
 #define SAMPLE_COUNT 16
 
-enum class PeekRegister {
-  AVG_REPORT_INTERVAL = 10
-};
-
 /**
- * This PeekDriver class is a development tool to provide code analysis
- * capabilities and a place to perform timing tests and the like.
+ * This PeekDriver class is an administrative and development tool to
+ * provide code analysis capabilities and a place to perform timing
+ * tests and the like.
  */
 class PeekDriver: public DeviceDriver {
 
@@ -42,9 +40,6 @@ private:
     unsigned long samples[SAMPLE_COUNT+1];
     int sampleIndex;
     bool isSampleBufferFull;
-
-    static const PROGMEM uint8_t driverSemVer[];
-    static const PROGMEM char driverName[];
 
 };
 

@@ -10,6 +10,10 @@
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
 
+// Open() flags
+
+#define DDO_FORCE_OPEN 0x01
+
 // These are the Common Device Register codes used by the DeviceDrivers in
 // their status() and control() methods.  Register names specific to a
 // particular device type are defined by the individual DeviceDrivers.
@@ -23,22 +27,6 @@ enum class CDR : int {
 };
 
 #define MAX_ROOT_NAME_LENGTH 32
-
-#define  DD_OPEN    0x00
-#define  DD_STATUS  0x01
-#define  DD_CONTROL 0x02
-#define  DD_READ    0x03
-#define  DD_WRITE   0x04
-#define  DD_CLOSE   0x05
-
-#define DDO_FORCE_OPEN 0x01
-
-#define DDC_INIT 0
-
-// Extract 7-bit index values from a 14-bit handle
-
-#define getUnitHandle(handle) ((handle) & 0x7F)
-#define getDeviceHandle(handle) (((handle) >> 7) & 0x7F)
 
 class DeviceDriver {
 

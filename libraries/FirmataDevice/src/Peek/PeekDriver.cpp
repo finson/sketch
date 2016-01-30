@@ -46,9 +46,11 @@ int PeekDriver::status(int handle, int reg, int count, byte *buf) {
 
   switch (reg) {
   case static_cast<int>(CDR::DriverVersion):
-    return DeviceDriver::buildVersionResponse(PeekDriver::driverSemVer, PeekDriver::driverName, count, buf);
+    return DeviceDriver::buildVersionResponse(releaseVersion, scopeName, count, buf);
+
   case static_cast<int>(CDR::Debug):
     return statusCDR_Debug(handle, reg, count, buf);
+
   default:
     return ENOTSUP;
   }

@@ -2,14 +2,8 @@
 #define HelloDriver_h
 
 #include <Device/DeviceDriver.h>
+#include "Hello.h"
 #include "HelloLUI.h"
-
-#define MAX_HELLO_TEXT_LENGTH 31
-
-enum class HelloRegister {
-  INTERJECTION = 0,
-  OBJECT = 1,
-};
 
 /**
  * This class defines a simple device driver as an example
