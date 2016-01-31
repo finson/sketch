@@ -13,22 +13,22 @@ public:
   ~Logger();
 
   template <typename... ItemType>
-  void fatal(char *msg, ItemType ...valPack);
+  void fatal(const char *msg, ItemType ...valPack);
 
   template <typename... ItemType>
-  void error(char *msg, ItemType ...valPack);
+  void error(const char *msg, ItemType ...valPack);
 
   template <typename... ItemType>
-  void warn(char *msg, ItemType ...valPack);
+  void warn(const char *msg, ItemType ...valPack);
 
   template <typename... ItemType>
-  void info(char *msg, ItemType ...valPack);
+  void info(const char *msg, ItemType ...valPack);
 
   template <typename... ItemType>
-  void debug(char *msg, ItemType ...valPack);
+  void debug(const char *msg, ItemType ...valPack);
 
   template <typename... ItemType>
-  void trace(char *msg, ItemType ...valPack);
+  void trace(const char *msg, ItemType ...valPack);
 
   char *getLoggerName();
   int getCurrentLogLevel();
@@ -41,7 +41,7 @@ private:
 
 
 template <typename... ItemType>
-void recordLogEvent(int theLvl, char *theMsg, ItemType ...valPack);
+void recordLogEvent(int theLvl, const char *theMsg, ItemType ...valPack);
 
 template <typename First, typename... Rest>
 void valuePrinter(First valFirst, Rest ...valPack);

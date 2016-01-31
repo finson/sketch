@@ -13,16 +13,16 @@ public:
   Tester();
   ~Tester();
 
-  void beforeGroup(char *groupName);
-  void beforeTest(char *testName);
+  void beforeGroup(const char *groupName);
+  void beforeTest(const char *testName);
   void afterTest();
   void afterGroup();
 
-  void assertTrue(char *msg, bool condition);
-  void assertFalse(char *msg, bool condition);
+  void assertTrue(const char *msg, bool condition);
+  void assertFalse(const char *msg, bool condition);
 
   template <typename T0, typename T1>
-  void assertEquals(char *msg, T0 expected, T1 actual);
+  void assertEquals(const char *msg, T0 expected, T1 actual);
 
   int getTestFailureCount();
   int getGroupFailureCount();

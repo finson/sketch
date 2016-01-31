@@ -19,24 +19,24 @@ Tester::~Tester() {
   }
 }
 
-void Tester::beforeGroup(char *groupName) {
+void Tester::beforeGroup(const char *groupName) {
   theGroupName = strdup(groupName);
-  Serial.print("\n*Begin group ");
+  Serial.print("\n#Begin group ");
   Serial.println(theGroupName);
   groupFailureCount = 0;
   testFailureCount = 0;
 
 };
 
-void Tester::beforeTest(char *testName) {
+void Tester::beforeTest(const char *testName) {
   theTestName = strdup(testName);
   testFailureCount = 0;
-  Serial.print("\n#Begin test ");
+  Serial.print("\n*Begin test ");
   Serial.println(theTestName);
 }
 
 void Tester::afterTest() {
-  Serial.print("#After test ");
+  Serial.print("*After test ");
   Serial.print(theTestName);
   Serial.print(". ");
   Serial.print(testFailureCount);
@@ -46,7 +46,7 @@ void Tester::afterTest() {
 }
 
 void Tester::afterGroup() {
-  Serial.print("\n*After group ");
+  Serial.print("\n#After group ");
   Serial.print(theGroupName);
   Serial.print(". ");
   Serial.print(groupFailureCount);
@@ -63,12 +63,12 @@ int Tester::getGroupFailureCount() {
   return groupFailureCount;
 }
 
-void Tester::assertTrue(char *msg, bool condition) {
+void Tester::assertTrue(const char *msg, bool condition) {
   if (condition) return;
   logger->fatal(msg);
   testFailureCount += 1;
 }
 
-void Tester::assertFalse(char *msg, bool condition) {
+void Tester::assertFalse(const char *msg, bool condition) {
   assertTrue(msg, !condition);
 }

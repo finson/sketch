@@ -2,12 +2,6 @@
 #include <Framework/Logger.h>
 #include <Framework/Tester.h>
 #include <Framework/ByteOrder.h>
-#include <elapsedMillis.h>
-
-bool waitingForInput = false;
-elapsedMillis millisecondsSinceLastInputCheck;
-unsigned int checkInterval = 500;
-
 
 /**
    Test the operation of the Logger class.
@@ -26,7 +20,6 @@ void setup() {
   // Countdown before running to give time to open the monitor window.
 
   Serial.begin(115200);
-  Serial.println("I'm starting ... ");
 
   delay(3000);
   for (int idx = 0; idx < 5; idx++) {
@@ -38,21 +31,17 @@ void setup() {
 
   //  Create the objects needed for the testing framework.
 
-  logger = new Logger("DriverTestMCP9808");
+  logger = new Logger("ToolTestLogger");
   logger->setCurrentLogLevel(LogLevel::INFO);
 
   tst = new Tester();
-}
 
-// Run the test group once, then again each time the user presses the enter key
+// Run the test group once
 
-void loop() {
   for (int logLevelIndex = 0; logLevelIndex < LogLevel::COUNT; logLevelIndex++) {
+
+    tst->beforeGroup(LogLevel::levelName[logLevelIndex]);
     logger->setCurrentLogLevel(LogLevel::levelValue[logLevelIndex]);
-
-    if (!waitingForInput) {
-
-    tst->beforeGroup("Logger");
 
       // --------------------------------------------------------
 
@@ -86,21 +75,8 @@ void loop() {
 
       // --------------------------------------------------------
 
-      waitingForInput = true;
-      millisecondsSinceLastInputCheck = 0;
-      Serial.print("Press enter key to repeat test: ");
     }
-
-    // Idle until we see an enter key press
-
-    int incomingByte;
-    if ((millisecondsSinceLastInputCheck > checkInterval) && Serial.available()) {
-    incomingByte = Serial.read();
-      Serial.println(incomingByte, HEX);
-      if ((incomingByte & 0x00FF) == '\n') {
-        waitingForInput = false;
-      }
-    }
-  }
 }
+
+void loop(){}
 

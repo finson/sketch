@@ -24,7 +24,7 @@ void Logger::setCurrentLogLevel(int newLevel) {
 }
 
 bool Logger::isEnabled(int lvl) {
-  return (lvl >= currentLogLevel);
+  return (lvl <= currentLogLevel);
 }
 
 void Logger::valuePrinter() {}
