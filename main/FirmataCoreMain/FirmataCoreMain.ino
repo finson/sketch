@@ -41,12 +41,9 @@
 
 void setup()
 {
-// start up the default Firmata using Serial interface:
 
 Firmata.begin(57600);
-
 FirmataExt.addSelectedFeatures();
-
 Firmata.reset();
 
 }
@@ -59,6 +56,6 @@ void loop() {
 while (Firmata.available()) {
   Firmata.processInputStream();
 }
-
 FirmataExt.dispatchTimers();
+
 }
