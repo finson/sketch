@@ -58,7 +58,8 @@ int MCP9808Driver::status(int handle, int reg, int count, byte *buf) {
 
   switch (reg) {
   case static_cast<int>(CDR::DriverVersion):
-    return DeviceDriver::buildVersionResponse(releaseVersion, scopeName, count, buf);
+    return DeviceDriver::buildVersionResponse(releaseVersion, scopeName,
+      preReleaseLabel, buildLabel, count, buf);
 
   case static_cast<int>(CDR::Debug):
     return statusCDR_Debug(handle, reg, count, buf);

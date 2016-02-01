@@ -57,25 +57,43 @@ int DeviceDriver::close(int handle) {
 
 //---------------------------------------------------------------------------
 
-int DeviceDriver::buildVersionResponse(const byte *semver,const char *name,int count, byte *buf) {
+int DeviceDriver::buildVersionResponse(const byte *semver,const char *name,
+  const char *prLabel, const char *bLabel, int count, byte *buf) {
 
   int nameLength = strlen_P(name);
+  int prLength = strlen_P(prLabel);
+  int bLength = strlen_P(bLabel);
+
   int packetSize = pgm_read_byte_near(&semver[0]);
 
-  if (count < (1 + packetSize + nameLength + 1)) return EMSGSIZE;
+  if (count < (1 + packetSize + nameLength + 1 + prLength + 1 + bLength +1)) {
+    return EMSGSIZE;
+  }
 
   int byteIndex = 0;
   buf[byteIndex++] = packetSize;
 
   // version
 
-  for (int idx=0; idx<packetSize; idx++) {
+  for (int idx=0; idx < packetSize; idx++) {
     buf[byteIndex++] = pgm_read_byte_near(&semver[idx+1]);
+  }
+
+  // preReleaseLabel (including terminating null)
+
+  for (int idx=0;idx <= prLength;idx++) {
+    buf[byteIndex++] = pgm_read_byte_near(&prLabel[idx]);
+  }
+
+  // buildLabel (including terminating null)
+
+  for (int idx=0;idx <= bLength;idx++) {
+    buf[byteIndex++] = pgm_read_byte_near(&bLabel[idx]);
   }
 
   // name (including terminating null)
 
-  for (int idx=0;idx<=nameLength;idx++) {
+  for (int idx=0;idx <= nameLength;idx++) {
     buf[byteIndex++] = pgm_read_byte_near(&name[idx]);
   }
 

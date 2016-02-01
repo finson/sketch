@@ -64,7 +64,8 @@ protected:
     int logicalUnitCount;
     LogicalUnitInfo **logicalUnits;
 
-    int buildVersionResponse(const byte *semver, const char *name, int count, byte *buf);
+    int buildVersionResponse(const byte *semver, const char *name,
+        const char *prLabel, const char *bLabel, int count, byte *buf);
 };
 
 #endif
