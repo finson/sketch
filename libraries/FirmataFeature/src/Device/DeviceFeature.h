@@ -29,12 +29,12 @@ public:
     void update(unsigned long deltaMicros);
     void report(unsigned long deltaMillis);
 
+private:
+    DeviceTable *dt;
+
     int dispatchDeviceAction(int act, int handle, int pc, byte *pv);
     void sendDeviceResponse(int handle, int action, int status);
     void sendDeviceResponse(int handle, int action, int status, const byte *dpBlock);
-
-private:
-    DeviceTable *dt;
 };
 
 #endif
