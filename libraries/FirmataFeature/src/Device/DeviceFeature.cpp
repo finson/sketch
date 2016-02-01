@@ -28,7 +28,7 @@ void DeviceFeature::update(unsigned long deltaMicros) {
 }
 
 void DeviceFeature::report(unsigned long deltaMillis) {
-  dt->update(deltaMillis);
+  dt->report(deltaMillis);
 }
 
 // The first six bytes of argv for DEVICE_QUERY messages are: action, reserved,
