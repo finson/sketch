@@ -17,9 +17,9 @@ DeviceFeature::DeviceFeature() {
 
 void DeviceFeature::reset(){}
 
-void DeviceFeature::handleGetCapability(byte pin){}
+void DeviceFeature::handleCapability(byte pin){}
 
-boolean DeviceFeature::handleSetPinMode(byte pin, int mode) {
+boolean DeviceFeature::handlePinMode(byte pin, int mode) {
   return false;
 }
 
@@ -40,7 +40,7 @@ void DeviceFeature::report(unsigned long deltaMillis) {
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
 
-boolean DeviceFeature::handleFeatureSysex(byte command, byte argc, byte *argv) {
+boolean DeviceFeature::handleSysex(byte command, byte argc, byte *argv) {
 
   byte dpBlock[1 + MAX_DPB_LENGTH]; // decoded parameter block
 

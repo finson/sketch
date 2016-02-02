@@ -27,9 +27,9 @@ class AnalogInputFeature: public FirmataFeature
   public:
     AnalogInputFeature();
     void reportAnalog(byte analogPin, int value);
-    void handleGetCapability(byte pin);
-    boolean handleSetPinMode(byte pin, int mode);
-    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
+    void handleCapability(byte pin);
+    boolean handlePinMode(byte pin, int mode);
+    boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
     void report();
 

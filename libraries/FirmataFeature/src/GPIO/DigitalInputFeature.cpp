@@ -30,7 +30,7 @@ DigitalInputFeature::DigitalInputFeature()
   Firmata.attach(REPORT_DIGITAL, reportDigitalInputCallback);
 }
 
-boolean DigitalInputFeature::handleFeatureSysex(byte command, byte argc, byte* argv)
+boolean DigitalInputFeature::handleSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }
@@ -86,7 +86,7 @@ void DigitalInputFeature::reportDigital(byte port, int value)
   // pins configured as analog
 }
 
-boolean DigitalInputFeature::handleSetPinMode(byte pin, int mode)
+boolean DigitalInputFeature::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
@@ -101,7 +101,7 @@ boolean DigitalInputFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalInputFeature::handleGetCapability(byte pin)
+void DigitalInputFeature::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)INPUT);

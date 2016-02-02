@@ -35,7 +35,7 @@ void AnalogOutputFeature::reset()
 
 }
 
-boolean AnalogOutputFeature::handleSetPinMode(byte pin, int mode)
+boolean AnalogOutputFeature::handlePinMode(byte pin, int mode)
 {
   if (mode == PWM && IS_PIN_PWM(pin)) {
     pinMode(PIN_TO_PWM(pin), OUTPUT);
@@ -45,7 +45,7 @@ boolean AnalogOutputFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void AnalogOutputFeature::handleGetCapability(byte pin)
+void AnalogOutputFeature::handleCapability(byte pin)
 {
   if (IS_PIN_PWM(pin)) {
     Firmata.write(PWM);
@@ -53,7 +53,7 @@ void AnalogOutputFeature::handleGetCapability(byte pin)
   }
 }
 
-boolean AnalogOutputFeature::handleFeatureSysex(byte command, byte argc, byte* argv)
+boolean AnalogOutputFeature::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == EXTENDED_ANALOG) {
     if (argc > 1) {

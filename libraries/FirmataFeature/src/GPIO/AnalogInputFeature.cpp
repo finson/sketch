@@ -56,7 +56,7 @@ void AnalogInputFeature::reportAnalog(byte analogPin, int value)
   // TODO: save status to EEPROM here, if changed
 }
 
-boolean AnalogInputFeature::handleSetPinMode(byte pin, int mode)
+boolean AnalogInputFeature::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_ANALOG(pin)) {
     if (mode == ANALOG) {
@@ -73,7 +73,7 @@ boolean AnalogInputFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void AnalogInputFeature::handleGetCapability(byte pin)
+void AnalogInputFeature::handleCapability(byte pin)
 {
   if (IS_PIN_ANALOG(pin)) {
     Firmata.write(ANALOG);
@@ -81,7 +81,7 @@ void AnalogInputFeature::handleGetCapability(byte pin)
   }
 }
 
-boolean AnalogInputFeature::handleFeatureSysex(byte command, byte argc, byte* argv)
+boolean AnalogInputFeature::handleSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }

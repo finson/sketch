@@ -40,7 +40,7 @@ class FirmataExtClass
     boolean dispatchFeatureSysex(byte command, byte argc, byte* argv);
 
   private:
-    boolean handleFeatureSysex(byte cmd, byte argc, byte* argv);
+    boolean handleSysex(byte cmd, byte argc, byte* argv);
 
     FirmataFeature *features[MAX_FEATURES];
     byte numFeatures;

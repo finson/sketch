@@ -47,9 +47,9 @@ class I2CFeature: public FirmataFeature
 {
   public:
     I2CFeature();
-    boolean handleSetPinMode(byte pin, int mode);
-    void handleGetCapability(byte pin);
-    boolean handleFeatureSysex(byte command, byte argc, byte* argv);
+    boolean handlePinMode(byte pin, int mode);
+    void handleCapability(byte pin);
+    boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
     void report();
 
@@ -128,7 +128,7 @@ void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes)
   Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
-boolean I2CFeature::handleSetPinMode(byte pin, int mode)
+boolean I2CFeature::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
     if (mode == I2C) {
@@ -145,7 +145,7 @@ boolean I2CFeature::handleSetPinMode(byte pin, int mode)
   return false;
 }
 
-void I2CFeature::handleGetCapability(byte pin)
+void I2CFeature::handleCapability(byte pin)
 {
   if (IS_PIN_I2C(pin)) {
     Firmata.write(I2C);
@@ -153,7 +153,7 @@ void I2CFeature::handleGetCapability(byte pin)
   }
 }
 
-boolean I2CFeature::handleFeatureSysex(byte command, byte argc, byte *argv)
+boolean I2CFeature::handleSysex(byte command, byte argc, byte *argv)
 {
   switch (command) {
     case I2C_REQUEST:
