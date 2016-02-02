@@ -15,11 +15,9 @@
 */
 
 #include <FirmataExt.h>
-#include <FirmataMode.h>
 #include <Device/DeviceDriver.h>
 #include <limits.h>
 
-extern FirmataMode *selectedModes[];
 extern FirmataFeature *selectedFeatures[];
 extern DeviceDriver *selectedDevices[];
 
@@ -92,26 +90,26 @@ boolean FirmataExtClass::dispatchSetPinMode(byte pin, int mode)
 {
   boolean known = false;
   for (byte i = 0; i < numFeatures; i++) {
-    known |= features[i]->handleSetPinMode(pin, mode);
+    known |= features[i]->handlePinMode(pin, mode);
   }
   return known;
 }
 
 boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* argv)
 {
-  if (this->handleFeatureSysex(command, argc, argv)) {
+  if (this->handleSysex(command, argc, argv)) {
     return true;
   }
 
   for (byte i = 0; i < numFeatures; i++) {
-    if (features[i]->handleFeatureSysex(command, argc, argv)) {
+    if (features[i]->handleSysex(command, argc, argv)) {
       return true;
     }
   }
   return false;
 }
 
-boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)
+boolean FirmataExtClass::handleSysex(byte cmd, byte argc, byte* argv)
 {
   switch (cmd) {
   case CAPABILITY_QUERY:
@@ -120,7 +118,7 @@ boolean FirmataExtClass::handleFeatureSysex(byte cmd, byte argc, byte* argv)
     for (byte pin = 0; pin < TOTAL_PINS; pin++) {
       if (Firmata.getPinMode(pin) != IGNORE) {
         for (byte i = 0; i < numFeatures; i++) {
-          features[i]->handleGetCapability(pin);
+          features[i]->handleCapability(pin);
         }
       }
       Firmata.write(127);
