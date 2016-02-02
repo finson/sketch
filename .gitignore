@@ -27,6 +27,9 @@
 *.out
 *.app
 
+# Linker
+*.map
+
 # Sublime Text editor
 *.sublime-project
 *.sublime-workspace
