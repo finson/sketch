@@ -1,6 +1,6 @@
 
-#ifndef DeviceFeature_h
-#define DeviceFeature_h
+#ifndef DeviceFirmata_h
+#define DeviceFirmata_h
 
 #include <FirmataFeature.h>
 #include <Device/DeviceDriver.h>
@@ -17,9 +17,9 @@
 #define  DD_WRITE   0x04
 #define  DD_CLOSE   0x05
 
-class DeviceFeature : public FirmataFeature {
+class DeviceFirmata: public FirmataFeature {
 public:
-    DeviceFeature();
+    DeviceFirmata();
 
     void reset();
     void handleCapability(byte pin);

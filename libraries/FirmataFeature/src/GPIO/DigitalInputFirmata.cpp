@@ -1,5 +1,5 @@
 /*
-  DigitalInputFeature.cpp - Firmata library
+  DigitalInputFirmata.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,27 +15,27 @@
 */
 
 #include <FirmataCore.h>
-#include "DigitalInputFeature.h"
+#include "DigitalInputFirmata.h"
 
-DigitalInputFeature *DigitalInputFeatureInstance;
+DigitalInputFirmata *DigitalInputFirmataInstance;
 
 void reportDigitalInputCallback(byte port, int value)
 {
-  DigitalInputFeatureInstance->reportDigital(port, value);
+  DigitalInputFirmataInstance->reportDigital(port, value);
 }
 
-DigitalInputFeature::DigitalInputFeature()
+DigitalInputFirmata::DigitalInputFirmata()
 {
-  DigitalInputFeatureInstance = this;
+  DigitalInputFirmataInstance = this;
   Firmata.attach(REPORT_DIGITAL, reportDigitalInputCallback);
 }
 
-boolean DigitalInputFeature::handleSysex(byte command, byte argc, byte* argv)
+boolean DigitalInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }
 
-void DigitalInputFeature::outputPort(byte portNumber, byte portValue, byte forceSend)
+void DigitalInputFirmata::outputPort(byte portNumber, byte portValue, byte forceSend)
 {
   // pins not configured as INPUT are cleared to zeros
   portValue = portValue & portConfigInputs[portNumber];
@@ -49,7 +49,7 @@ void DigitalInputFeature::outputPort(byte portNumber, byte portValue, byte force
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
  * to the Serial output queue using Serial.print() */
-void DigitalInputFeature::report(void)
+void DigitalInputFirmata::report(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
    * The compiler will apply substantial optimizations if the inputs
@@ -72,7 +72,7 @@ void DigitalInputFeature::report(void)
   if (TOTAL_PORTS > 15 && reportPINs[15]) outputPort(15, readPort(15, portConfigInputs[15]), false);
 }
 
-void DigitalInputFeature::reportDigital(byte port, int value)
+void DigitalInputFirmata::reportDigital(byte port, int value)
 {
   if (port < TOTAL_PORTS) {
     reportPINs[port] = (byte)value;
@@ -86,7 +86,7 @@ void DigitalInputFeature::reportDigital(byte port, int value)
   // pins configured as analog
 }
 
-boolean DigitalInputFeature::handlePinMode(byte pin, int mode)
+boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
@@ -101,7 +101,7 @@ boolean DigitalInputFeature::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalInputFeature::handleCapability(byte pin)
+void DigitalInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)INPUT);
@@ -109,7 +109,7 @@ void DigitalInputFeature::handleCapability(byte pin)
   }
 }
 
-void DigitalInputFeature::reset()
+void DigitalInputFirmata::reset()
 {
   for (byte i = 0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off

@@ -1,33 +1,33 @@
 /*
-  DeviceFeature.cpp - Firmata library
+  DeviceFirmata.cpp - Firmata library
 */
 
-#include "DeviceFeature.h"
+#include "DeviceFirmata.h"
 #include <Base64.h>
 
 extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFeature::DeviceFeature() {
+DeviceFirmata::DeviceFirmata() {
   dt = new DeviceTable(selectedDevices);
 }
 
 //---------------------------------------------------------------------------
 
-void DeviceFeature::reset(){}
+void DeviceFirmata::reset(){}
 
-void DeviceFeature::handleCapability(byte pin){}
+void DeviceFirmata::handleCapability(byte pin){}
 
-boolean DeviceFeature::handlePinMode(byte pin, int mode) {
+boolean DeviceFirmata::handlePinMode(byte pin, int mode) {
   return false;
 }
 
-void DeviceFeature::update(unsigned long deltaMicros) {
+void DeviceFirmata::update(unsigned long deltaMicros) {
   dt->update(deltaMicros);
 }
 
-void DeviceFeature::report(unsigned long deltaMillis) {
+void DeviceFirmata::report(unsigned long deltaMillis) {
   dt->report(deltaMillis);
 }
 
@@ -40,7 +40,7 @@ void DeviceFeature::report(unsigned long deltaMillis) {
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
 
-boolean DeviceFeature::handleSysex(byte command, byte argc, byte *argv) {
+boolean DeviceFirmata::handleSysex(byte command, byte argc, byte *argv) {
 
   byte dpBlock[1 + MAX_DPB_LENGTH]; // decoded parameter block
 
@@ -69,7 +69,7 @@ boolean DeviceFeature::handleSysex(byte command, byte argc, byte *argv) {
 
 //---------------------------------------------------------------------------
 
-int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
+int DeviceFirmata::dispatchDeviceAction(int action, int handle, int dpCount, byte *dpBlock) {
   int count = 0;
   int reg = 0;
   int flags = 0;
@@ -108,11 +108,11 @@ int DeviceFeature::dispatchDeviceAction(int action, int handle, int dpCount, byt
 //  dpB -> decoded parameter block
 //  epB -> encoded parameter block
 
-void DeviceFeature::sendDeviceResponse(int handle, int action, int status) {
+void DeviceFirmata::sendDeviceResponse(int handle, int action, int status) {
   sendDeviceResponse(handle, action, status, 0);
 }
 
-void DeviceFeature::sendDeviceResponse(int handle, int action, int status, const byte *dpB) {
+void DeviceFirmata::sendDeviceResponse(int handle, int action, int status, const byte *dpB) {
   byte epB[1 + ((MAX_DPB_LENGTH + 2) / 3) * 4];
 
   Firmata.write(START_SYSEX);

@@ -1,5 +1,5 @@
 /*
-  DigitalInputFeature.h - Firmata library
+  DigitalInputFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,18 +14,18 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef DigitalInputFeature_h
-#define DigitalInputFeature_h
+#ifndef DigitalInputFirmata_h
+#define DigitalInputFirmata_h
 
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
 
 void reportDigitalInputCallback(byte port, int value);
 
-class DigitalInputFeature: public FirmataFeature
+class DigitalInputFirmata: public FirmataFeature
 {
   public:
-    DigitalInputFeature();
+    DigitalInputFirmata();
     void reportDigital(byte port, int value);
     void report(void);
     void handleCapability(byte pin);

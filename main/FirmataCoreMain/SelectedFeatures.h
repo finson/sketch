@@ -1,26 +1,26 @@
 
 // Firmata Features
 
-#include <GPIO/DigitalInputFeature.h>
-DigitalInputFeature digitalInput;
+#include <GPIO/DigitalInputFirmata.h>
+DigitalInputFirmata digitalInput;
 
-#include <GPIO/DigitalOutputFeature.h>
-DigitalOutputFeature digitalOutput;
+#include <GPIO/DigitalOutputFirmata.h>
+DigitalOutputFirmata digitalOutput;
 
-#include <GPIO/AnalogInputFeature.h>
-AnalogInputFeature analogInput;
+#include <GPIO/AnalogInputFirmata.h>
+AnalogInputFirmata analogInput;
 
-#include <GPIO/AnalogOutputFeature.h>
-AnalogOutputFeature analogOutput;
+#include <GPIO/AnalogOutputFirmata.h>
+AnalogOutputFirmata analogOutput;
 
-#include <I2C/I2CFeature.h>
-I2CFeature ffI2C;
+#include <I2C/I2CFirmata.h>
+I2CFirmata ffI2C;
 
-#include <Stepper/StepperFeature.h>
-StepperFeature ffStepper;
+#include <Stepper/StepperFirmata.h>
+StepperFirmata ffStepper;
 
-//#include <Device/DeviceFeature.h>
-//DeviceFeature ffDevice;
+//#include <Device/DeviceFirmata.h>
+//DeviceFirmata ffDevice;
 
 FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&ffStepper,&ffI2C,0};
 //FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,&analogOutput,&ffStepper,&ffI2C,&ffDevice,0};

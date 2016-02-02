@@ -1,5 +1,5 @@
 /*
-  I2CFeature.h - Firmata library
+  I2CFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -17,12 +17,12 @@
   include Servo.h for every arduino sketch that includes ConfigurableFirmata.
 */
 
-#ifndef I2CFeature_h
-#define I2CFeature_h
+#ifndef I2CFirmata_h
+#define I2CFirmata_h
 
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
-#include <Reporting/ReportingFeature.h>
+#include <Reporting/ReportingFirmata.h>
 #include <Wire.h>
 
 #define I2C_WRITE B00000000
@@ -43,10 +43,10 @@ struct i2c_device_info {
   byte bytes;
 };
 
-class I2CFeature: public FirmataFeature
+class I2CFirmata: public FirmataFeature
 {
   public:
-    I2CFeature();
+    I2CFirmata();
     boolean handlePinMode(byte pin, int mode);
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte* argv);
@@ -71,19 +71,19 @@ class I2CFeature: public FirmataFeature
 
 
 /*
- * I2CFeature.cpp
+ * I2CFirmata.cpp
  * Copied here as a hack to avoid having to include Wire.h in all sketch files that
  * include ConfigurableFirmata.h
  */
 
-I2CFeature::I2CFeature()
+I2CFirmata::I2CFirmata()
 {
   isI2CEnabled = false;
   queryIndex = -1;
   i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
 
-void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes) {
+void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
@@ -128,7 +128,7 @@ void I2CFeature::readAndReportData(byte address, int theRegister, byte numBytes)
   Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
-boolean I2CFeature::handlePinMode(byte pin, int mode)
+boolean I2CFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
     if (mode == I2C) {
@@ -145,7 +145,7 @@ boolean I2CFeature::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void I2CFeature::handleCapability(byte pin)
+void I2CFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_I2C(pin)) {
     Firmata.write(I2C);
@@ -153,7 +153,7 @@ void I2CFeature::handleCapability(byte pin)
   }
 }
 
-boolean I2CFeature::handleSysex(byte command, byte argc, byte *argv)
+boolean I2CFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   switch (command) {
     case I2C_REQUEST:
@@ -167,7 +167,7 @@ boolean I2CFeature::handleSysex(byte command, byte argc, byte *argv)
   return false;
 }
 
-void I2CFeature::handleI2CRequest(byte argc, byte *argv)
+void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
 {
   byte mode;
   byte slaveAddress;
@@ -262,7 +262,7 @@ void I2CFeature::handleI2CRequest(byte argc, byte *argv)
   }
 }
 
-boolean I2CFeature::handleI2CConfig(byte argc, byte *argv)
+boolean I2CFirmata::handleI2CConfig(byte argc, byte *argv)
 {
   unsigned int delayTime = (argv[0] + (argv[1] << 7));
 
@@ -276,7 +276,7 @@ boolean I2CFeature::handleI2CConfig(byte argc, byte *argv)
   return isI2CEnabled;
 }
 
-boolean I2CFeature::enableI2CPins()
+boolean I2CFirmata::enableI2CPins()
 {
   byte i;
   // is there a faster way to do this? would probaby require importing
@@ -299,7 +299,7 @@ boolean I2CFeature::enableI2CPins()
 }
 
 /* disable the i2c pins so they can be used for other functions */
-void I2CFeature::disableI2CPins()
+void I2CFirmata::disableI2CPins()
 {
   isI2CEnabled = false;
   // disable read continuous mode for all devices
@@ -308,14 +308,14 @@ void I2CFeature::disableI2CPins()
   // Wire.end();
 }
 
-void I2CFeature::reset()
+void I2CFirmata::reset()
 {
   if (isI2CEnabled) {
     disableI2CPins();
   }
 }
 
-void I2CFeature::report()
+void I2CFirmata::report()
 {
   // report i2c data for all device with read continuous mode enabled
   if (queryIndex > -1) {
@@ -325,4 +325,4 @@ void I2CFeature::report()
   }
 }
 
-#endif /* I2CFeature_h */
+#endif /* I2CFirmata_h */

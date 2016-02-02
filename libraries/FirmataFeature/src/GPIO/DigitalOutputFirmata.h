@@ -1,5 +1,5 @@
 /*
-  ReportingFeature.h - Firmata library
+  DigitalOutputFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,27 +14,24 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef ReportingFeature_h
-#define ReportingFeature_h
+#ifndef DigitalOutputFirmata_h
+#define DigitalOutputFirmata_h
 
-#include "FirmataFeature.h"
+#include <FirmataCore.h>
+#include <FirmataFeature.h>
 
-#define MINIMUM_SAMPLING_INTERVAL 10
+void digitalOutputWriteCallback(byte port, int value);
 
-class ReportingFeature: public FirmataFeature
+class DigitalOutputFirmata: public FirmataFeature
 {
   public:
-    void setSamplingInterval(int interval);
-    void handleCapability(byte pin); //empty method
-    boolean handlePinMode(byte pin, int mode); //empty method
+    DigitalOutputFirmata();
+    void handleCapability(byte pin);
+    boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);
-    boolean elapsed();
     void reset();
+    void digitalWrite(byte port, int value);
   private:
-    /* timer variables */
-    unsigned long currentMillis;        // store the current value from millis()
-    unsigned long previousMillis;       // for comparison with currentMillis
-    int samplingInterval;          // how often to run the main loop (in ms)
 };
 
 #endif

@@ -30,8 +30,8 @@
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
-#ifndef StepperFeature_h
-#define StepperFeature_h
+#ifndef StepperFirmata_h
+#define StepperFirmata_h
 
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
@@ -41,7 +41,7 @@
 #define STEPPER_CONFIG 0
 #define STEPPER_STEP 1
 
-class StepperFeature: public FirmataFeature
+class StepperFirmata: public FirmataFeature
 {
   public:
     boolean handlePinMode(byte pin, int mode);

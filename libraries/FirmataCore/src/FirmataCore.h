@@ -54,19 +54,19 @@
 
 // Feature Direct Commands
 
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFeature)
-#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFeature)
-#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFeature)
-#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFeature)
+#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFirmata)
+#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFirmata)
+#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFirmata)
+#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFirmata)
 
 // Feature Sysex commands that do not have an associated pin mode
 
-#define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFeature)
-#define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFeature)
+#define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFirmata)
+#define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFirmata)
 
 // Feature Sysex commands that have an associated pin mode and implement or extend the mode
 
-#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFeature)
+#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFirmata)
 
 #define ENCODER_DATA            0x61 // reply with encoders current positions (??)
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq (ServoFirmata)
@@ -74,9 +74,9 @@
 #define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request (OneWireFirmata)
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register (??)
 
-#define I2C_REQUEST             0x76 // send an I2C read/write request (I2CFeature)
-#define I2C_REPLY               0x77 // a reply to an I2C read request (I2CFeature)
-#define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (I2CFeature)
+#define I2C_REQUEST             0x76 // send an I2C read/write request (I2CFirmata)
+#define I2C_REPLY               0x77 // a reply to an I2C read request (I2CFirmata)
+#define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (I2CFirmata)
 
 // Other Sysex sub-commands (defined but not used)
 
@@ -189,10 +189,10 @@ class FirmataClass
 
     /* callback functions */
 
-    callbackFunction currentAnalogCallback;         // AnalogOutputFeature
-    callbackFunction currentDigitalCallback;        // DigitalOutputFeature
-    callbackFunction currentReportAnalogCallback;   // AnalogInputFeature
-    callbackFunction currentReportDigitalCallback;  // DigitalInputFeature
+    callbackFunction currentAnalogCallback;         // AnalogOutputFirmata
+    callbackFunction currentDigitalCallback;        // DigitalOutputFirmata
+    callbackFunction currentReportAnalogCallback;   // AnalogInputFirmata
+    callbackFunction currentReportDigitalCallback;  // DigitalInputFirmata
 
     // User supplies address of function to use as StringCallback if desired.
     // Otherwise FirmataCore leaves it at null and decodes but does not dispatch

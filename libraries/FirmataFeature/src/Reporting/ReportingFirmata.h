@@ -1,5 +1,5 @@
 /*
-  AnalogOutputFeature.h - Firmata library
+  ReportingFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,24 +14,27 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef AnalogOutputFeature_h
-#define AnalogOutputFeature_h
+#ifndef ReportingFirmata_h
+#define ReportingFirmata_h
 
-#include <FirmataCore.h>
 #include <FirmataFeature.h>
 
-void analogOutputWriteCallback(byte port, int value);
+#define MINIMUM_SAMPLING_INTERVAL 10
 
-class AnalogOutputFeature: public FirmataFeature
+class ReportingFirmata: public FirmataFeature
 {
   public:
-    AnalogOutputFeature();
-    void handleCapability(byte pin);
-    boolean handlePinMode(byte pin, int mode);
+    void setSamplingInterval(int interval);
+    void handleCapability(byte pin); //empty method
+    boolean handlePinMode(byte pin, int mode); //empty method
     boolean handleSysex(byte command, byte argc, byte* argv);
+    boolean elapsed();
     void reset();
-    void analogWrite(byte port, int value);
   private:
+    /* timer variables */
+    unsigned long currentMillis;        // store the current value from millis()
+    unsigned long previousMillis;       // for comparison with currentMillis
+    int samplingInterval;          // how often to run the main loop (in ms)
 };
 
 #endif

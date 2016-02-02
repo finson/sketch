@@ -30,9 +30,9 @@
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
-#include "StepperFeature.h"
+#include "StepperFirmata.h"
 
-boolean StepperFeature::handlePinMode(byte pin, int mode)
+boolean StepperFirmata::handlePinMode(byte pin, int mode)
 {
   if (mode == STEPPER) {
     if (IS_PIN_DIGITAL(pin)) {
@@ -44,7 +44,7 @@ boolean StepperFeature::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void StepperFeature::handleCapability(byte pin)
+void StepperFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write(STEPPER);
@@ -56,7 +56,7 @@ void StepperFeature::handleCapability(byte pin)
  * SYSEX-BASED commands
  *============================================================================*/
 
-boolean StepperFeature::handleSysex(byte command, byte argc, byte *argv)
+boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   if (command == STEPPER_DATA) {
     byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
@@ -124,7 +124,7 @@ boolean StepperFeature::handleSysex(byte command, byte argc, byte *argv)
  * SETUP()
  *============================================================================*/
 
-void StepperFeature::reset()
+void StepperFirmata::reset()
 {
   for (byte i = 0; i < MAX_STEPPERS; i++) {
     if (stepper[i]) {
@@ -138,7 +138,7 @@ void StepperFeature::reset()
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void StepperFeature::update()
+void StepperFirmata::update()
 {
   if (numSteppers > 0) {
     // if one or more stepper motors are used, update their position

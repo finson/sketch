@@ -1,5 +1,5 @@
 /*
-  AnalogInputFeature.h - Firmata library
+  AnalogOutputFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,28 +14,24 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef AnalogInputFeature_h
-#define AnalogInputFeature_h
+#ifndef AnalogOutputFirmata_h
+#define AnalogOutputFirmata_h
 
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
 
-void reportAnalogInputCallback(byte analogPin, int value);
+void analogOutputWriteCallback(byte port, int value);
 
-class AnalogInputFeature: public FirmataFeature
+class AnalogOutputFirmata: public FirmataFeature
 {
   public:
-    AnalogInputFeature();
-    void reportAnalog(byte analogPin, int value);
+    AnalogOutputFirmata();
     void handleCapability(byte pin);
     boolean handlePinMode(byte pin, int mode);
     boolean handleSysex(byte command, byte argc, byte* argv);
     void reset();
-    void report();
-
+    void analogWrite(byte port, int value);
   private:
-    /* analog inputs */
-    int analogInputsToReport; // bitwise array to store pin reporting
 };
 
 #endif

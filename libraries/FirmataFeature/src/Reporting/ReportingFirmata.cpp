@@ -1,5 +1,5 @@
 /*
-  ReportingFeature.cpp - Firmata library
+  ReportingFirmata.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,25 +15,25 @@
 */
 
 #include <FirmataCore.h>
-#include "FirmataFeature.h"
-#include "ReportingFeature.h"
+#include <FirmataFeature.h>
+#include "ReportingFirmata.h"
 
-void ReportingFeature::setSamplingInterval(int interval)
+void ReportingFirmata::setSamplingInterval(int interval)
 {
   samplingInterval = interval;
 }
 
-void ReportingFeature::handleCapability(byte pin)
+void ReportingFirmata::handleCapability(byte pin)
 {
 
 }
 
-boolean ReportingFeature::handlePinMode(byte pin, int mode)
+boolean ReportingFirmata::handlePinMode(byte pin, int mode)
 {
   return false;
 }
 
-boolean ReportingFeature::handleSysex(byte command, byte argc, byte* argv)
+boolean ReportingFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == SAMPLING_INTERVAL) {
     if (argc > 1) {
@@ -47,7 +47,7 @@ boolean ReportingFeature::handleSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-boolean ReportingFeature::elapsed()
+boolean ReportingFirmata::elapsed()
 {
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
@@ -59,7 +59,7 @@ boolean ReportingFeature::elapsed()
   return false;
 }
 
-void ReportingFeature::reset()
+void ReportingFirmata::reset()
 {
   previousMillis = millis();
   samplingInterval = 19;

@@ -1,5 +1,5 @@
 /*
-  DigitalOutputFeature.cpp - Firmata library
+  DigitalOutputFirmata.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,27 +15,27 @@
 */
 
 #include <FirmataCore.h>
-#include "DigitalOutputFeature.h"
+#include "DigitalOutputFirmata.h"
 
-DigitalOutputFeature *DigitalOutputFeatureInstance;
+DigitalOutputFirmata *DigitalOutputFirmataInstance;
 
 void digitalOutputWriteCallback(byte port, int value)
 {
-  DigitalOutputFeatureInstance->digitalWrite(port, value);
+  DigitalOutputFirmataInstance->digitalWrite(port, value);
 }
 
-DigitalOutputFeature::DigitalOutputFeature()
+DigitalOutputFirmata::DigitalOutputFirmata()
 {
-  DigitalOutputFeatureInstance = this;
+  DigitalOutputFirmataInstance = this;
   Firmata.attach(DIGITAL_MESSAGE, digitalOutputWriteCallback);
 }
 
-void DigitalOutputFeature::reset()
+void DigitalOutputFirmata::reset()
 {
 
 }
 
-boolean DigitalOutputFeature::handlePinMode(byte pin, int mode)
+boolean DigitalOutputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin) && mode == OUTPUT && Firmata.getPinMode(pin) != IGNORE) {
     digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
@@ -45,7 +45,7 @@ boolean DigitalOutputFeature::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalOutputFeature::handleCapability(byte pin)
+void DigitalOutputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)OUTPUT);
@@ -53,12 +53,12 @@ void DigitalOutputFeature::handleCapability(byte pin)
   }
 }
 
-boolean DigitalOutputFeature::handleSysex(byte command, byte argc, byte* argv)
+boolean DigitalOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }
 
-void DigitalOutputFeature::digitalWrite(byte port, int value)
+void DigitalOutputFirmata::digitalWrite(byte port, int value)
 {
   byte pin, lastPin, mask = 1, pinWriteMask = 0;
 

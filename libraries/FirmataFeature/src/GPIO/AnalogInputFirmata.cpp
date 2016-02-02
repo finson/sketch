@@ -1,5 +1,5 @@
 /*
-  AnalogInputFeature.h - Firmata library
+  AnalogInputFirmata.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,18 +15,18 @@
 */
 
 #include <FirmataCore.h>
-#include "AnalogInputFeature.h"
+#include "AnalogInputFirmata.h"
 
-AnalogInputFeature *AnalogInputFeatureInstance;
+AnalogInputFirmata *AnalogInputFirmataInstance;
 
 void reportAnalogInputCallback(byte analogPin, int value)
 {
-  AnalogInputFeatureInstance->reportAnalog(analogPin, value);
+  AnalogInputFirmataInstance->reportAnalog(analogPin, value);
 }
 
-AnalogInputFeature::AnalogInputFeature()
+AnalogInputFirmata::AnalogInputFirmata()
 {
-  AnalogInputFeatureInstance = this;
+  AnalogInputFirmataInstance = this;
   analogInputsToReport = 0;
   Firmata.attach(REPORT_ANALOG, reportAnalogInputCallback);
 }
@@ -36,7 +36,7 @@ AnalogInputFeature::AnalogInputFeature()
  */
 //void FirmataClass::setAnalogPinReporting(byte pin, byte state) {
 //}
-void AnalogInputFeature::reportAnalog(byte analogPin, int value)
+void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
 {
   if (analogPin < TOTAL_ANALOG_PINS) {
     if (value == 0) {
@@ -56,7 +56,7 @@ void AnalogInputFeature::reportAnalog(byte analogPin, int value)
   // TODO: save status to EEPROM here, if changed
 }
 
-boolean AnalogInputFeature::handlePinMode(byte pin, int mode)
+boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_ANALOG(pin)) {
     if (mode == ANALOG) {
@@ -73,7 +73,7 @@ boolean AnalogInputFeature::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void AnalogInputFeature::handleCapability(byte pin)
+void AnalogInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_ANALOG(pin)) {
     Firmata.write(ANALOG);
@@ -81,18 +81,18 @@ void AnalogInputFeature::handleCapability(byte pin)
   }
 }
 
-boolean AnalogInputFeature::handleSysex(byte command, byte argc, byte* argv)
+boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }
 
-void AnalogInputFeature::reset()
+void AnalogInputFirmata::reset()
 {
   // by default, do not report any analog inputs
   analogInputsToReport = 0;
 }
 
-void AnalogInputFeature::report()
+void AnalogInputFirmata::report()
 {
   byte pin, analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
