@@ -48,7 +48,7 @@ class StepperFirmata: public FirmataFeature
     void handleCapability(byte pin);
     boolean handleSysex(byte command, byte argc, byte *argv);
     void reset();
-    void update();
+    void update(unsigned long elapsedTime);
 
   private:
     FirmataStepper *stepper[MAX_STEPPERS];

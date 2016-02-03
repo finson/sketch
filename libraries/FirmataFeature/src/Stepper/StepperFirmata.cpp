@@ -138,7 +138,7 @@ void StepperFirmata::reset()
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void StepperFirmata::update()
+void StepperFirmata::update(unsigned long elapsedTime)
 {
   if (numSteppers > 0) {
     // if one or more stepper motors are used, update their position
