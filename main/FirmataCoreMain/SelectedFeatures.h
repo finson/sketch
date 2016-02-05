@@ -27,6 +27,9 @@ FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,
 
 // Device Drivers
 
+// #include <Device/TableDriver.h>
+// TableDriver ddTable("DeviceTable",1);
+
 // #include <Hello/HelloDriver.h>
 // HelloDriver ddHello("Hello",2);
 
@@ -36,4 +39,4 @@ FirmataFeature *selectedFeatures[] = {&digitalInput,&digitalOutput,&analogInput,
 // DeviceDriver *selectedDevices[] = {0};
 // DeviceDriver *selectedDevices[] = {&ddHello,0};
 // DeviceDriver *selectedDevices[] = {&ddMCP9808,0};
-// DeviceDriver *selectedDevices[] = {&ddHello,&ddMCP9808,0};
+// DeviceDriver *selectedDevices[] = {&ddHello,&ddMCP9808,&ddTable,0};

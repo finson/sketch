@@ -15,32 +15,28 @@
 */
 
 #include <FirmataExt.h>
-#include <Device/DeviceDriver.h>
 #include <limits.h>
-
-extern FirmataFeature *selectedFeatures[];
-extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
 FirmataExtClass::FirmataExtClass()
 {
-  numFeatures = 0;
+  featureCount = 0;
   previousTime[0] = 0;
   previousTime[1] = 0;
   intervalTime[0] = DEFAULT_UPDATE_INTERVAL;
   intervalTime[1] = DEFAULT_REPORT_INTERVAL;
 }
 
-void FirmataExtClass::addSelectedFeatures()
+void FirmataExtClass::addSelectedFeatures(FirmataFeature *featureArray[])
 {
 
 // Install the user-selected FirmataFeatures.
 
   int selectionIndex = 0;
   while (selectedFeatures[selectionIndex] != 0) {
-    if (numFeatures < MAX_FEATURES) {
-      features[numFeatures++] = selectedFeatures[selectionIndex++];
+    if (featureCount < MAX_FEATURE_COUNT) {
+      features[featureCount++] = featureArray[selectionIndex++];
     }
   }
 }
@@ -53,7 +49,7 @@ void FirmataExtClass::dispatchReset()
   intervalTime[0] = DEFAULT_UPDATE_INTERVAL;
   intervalTime[1] = DEFAULT_REPORT_INTERVAL;
 
-  for (byte i = 0; i < numFeatures; i++) {
+  for (byte i = 0; i < featureCount; i++) {
     features[i]->reset();
   }
 }
@@ -73,11 +69,11 @@ void FirmataExtClass::dispatchTimers() {
 
     if (elapsedTime >= intervalTime[idx]) {
       if (idx==0) {
-        for (int n = 0; n < numFeatures; n++) {
+        for (int n = 0; n < featureCount; n++) {
           features[n]->update(elapsedTime);
         }
       } else {
-        for (int n = 0; n < numFeatures; n++) {
+        for (int n = 0; n < featureCount; n++) {
           features[n]->report(elapsedTime);
         }
       }
@@ -89,7 +85,7 @@ void FirmataExtClass::dispatchTimers() {
 boolean FirmataExtClass::dispatchSetPinMode(byte pin, int mode)
 {
   boolean known = false;
-  for (byte i = 0; i < numFeatures; i++) {
+  for (byte i = 0; i < featureCount; i++) {
     known |= features[i]->handlePinMode(pin, mode);
   }
   return known;
@@ -101,7 +97,7 @@ boolean FirmataExtClass::dispatchFeatureSysex(byte command, byte argc, byte* arg
     return true;
   }
 
-  for (byte i = 0; i < numFeatures; i++) {
+  for (byte i = 0; i < featureCount; i++) {
     if (features[i]->handleSysex(command, argc, argv)) {
       return true;
     }
@@ -117,7 +113,7 @@ boolean FirmataExtClass::handleSysex(byte cmd, byte argc, byte* argv)
     Firmata.write(CAPABILITY_RESPONSE);
     for (byte pin = 0; pin < TOTAL_PINS; pin++) {
       if (Firmata.getPinMode(pin) != IGNORE) {
-        for (byte i = 0; i < numFeatures; i++) {
+        for (byte i = 0; i < featureCount; i++) {
           features[i]->handleCapability(pin);
         }
       }

@@ -5,7 +5,7 @@
 #include <Device/DeviceDriver.h>
 #include <limits.h>
 
-#define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
+#define MAX_DEVICE_COUNT 20
 
 #define MINIMUM_REPORT_INTERVAL 10     // milliseconds
 #define DEFAULT_REPORT_INTERVAL 19
@@ -13,15 +13,15 @@
 #define MINIMUM_UPDATE_INTERVAL 100    // microseconds
 #define DEFAULT_UPDATE_INTERVAL 200
 
-class DeviceTable : public DeviceDriver {
+#define MAX_DPB_LENGTH 128  // decoded parameter block length (plain text)
+
+class DeviceTable {
+
+    friend class TableDriver;
 
 public:
     DeviceTable(DeviceDriver *deviceArray[]);
     ~DeviceTable();
-
-    void dispatchTimers();
-    void update(unsigned long deltaMicros);
-    void report(unsigned long deltaMillis);
 
     int open(const char *name, int flags = 0);
     int status(int handle, int reg, int count, byte *buf);
@@ -30,11 +30,15 @@ public:
     int write(int handle, int count, byte *buf);
     int close(int handle);
 
+    void dispatchTimers();
+    void update(unsigned long deltaMicros);
+    void report(unsigned long deltaMillis);
+
 private:
     DECLARE_SEMVER
 
     int deviceCount;
-    DeviceDriver **devices;
+    DeviceDriver *devices[MAX_DEVICE_COUNT];
 
     unsigned long previousTime[2];   // the time the last interval expired
     unsigned long currentTime[2];    // the current values from millis() and micros()

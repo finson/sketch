@@ -43,7 +43,7 @@ void setup()
 {
 
 Firmata.begin(57600);
-FirmataExt.addSelectedFeatures();
+FirmataExt.addSelectedFeatures(selectedFeatures);
 Firmata.reset();
 
 }

@@ -20,19 +20,19 @@
 #include <FirmataCore.h>
 #include <FirmataFeature.h>
 
+#define MAX_FEATURE_COUNT 20
+
 #define MINIMUM_REPORT_INTERVAL 10     // milliseconds
 #define DEFAULT_REPORT_INTERVAL 19
 
 #define MINIMUM_UPDATE_INTERVAL 100    // microseconds
 #define DEFAULT_UPDATE_INTERVAL 200
 
-#define MAX_FEATURES 20
-
 class FirmataExtClass
 {
   public:
     FirmataExtClass();
-    void addSelectedFeatures();
+    void addSelectedFeatures(FirmataFeature *featureArray[]);
 
     void dispatchReset();
     void dispatchTimers();
@@ -42,8 +42,8 @@ class FirmataExtClass
   private:
     boolean handleSysex(byte cmd, byte argc, byte* argv);
 
-    FirmataFeature *features[MAX_FEATURES];
-    byte numFeatures;
+    FirmataFeature *features[MAX_FEATURE_COUNT];
+    int featureCount;
 
     unsigned long previousTime[2];   // the time the last interval expired
     unsigned long currentTime[2];    // the current values from millis() and micros()

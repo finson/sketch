@@ -20,24 +20,23 @@ DEFINE_SEMVER(DeviceTable, 0, 1, 0)
  * a logical unit index value, whereas the 7-bit handles returned by the
  * DeviceDrivers themselves contain only a logical unit value.
  */
-//----------------------------------------------------------------------------
+DeviceTable::DeviceTable(DeviceDriver *deviceArray[]) {
 
-DeviceTable::DeviceTable(DeviceDriver *deviceArray[]) :
-  DeviceDriver("DeviceTable", 0),
-  deviceCount(0) {
-
-  devices = deviceArray;
-
-// Count the installed DeviceDrivers in the array.
-
-  while (devices[deviceCount] != 0) {
-    deviceCount += 1;
+  deviceCount = 0;
+  int selectionIndex = 0;
+  while (deviceArray[selectionIndex] != 0) {
+    if (deviceCount < MAX_DEVICE_COUNT) {
+      devices[deviceCount++] = deviceArray[selectionIndex++];
+    }
   }
 
   previousTime[0] = 0;
   previousTime[1] = 0;
   intervalTime[0] = DEFAULT_REPORT_INTERVAL;
   intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
+
+  ddTable = new TableDriver(this)
+  add ddTable to the devices array
 
 }
 

@@ -41,7 +41,6 @@ public:
     virtual int write(int handle, int count, byte *buf) = 0;
     virtual int close(int handle) = 0;
 
-
     /**
      * Called repeatedly by the application program at the expiration of a
      * microsecond based interval to perform real time updates of position and
