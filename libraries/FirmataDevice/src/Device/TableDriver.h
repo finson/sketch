@@ -2,12 +2,14 @@
 #define TableDriver_h
 
 #include <Device/DeviceDriver.h>
+#include "DeviceTable.h"
+#include "TableDriver.h"
 #include "TableLUI.h"
 
 class TableDriver: public DeviceDriver {
 
 public:
-    TableDriver(DeviceTable *dt, const char *unitName = "DeviceTable", int count = 1);
+    TableDriver(const DeviceTable *dt, const char *unitName = "DeviceTable", int count = 1);
     ~TableDriver();
 
     int open(const char *name, int flags = 0);
@@ -19,6 +21,8 @@ public:
 
 private:
     DECLARE_SEMVER
+
+    const DeviceTable *theDeviceTable;
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "DeviceTable.h"
+#include "TableDriver.h"
 
 DEFINE_SEMVER(DeviceTable, 0, 1, 0)
 
@@ -20,13 +21,30 @@ DEFINE_SEMVER(DeviceTable, 0, 1, 0)
  * a logical unit index value, whereas the 7-bit handles returned by the
  * DeviceDrivers themselves contain only a logical unit value.
  */
-DeviceTable::DeviceTable(DeviceDriver *deviceArray[]) {
+DeviceTable::DeviceTable(DeviceDriver *deviceArray[], const char*luRootName) {
 
+  bool enableTableDriver = (luRootName != 0);
   deviceCount = 0;
-  int selectionIndex = 0;
-  while (deviceArray[selectionIndex] != 0) {
-    if (deviceCount < MAX_DEVICE_COUNT) {
-      devices[deviceCount++] = deviceArray[selectionIndex++];
+  while (deviceArray[deviceCount++] != 0) {}
+  deviceCount = (enableTableDriver) ? deviceCount + 1 : deviceCount;
+
+  devices = new DeviceDriver*[deviceCount];
+  if (devices == 0) {
+    deviceCount = 0;
+  } else {
+    int idx = 0;
+    while (deviceArray[idx] != 0) {
+      devices[idx] = deviceArray[idx++];
+    }
+
+    if (enableTableDriver) {
+      DeviceDriver *metaDriver = new TableDriver(this, luRootName, 1);
+      if (metaDriver == 0) {
+        free(devices);
+        deviceCount = 0;
+      } else {
+        devices[idx] = metaDriver;
+      }
     }
   }
 
@@ -34,10 +52,6 @@ DeviceTable::DeviceTable(DeviceDriver *deviceArray[]) {
   previousTime[1] = 0;
   intervalTime[0] = DEFAULT_REPORT_INTERVAL;
   intervalTime[1] = DEFAULT_UPDATE_INTERVAL;
-
-  ddTable = new TableDriver(this)
-  add ddTable to the devices array
-
 }
 
 DeviceTable::~DeviceTable() {}

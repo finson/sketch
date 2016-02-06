@@ -1,5 +1,4 @@
 #include "TableDriver.h"
-#include "DeviceTable.h"
 
 //---------------------------------------------------------------------------
 
@@ -11,8 +10,10 @@ DEFINE_SEMVER(TableDriver, 0, 1, 0)
  * for a virtual device, the DeviceTable and its array of DeviceDriver pointers.
  *
  */
-TableDriver::TableDriver(const char *dName, int lunCount) :
-  DeviceDriver(dName, lunCount) {}
+TableDriver::TableDriver(const DeviceTable *dt, const char *dName, int lunCount) :
+  DeviceDriver(dName, lunCount) {
+    theDeviceTable = dt;
+  }
 
 //---------------------------------------------------------------------------
 
@@ -42,13 +43,12 @@ int TableDriver::status(int handle, int reg, int count, byte *buf) {
   switch (reg) {
 
   case static_cast<int>(CDR::DriverVersion):
-    return buildVersionResponse(releaseVersion, scopeName, preReleaseLabel, buildLabel, count, buf);
+    return DeviceDriver::buildVersionResponse(releaseVersion, scopeName, preReleaseLabel, buildLabel, count, buf);
 
   default:
     return ENOTSUP;
   }
 }
-
 
 /**
  * Write a control value to the virtual device.
@@ -60,6 +60,7 @@ int TableDriver::control(int handle, int reg, int count, byte *buf) {
   }
   return ENOSYS;
 }
+
 /**
  * The read() method of this device driver returns a string of all the
  * version strings for all the installed device drivers.
@@ -69,17 +70,18 @@ int TableDriver::control(int handle, int reg, int count, byte *buf) {
  * @return        [status code.  <0 error, >= count of bytes read]
  */
 int TableDriver::read(int handle, int count, byte * buf) {
-  TableLUI *currentUnit = static_cast<TableLUI *>(logicalUnits[handle & 0x7F]);
-  if (currentUnit == 0) {
-    return ENOTCONN;
-  }
+  // TableLUI *currentUnit = static_cast<TableLUI *>(logicalUnits[handle & 0x7F]);
+  // if (currentUnit == 0) {
+  //   return ENOTCONN;
+  // }
 
-  for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
-    DeviceDriver dd = devices[deviceIndex];
-    int regV = static_cast<int>(CDR::DriverVersion);
-    dd.status(127,regV,count,buf);
-  }
-  return count;
+  // for (int deviceIndex = 0; deviceIndex < theDeviceTable->deviceCount; deviceIndex++) {
+  //   DeviceDriver *dd = theDeviceTable->devices[deviceIndex];
+  //   int regV = static_cast<int>(CDR::DriverVersion);
+  //   dd->status(127,regV,count,buf);
+  // }
+  // return count;
+  return ENOTSUP;
 }
 
 int TableDriver::write(int handle, int count, byte * buf) {

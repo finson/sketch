@@ -5,8 +5,6 @@
 #include <Device/DeviceDriver.h>
 #include <limits.h>
 
-#define MAX_DEVICE_COUNT 20
-
 #define MINIMUM_REPORT_INTERVAL 10     // milliseconds
 #define DEFAULT_REPORT_INTERVAL 19
 
@@ -20,7 +18,7 @@ class DeviceTable {
     friend class TableDriver;
 
 public:
-    DeviceTable(DeviceDriver *deviceArray[]);
+    DeviceTable(DeviceDriver *deviceArray[], const char*luRootName=0);
     ~DeviceTable();
 
     int open(const char *name, int flags = 0);
@@ -38,7 +36,7 @@ private:
     DECLARE_SEMVER
 
     int deviceCount;
-    DeviceDriver *devices[MAX_DEVICE_COUNT];
+    DeviceDriver **devices;
 
     unsigned long previousTime[2];   // the time the last interval expired
     unsigned long currentTime[2];    // the current values from millis() and micros()

@@ -9,8 +9,8 @@ extern DeviceDriver *selectedDevices[];
 
 //----------------------------------------------------------------------------
 
-DeviceFirmata::DeviceFirmata() {
-  dt = new DeviceTable(selectedDevices);
+DeviceFirmata::DeviceFirmata(const char *luRootName) {
+  dt = new DeviceTable(selectedDevices, luRootName);
 }
 
 //---------------------------------------------------------------------------

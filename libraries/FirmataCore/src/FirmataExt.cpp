@@ -34,7 +34,7 @@ void FirmataExtClass::addSelectedFeatures(FirmataFeature *featureArray[])
 // Install the user-selected FirmataFeatures.
 
   int selectionIndex = 0;
-  while (selectedFeatures[selectionIndex] != 0) {
+  while (featureArray[selectionIndex] != 0) {
     if (featureCount < MAX_FEATURE_COUNT) {
       features[featureCount++] = featureArray[selectionIndex++];
     }

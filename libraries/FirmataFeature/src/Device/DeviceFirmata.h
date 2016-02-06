@@ -19,7 +19,7 @@
 
 class DeviceFirmata: public FirmataFeature {
 public:
-    DeviceFirmata();
+    DeviceFirmata(const char *luRootName = 0);
 
     void reset();
     void handleCapability(byte pin);
