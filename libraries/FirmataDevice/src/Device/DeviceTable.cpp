@@ -25,7 +25,9 @@ DeviceTable::DeviceTable(DeviceDriver *deviceArray[], const char*luRootName) {
 
   bool enableTableDriver = (luRootName != 0);
   deviceCount = 0;
-  while (deviceArray[deviceCount++] != 0) {}
+  while (deviceArray[deviceCount] != 0) {
+    deviceCount += 1;
+  }
   deviceCount = (enableTableDriver) ? deviceCount + 1 : deviceCount;
 
   devices = new DeviceDriver*[deviceCount];

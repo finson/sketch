@@ -36,8 +36,9 @@ void FirmataExtClass::addSelectedFeatures(FirmataFeature *featureArray[])
   int selectionIndex = 0;
   while (featureArray[selectionIndex] != 0) {
     if (featureCount < MAX_FEATURE_COUNT) {
-      features[featureCount++] = featureArray[selectionIndex++];
+      features[featureCount++] = featureArray[selectionIndex];
     }
+    selectionIndex += 1;
   }
 }
 
