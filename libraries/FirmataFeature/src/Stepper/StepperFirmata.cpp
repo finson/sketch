@@ -145,7 +145,9 @@ void StepperFirmata::update(unsigned long elapsedTime)
     for (byte i = 0; i < MAX_STEPPERS; i++) {
       if (stepper[i]) {
         bool done = stepper[i]->update();
+
         // send command to client application when stepping is complete
+
         if (done) {
           Firmata.write(START_SYSEX);
           Firmata.write(STEPPER_DATA);
