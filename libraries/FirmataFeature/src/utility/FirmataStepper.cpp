@@ -78,6 +78,7 @@ FirmataStepper::FirmataStepper(byte interface,
                                byte pin3,
                                byte pin4)
 {
+
   this->step_number = 0;      // which step the motor is on
   this->direction = 0;      // motor direction
   this->last_step_time = 0;    // time stamp in ms of the last step taken
