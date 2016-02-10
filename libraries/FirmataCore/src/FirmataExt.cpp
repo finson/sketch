@@ -61,15 +61,15 @@ void FirmataExtClass::dispatchTimers() {
   currentTime[0] = micros();
   currentTime[1] = millis();
 
-  for (int idx=0; idx<2; idx++) {
+  for (int idx = 0; idx < 2; idx++) {
     if (currentTime[idx] >= previousTime[idx]) {
-      elapsedTime = currentTime[idx]-previousTime[idx];
+      elapsedTime = currentTime[idx] - previousTime[idx];
     } else {
-      elapsedTime = (ULONG_MAX - previousTime[idx])+(currentTime[idx]+1);
+      elapsedTime = (ULONG_MAX - previousTime[idx]) + (currentTime[idx] + 1);
     }
 
     if (elapsedTime >= intervalTime[idx]) {
-      if (idx==0) {
+      if (idx == 0) {
         for (int n = 0; n < featureCount; n++) {
           features[n]->update(elapsedTime);
         }
