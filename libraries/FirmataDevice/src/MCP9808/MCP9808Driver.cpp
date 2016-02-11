@@ -105,7 +105,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
   case static_cast<int>(MCP9808Register::LOWER_TEMP):
   case static_cast<int>(MCP9808Register::CRIT_TEMP):
     if (count == 2) {
-      i2c.write16BE(theI2CAddress, reg, from16LEToHost(buf));
+      i2c.write16BE(theI2CAddress, reg, from16BEToHost(buf));
       return count;
     } else {
       return EMSGSIZE;
@@ -113,7 +113,7 @@ int MCP9808Driver::control(int handle, int reg, int count, byte *buf) {
 
   case static_cast<int>(MCP9808Register::RESOLUTION):
     if (count == 1) {
-      i2c.write8BE(theI2CAddress, reg, from8LEToHost(buf));
+      i2c.write8BE(theI2CAddress, reg, from8BEToHost(buf));
       return count;
     } else {
       return EMSGSIZE;
@@ -136,7 +136,7 @@ int MCP9808Driver::read(int handle, int count, byte * buf) {
   int address = currentUnit->getI2CAddress();
   int reg = static_cast<int>(MCP9808Register::AMBIENT_TEMP);
   int v = i2c.read16BE(address, reg);
-  fromHostTo16LE(v, buf);
+  fromHostTo16BE(v, buf);
   return count;
 }
 
