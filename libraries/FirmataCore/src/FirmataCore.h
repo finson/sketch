@@ -26,9 +26,7 @@
 #define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES            64 // max number of data bytes in incoming messages
-#define MINIMUM_SAMPLING_INTERVAL 10  // milliseconds
-#define DEFAULT_SAMPLING_INTERVAL 19
+#define MAX_DATA_BYTES         64 // max number of data bytes in incoming messages
 
 // Core Direct commands
 
@@ -44,7 +42,7 @@
 // Core Sysex commands (none have an associated pin mode)
 
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware (FirmataCore)
-#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataCore)
+#define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop (FirmataExt)
 #define STRING_DATA             0x71 // a string message with 14-bits per char (FirmataCore)
 
 #define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers (FirmataExt)
@@ -56,19 +54,19 @@
 
 // Feature Direct Commands
 
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFeature)
-#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFeature)
-#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFeature)
-#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFeature)
+#define DIGITAL_MESSAGE         0x90 // send data for a digital pin (DigitalOutputFirmata)
+#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM) (AnalogOutputFirmata)
+#define REPORT_ANALOG           0xC0 // enable analog input by pin # (AnalogInputFirmata)
+#define REPORT_DIGITAL          0xD0 // enable digital input by port pair (DigitalInputFirmata)
 
 // Feature Sysex commands that do not have an associated pin mode
 
-#define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFeature)
-#define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFeature)
+#define DEVICE_QUERY            0x30 // message requesting action from a device driver (DeviceFirmata)
+#define DEVICE_RESPONSE         0x31 // message providing the device driver response (DeviceFirmata)
 
 // Feature Sysex commands that have an associated pin mode and implement or extend the mode
 
-#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFeature)
+#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin (AnalogOutputFirmata)
 
 #define ENCODER_DATA            0x61 // reply with encoders current positions (??)
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq (ServoFirmata)
@@ -76,21 +74,32 @@
 #define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request (OneWireFirmata)
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register (??)
 
-#define I2C_REQUEST             0x76 // send an I2C read/write request (I2CFeature)
-#define I2C_REPLY               0x77 // a reply to an I2C read request (I2CFeature)
-#define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (I2CFeature)
+#define I2C_REQUEST             0x76 // send an I2C read/write request (I2CFirmata)
+#define I2C_REPLY               0x77 // a reply to an I2C read request (I2CFirmata)
+#define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins (I2CFirmata)
 
 // Other Sysex sub-commands (defined but not used)
 
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 
+// these are DEPRECATED to make the naming more consistent
+
+#define FIRMATA_STRING          0x71 // same as STRING_DATA
+#define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
+#define SYSEX_I2C_REPLY         0x77 // same as I2C_REPLY
+#define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
+
 #define TOTAL_SYSEX_COMMANDS    22   // MAX_FEATURES in FirmataExt is based on this (inflated) number
 
 // pin modes
 
+#ifndef INPUT
 #define INPUT                   0x00 // defined in wiring.h
+#endif
+#ifndef OUTPUT
 #define OUTPUT                  0x01 // defined in wiring.h
+#endif
 #define ANALOG                  0x02 // analog pin in analogInput mode
 #define PWM                     0x03 // digital pin in PWM output mode
 #define SERVO                   0x04 // digital pin in Servo output mode
@@ -155,10 +164,6 @@ class FirmataClass
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
 
-    /* Sampling interval */
-    void setSamplingInterval(int interval);
-    boolean elapsed();
-
   private:
     Stream *FirmataStream;
 
@@ -180,19 +185,14 @@ class FirmataClass
     byte pinConfig[TOTAL_PINS];     // configuration of every pin
     int pinState[TOTAL_PINS];       // any value that has been written
 
-    /* timer variables */
-    unsigned long currentMillis;   // store the current value from millis()
-    unsigned long previousMillis;  // for comparison with currentMillis
-    int samplingInterval;          // how often to run the main loop (in ms)
-
     boolean resetting;
 
     /* callback functions */
 
-    callbackFunction currentAnalogCallback;         // AnalogOutputFeature
-    callbackFunction currentDigitalCallback;        // DigitalOutputFeature
-    callbackFunction currentReportAnalogCallback;   // AnalogInputFeature
-    callbackFunction currentReportDigitalCallback;  // DigitalInputFeature
+    callbackFunction currentAnalogCallback;         // AnalogOutputFirmata
+    callbackFunction currentDigitalCallback;        // DigitalOutputFirmata
+    callbackFunction currentReportAnalogCallback;   // AnalogInputFirmata
+    callbackFunction currentReportDigitalCallback;  // DigitalInputFirmata
 
     // User supplies address of function to use as StringCallback if desired.
     // Otherwise FirmataCore leaves it at null and decodes but does not dispatch

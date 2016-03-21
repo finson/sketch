@@ -65,7 +65,7 @@ FirmataClass::FirmataClass()
   firmwareVersionVector = 0;
   reset();
 //  setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
-  setFirmwareVersion(0,3);    // Development version of the implementation, not the protocol
+  setFirmwareVersion(0,4);    // Development version of the implementation, not the protocol
 }
 
 // resets the system state upon a SYSTEM_RESET message from the host software
@@ -101,9 +101,6 @@ void FirmataClass::reset(void)
 #endif
     }
   }
-
-previousMillis = millis();
-samplingInterval = DEFAULT_SAMPLING_INTERVAL;
 
 FirmataExt.dispatchReset();
 
@@ -238,7 +235,7 @@ void FirmataClass::parse(int inputData)
       parsingSysex = false;
       if (!executeCoreSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1)) {
         if (!FirmataExt.dispatchFeatureSysex(storedInputData[0], sysexBytesRead - 1, storedInputData + 1) ) {
-            sprintf(errorMsg, "Unrecognized sysex command. %02x",storedInputData[0]);
+            sprintf(errorMsg, "Unrecognized sysex command. 0x%02x",storedInputData[0]);
             Firmata.sendString(errorMsg);
         }
       }
@@ -325,11 +322,6 @@ boolean FirmataClass::executeCoreSysex(byte cmd, byte argc, byte* argv)
   switch (cmd) {
     case REPORT_FIRMWARE:
       printFirmwareVersion();
-      break;
-    case SAMPLING_INTERVAL:
-      if (argc >= 2) {
-        samplingInterval = max(argv[0] + (argv[1] << 7),MINIMUM_SAMPLING_INTERVAL);
-      }
       break;
     case STRING_DATA:
       if (currentStringCallback) {
@@ -504,24 +496,6 @@ void FirmataClass::setPinState(byte pin, int state)
 {
   pinState[pin] = state;
 }
-
-void FirmataClass::setSamplingInterval(int interval)
-{
-  samplingInterval = max(interval, MINIMUM_SAMPLING_INTERVAL);
-}
-
-boolean FirmataClass::elapsed()
-{
-  currentMillis = millis();
-  if (currentMillis - previousMillis > samplingInterval) {
-    previousMillis += samplingInterval;
-    if (currentMillis - previousMillis > samplingInterval)
-      previousMillis = currentMillis - samplingInterval;
-    return true;
-  }
-  return false;
-}
-
 
 // sysex callbacks
 /*
